@@ -68,4 +68,12 @@ task copyToLib(type: Copy) {
     from configurations.runtime
 }
 
+configurations.all {
 
+	resolutionStrategy {
+	
+		force 'com.google.protobuf:protobuf-java:2.6.0'	
+		
+	}
+}	
+	

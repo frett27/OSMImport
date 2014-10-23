@@ -187,9 +187,9 @@ public class OSMObjectGenerator extends UntypedActor {
 						j++; // Skip over the '0' delimiter.
 					}
 				} catch (Exception ex) {
-					System.out.println("error");
+					System.out.println("error : "+ex.getMessage());
 				}
-				OSMEntity o = new OSMEntityPoint(lastId, lastLon, lastLat, flds);
+				OSMEntity o = new OSMEntityPoint(lastId, ctx.parseLon(lastLon), ctx.parseLat(lastLat), flds);
 				parsedNodes.add(o);
 
 			}

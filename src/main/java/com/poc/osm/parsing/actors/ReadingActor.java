@@ -62,6 +62,7 @@ public class ReadingActor extends UntypedActor {
 			getContext().watch(r);
 			routees.add(new ActorRefRoutee(r));
 		}
+		
 		generatorRouter = new Router(new RoundRobinRoutingLogic(), routees);
 
 		// create dispatcher

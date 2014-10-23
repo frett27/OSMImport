@@ -72,7 +72,12 @@ public class WayConstructorActor extends UntypedActor {
 	 */
 	private boolean needMoreRead = true;
 
-	public WayConstructorActor() {
+	
+	private ActorRef dispatcher;
+	
+	
+	public WayConstructorActor(ActorRef dispatcher) {
+		this.dispatcher = dispatcher;
 	}
 
 	@Override
@@ -106,7 +111,7 @@ public class WayConstructorActor extends UntypedActor {
 				MessageParsingSystemStatus m = (MessageParsingSystemStatus) message;
 				if (m == MessageParsingSystemStatus.INITIALIZE) {
 					// launch registration
-					getDispatcherSelection()
+					dispatcher
 							.tell(MessageClusterRegistration.ASK_FOR_WAY_REGISTRATION,
 									getSelf());
 				}
@@ -133,11 +138,11 @@ public class WayConstructorActor extends UntypedActor {
 				} else if (message == MessageParsingSystemStatus.END_READING_FILE) {
 
 					if (needMoreRead || (reg.getWaysRegistered() > 0)) {
-						getDispatcherSelection().tell(
+						dispatcher.tell(
 								MessageClusterRegistration.NEED_MORE_READ,
 								getSelf());
 					} else {
-						getDispatcherSelection().tell(
+						dispatcher.tell(
 								MessageClusterRegistration.ALL_BLOCKS_READ,
 								getSelf());
 					}
@@ -178,7 +183,7 @@ public class WayConstructorActor extends UntypedActor {
 					{
 						// inform that this block could not be handled
 						// and we need a more read of the input file
-						getDispatcherSelection().tell(
+						dispatcher.tell(
 								MessageClusterRegistration.NEED_MORE_READ,
 								getSelf());
 					}
@@ -218,11 +223,5 @@ public class WayConstructorActor extends UntypedActor {
 		log.debug("current state :" + currentState);
 	}
 
-	/**
-	 * @return
-	 */
-	protected ActorSelection getDispatcherSelection() {
-		return getContext().actorSelection(
-				"/user/" + ParsingSystemActorsConstants.DISPATCHER);
-	}
+
 }

@@ -59,20 +59,20 @@ public class TableHelper {
 		flds.setFieldArray(new ArrayOfField());
 		flds.getFieldArray().getField().add(o); // adding objectid
 
-//		Index oid = new Index();
-//		oid.setName("OIDINDEX");
-//
-//		Fields sfields = flds;
-//		ArrayOfField indexsarrayOfField = new ArrayOfField();
-//		sfields.setFieldArray(indexsarrayOfField);
-//		indexsarrayOfField.getField().add(o);
-//
-//		oid.setFields(sfields);
-//		oid.setIsUnique(true);
-//		oid.setIsAscending(true);
+		Index oid = new Index();
+		oid.setName("OIDINDEX");
+
+		Fields sfields = flds;
+		ArrayOfField indexsarrayOfField = new ArrayOfField();
+		sfields.setFieldArray(indexsarrayOfField);
+		indexsarrayOfField.getField().add(o);
+
+		oid.setFields(sfields);
+		oid.setIsUnique(true);
+		oid.setIsAscending(true);
 
 		ArrayOfIndex arrayOfIndex = new ArrayOfIndex();
-//		arrayOfIndex.getIndex().add(oid);
+		arrayOfIndex.getIndex().add(oid);
 
 		th.dataElement = new DETable();
 

@@ -29,6 +29,7 @@ import com.poc.osm.output.actors.ChainCompiler.ValidateResult;
 import com.poc.osm.output.model.TableHelper;
 import com.poc.osm.parsing.actors.ParsingDispatcher;
 import com.poc.osm.parsing.actors.ParsingOutput;
+import com.poc.osm.parsing.actors.ParsingSubSystemActor;
 import com.poc.osm.parsing.actors.ReadingActor;
 import com.poc.osm.parsing.actors.ResultActor;
 import com.poc.osm.parsing.actors.WayConstructorActor;
@@ -268,31 +269,12 @@ public class OSMImport {
 
 		ActorSystem sys = ActorSystem.create("osmcluster",
 				config.getConfig("osmcluster"));
-
+		
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
 				"output", 200000L)); // consigne à 200k
 
-		// parsing result output actor, will redirect the parsing in result
-		ActorRef parsingOutput = sys.actorOf(Props.create(ParsingOutput.class,
-				"/user/result"));
-
-		ActorRef dispatcher = sys.actorOf(
-				Props.create(ParsingDispatcher.class, parsingOutput),
-				"dispatcher");
-
-		// reading actor
-		ActorRef reading = sys.actorOf(
-				Props.create(ReadingActor.class, dispatcher, flowRegulator),
-				"reading");
-
-		// init the worker
-		ActorRef worker1 = sys.actorOf(Props.create(WayConstructorActor.class),
-				"worker1");
-		worker1.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
-
-		ActorRef worker2 = sys.actorOf(Props.create(WayConstructorActor.class),
-				"worker2");
-		worker2.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
+		
+		ActorRef parsingSubSystem = sys.actorOf(Props.create(ParsingSubSystemActor.class,flowRegulator));
 
 		createGeodatabasesAndTables();
 
@@ -374,10 +356,11 @@ public class OSMImport {
 				Props.create(ResultActor.class, frontActors), "result");
 
 		// init the reading
-		reading.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
+		parsingSubSystem.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
+		Thread.sleep(2000);
 
 		System.out.println("launch the reading");
-		reading.tell(new MessageReadFile(osmInputFile), ActorRef.noSender());
+		parsingSubSystem.tell(new MessageReadFile(osmInputFile), ActorRef.noSender());
 
 		sys.awaitTermination();
 

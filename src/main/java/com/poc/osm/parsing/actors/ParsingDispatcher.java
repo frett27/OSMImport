@@ -53,7 +53,7 @@ public class ParsingDispatcher extends UntypedActor {
 
 				wayDispatcher.add(getSender());
 
-				log.debug("way dispatcher " + getSender() + " registered");
+				log.info("way dispatcher " + getSender() + " registered");
 
 				// inform for the output ActorRef
 				getSender().tell(new MessageOutputRef(outputRef), getSelf());
@@ -69,11 +69,11 @@ public class ParsingDispatcher extends UntypedActor {
 					getSender().tell(MessageClusterRegistration.NEED_MORE_READ,
 							getSelf());
 				} else {
+					log.info("All Blocks read");
 					getSender().tell(
 							MessageClusterRegistration.ALL_BLOCKS_READ,
-							getSender());
-					getContext().parent().tell(PoisonPill.getInstance(),
 							getSelf());
+					getContext().parent().tell(MessageParsingSystemStatus.TERMINATE, getSelf());
 				}
 
 			} else {
@@ -107,6 +107,9 @@ public class ParsingDispatcher extends UntypedActor {
 			MessageWayToConstruct mwtc = (MessageWayToConstruct) message;
 
 			// get the partition number for ways
+			
+			assert wayDispatcher.size() > 0;
+			
 			int partition = (int) (mwtc.getBlockid() % wayDispatcher.size());
 
 			// inform the right actor
