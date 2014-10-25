@@ -11,6 +11,12 @@ description = """tools for handling import of osm datas into filegeodatabases"""
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
+eclipse {
+    classpath {
+       downloadSources=true
+    }
+}
+
 sourceSets {
     main {
         groovy {

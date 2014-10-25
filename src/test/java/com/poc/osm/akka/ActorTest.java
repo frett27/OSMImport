@@ -31,7 +31,7 @@ public class ActorTest extends UntypedActor {
 
 	@Override
 	public void postStop() throws Exception {
-		System.out.println("prestart " + getSelf().path());
+		System.out.println("stop " + getSelf().path());
 		super.postStop();
 	}
 

@@ -49,7 +49,7 @@ public class WayConstructorActor extends UntypedActor {
 	/**
 	 * max way to handle by reading
 	 */
-	private int maxWayToConstruct = 1000000;
+	private int maxWayToConstruct = 500000;
 
 	private enum State {
 		REGISTRATION_PHASE, PROCESSING_PHASE
@@ -164,6 +164,8 @@ public class WayConstructorActor extends UntypedActor {
 
 			} else if (message instanceof MessageWayToConstruct) {
 
+				
+				
 				MessageWayToConstruct mw = (MessageWayToConstruct) message;
 
 				// if block is already handled, skip it
@@ -171,6 +173,9 @@ public class WayConstructorActor extends UntypedActor {
 					// skipped, already processed
 					return;
 				}
+				
+				needMoreRead = needMoreRead || reg.getWaysRegistered() > 0; 
+				
 
 				// the block is not already handled, 
 				// check if we have room to handle it
@@ -179,15 +184,7 @@ public class WayConstructorActor extends UntypedActor {
 						log.debug("too much ways left - handled blocks :"
 								+ handledBlocks.size());
 					
-					if (!needMoreRead)
-					{
-						// inform that this block could not be handled
-						// and we need a more read of the input file
-						dispatcher.tell(
-								MessageClusterRegistration.NEED_MORE_READ,
-								getSelf());
-					}
-					needMoreRead = true;
+					
 					return;
 				}
 
@@ -200,8 +197,8 @@ public class WayConstructorActor extends UntypedActor {
 
 				handledBlocks.add(mw.getBlockid());
 
-				log.info("Current nb of registered ways :"
-						+ reg.getWaysRegistered());
+				log.info(reg.getWaysRegistered() + " ways registered for actor " 
+						+ getSelf().path());
 
 			} else {
 				unhandled(message);

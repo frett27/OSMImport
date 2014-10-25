@@ -3,22 +3,29 @@ package com.poc.osm.parsing.actors;
 import scala.collection.Iterator;
 import scala.collection.immutable.Iterable;
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageReadFile;
 
 public class ParsingSubSystemActor extends UntypedActor {
 
+	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+
+	
 	private ActorRef reading;
 
 	private ActorRef dispatcher;
 
+	private ActorRef parsingOutput;
+
 	public ParsingSubSystemActor(ActorRef flowRegulator) {
 
-		// parsing result output actor, will redirect the parsing in result
-		ActorRef parsingOutput = getContext().actorOf(
+		parsingOutput = getContext().actorOf(
 				Props.create(ParsingOutput.class, "/user/result"));
 
 		dispatcher = getContext().actorOf(
@@ -50,6 +57,13 @@ public class ParsingSubSystemActor extends UntypedActor {
 			for (ActorRef a = it.next(); it.hasNext(); a = it.next()) {
 				a.tell(message, getSelf());
 			}
+			
+			if (MessageParsingSystemStatus.END_JOB == message)
+			{
+				log.info("terminate the process");
+				getContext().system().shutdown();
+			}
+			
 			
 		} else if (message instanceof MessageReadFile) {
 

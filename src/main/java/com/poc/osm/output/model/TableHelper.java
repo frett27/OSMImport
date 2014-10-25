@@ -13,6 +13,8 @@ import com.esrifrance.fgdbapi.xml.ArrayOfPropertySetProperty;
 import com.esrifrance.fgdbapi.xml.DEFeatureClass;
 import com.esrifrance.fgdbapi.xml.DETable;
 import com.esrifrance.fgdbapi.xml.DataElement;
+import com.esrifrance.fgdbapi.xml.Envelope;
+import com.esrifrance.fgdbapi.xml.EnvelopeN;
 import com.esrifrance.fgdbapi.xml.EsriDatasetType;
 import com.esrifrance.fgdbapi.xml.EsriFeatureType;
 import com.esrifrance.fgdbapi.xml.EsriFieldType;
@@ -152,6 +154,14 @@ public class TableHelper {
 //
 //		fc.getIndexes().getIndexArray().getIndex().add(sindex);
 
+		EnvelopeN e = new EnvelopeN();
+		e.setXMin(-180);
+		e.setXMax(180);
+		e.setYMin(-90);
+		e.setYMax(90);
+		fc.setExtent(e);
+		
+		
 		fc.setCatalogPath("/" + name);
 		fc.setName(name);
 		fc.setFeatureType(EsriFeatureType.ESRI_FT_SIMPLE);
@@ -283,14 +293,14 @@ public class TableHelper {
 		gcs.setWKID(4326);
 		gcs.setWKT("GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]]");
 		gcs.setHighPrecision(true);
-		gcs.setXYScale(10000.0);
+		gcs.setXYScale(10000000000.0);
 		gcs.setXOrigin(-200.0);
 		gcs.setYOrigin(-100.0);
 		gcs.setZOrigin(-1000.0);
 		gcs.setMOrigin(0.0);
 		gcs.setZScale(100.0);
 		gcs.setMScale(100.0);
-		gcs.setXYTolerance(0.0001);
+		gcs.setXYTolerance(0.0000000001);
 		gcs.setLeftLongitude(-180.0);
 		return gcs;
 	}

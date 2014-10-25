@@ -66,6 +66,7 @@ public class ParsingDispatcher extends UntypedActor {
 				// supervisor tell if all blocks have been completed
 				if (stillneedmoreread) {
 					// respond to the state
+					log.info("workers need more read");
 					getSender().tell(MessageClusterRegistration.NEED_MORE_READ,
 							getSelf());
 				} else {
@@ -73,7 +74,10 @@ public class ParsingDispatcher extends UntypedActor {
 					getSender().tell(
 							MessageClusterRegistration.ALL_BLOCKS_READ,
 							getSelf());
-					getContext().parent().tell(MessageParsingSystemStatus.TERMINATE, getSelf());
+					
+					getContext().parent().tell(MessageParsingSystemStatus.END_JOB, getSelf());
+					
+					// getContext().parent().tell(MessageParsingSystemStatus.TERMINATE, getSelf());
 				}
 
 			} else {

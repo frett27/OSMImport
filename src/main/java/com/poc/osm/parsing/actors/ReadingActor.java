@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -158,9 +159,12 @@ public class ReadingActor extends UntypedActor {
 
 						log.info("Ask for more read ?");
 
-						dispatcher
-								.tell(MessageClusterRegistration.ASK_IF_NEED_MORE_READ,
-										getSelf());
+						
+						
+						
+						getContext().system().scheduler().scheduleOnce(Duration.create(3000, TimeUnit.MILLISECONDS),
+							      dispatcher,  MessageClusterRegistration.ASK_IF_NEED_MORE_READ, getContext().dispatcher(), getSelf());
+						
 
 					} catch (Throwable ex)
 					{

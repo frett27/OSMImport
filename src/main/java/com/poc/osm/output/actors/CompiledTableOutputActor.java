@@ -40,14 +40,15 @@ public class CompiledTableOutputActor extends UntypedActor {
 		assert t != null;
 		this.table = t;
 		this.flowRegulatorActorRef = flowRegulator;
+
+		table.setWriteLock();
+		table.setLoadOnlyMode(true);
+
 	}
 
 	@Override
 	public void preStart() throws Exception {
 		super.preStart();
-
-		table.setWriteLock();
-		table.setLoadOnlyMode(true);
 
 	}
 
@@ -59,9 +60,10 @@ public class CompiledTableOutputActor extends UntypedActor {
 	@Override
 	public void postStop() throws Exception {
 
+		log.info("Stopping actor" + getSelf());
 		table.setLoadOnlyMode(false);
 		table.freeWriteLock();
-
+		
 		super.postStop();
 	}
 
@@ -77,37 +79,39 @@ public class CompiledTableOutputActor extends UntypedActor {
 			return;
 		}
 		CompiledFieldsMessage e = (CompiledFieldsMessage) message;
+		try {
+			Row r = table.createRowObject();
 
-		Row r = table.createRowObject();
+			// r.setInteger("OBJECTID", oid++);
 
-		// r.setInteger("OBJECTID", oid++);
-
-		AbstractFieldSetter[] setters = e.getSetters();
-		for (AbstractFieldSetter f : setters) {
-			try {
-				f.store(r);
-			} catch (Exception ex) {
-				log.error(
-						"error in storing value on " + f + " :"
-								+ ex.getMessage(), ex);
+			AbstractFieldSetter[] setters = e.getSetters();
+			for (AbstractFieldSetter f : setters) {
+				try {
+					f.store(r);
+				} catch (Exception ex) {
+					log.error(
+							"error in storing value on " + f + " :"
+									+ ex.getMessage(), ex);
+				}
 			}
+
+			table.insertRow(r);
+
+			flowRegulatorActorRef.tell(new MessageRegulation(-1), getSelf());
+		} catch (Exception ex) {
+			log.error("error processing entity :" + e + ":" + ex.getMessage(),
+					ex);
 		}
+		if (start != -1) {
 
-		table.insertRow(r);
-
-		flowRegulatorActorRef.tell(new MessageRegulation(-1), getSelf());
-
-		if (start != -1)
-		{
-			
 			long t = (System.currentTimeMillis() - start);
-			if (t > 10000000)
-			{
-				log.info("" + oid + " elements, processed for actor " + getSelf().path());
+			if (t > 10000000) {
+				log.info("" + oid + " elements, processed for actor "
+						+ getSelf().path());
 			}
-			
+
 		}
-		
+
 		if (oid++ % 10000 == 0) {
 
 			long t = -1;
@@ -115,7 +119,7 @@ public class CompiledTableOutputActor extends UntypedActor {
 			if (start != -1)
 				t = (System.currentTimeMillis() - start);
 
-			log.info("" + oid + " elements, processed in " + t + " "
+			log.info("" + oid + " elements, last chunk processed in " + t + "ms -> writing speed : "
 					+ ((10000.0) / t * 1000) + " o/s");
 			start = System.currentTimeMillis();
 		}

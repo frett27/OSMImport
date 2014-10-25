@@ -147,7 +147,7 @@ public class OSMReader {
 		}
 
 		public void complete() {
-			System.out.println("Complete!");
+			System.out.println("Complete file read !");
 		}
 
 	}

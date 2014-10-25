@@ -53,11 +53,12 @@ public class TableOutputActor extends UntypedActor {
 
 		table.setWriteLock();
 		table.setLoadOnlyMode(true);
-
+	
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see akka.actor.UntypedActor#postStop()
 	 */
 	@Override
@@ -71,6 +72,7 @@ public class TableOutputActor extends UntypedActor {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see akka.actor.UntypedActor#onReceive(java.lang.Object)
 	 */
 	@Override
@@ -79,34 +81,42 @@ public class TableOutputActor extends UntypedActor {
 		if (!(message instanceof OSMEntity)) {
 			return;
 		}
+
 		OSMEntity e = (OSMEntity) message;
+		try {
 
-		Row r = table.createRowObject();
+			Row r = table.createRowObject();
 
-		// r.setInteger("OBJECTID", oid++);
+			// r.setInteger("OBJECTID", oid++);
 
-		Geometry geometry = e.getGeometry();
+			Geometry geometry = e.getGeometry();
 
-		if (geometry != null) {
-			r.setGeometry(GeometryEngine.geometryToEsriShape(geometry));
-		}
+			if (geometry != null) {
+				r.setGeometry(GeometryEngine.geometryToEsriShape(geometry));
+			}
 
-		if (e.getFields() != null) {
-			for (Entry<String, Object> t : e.getFields().entrySet()) {
-				Object v = t.getValue();
-				try {
-					if (v == null) {
-						r.setNull(t.getKey());
-					} else  {
-						r.setString(t.getKey(), v.toString());
+			if (e.getFields() != null) {
+				for (Entry<String, Object> t : e.getFields().entrySet()) {
+					Object v = t.getValue();
+					try {
+						if (v == null) {
+							r.setNull(t.getKey());
+						} else {
+							r.setString(t.getKey(), v.toString());
+						}
+					} catch (Exception ex) {
+						log.error(
+								"error while processing column " + t.getKey()
+										+ " with value " + v + " -> "
+										+ ex.getMessage(), ex);
 					}
-				} catch (Exception ex) {
-					log.error("error while processing column " + t.getKey()
-							+ " with value " + v + " -> " + ex.getMessage(), ex);
 				}
 			}
+			table.insertRow(r);
+
+		} catch (Exception ex) {
+			log.error("error handling entity " + e + ":" + ex.getMessage(), ex);
 		}
-		table.insertRow(r);
 
 		flowRegulatorActorRef.tell(new MessageRegulation(-1), getSelf());
 
@@ -117,8 +127,8 @@ public class TableOutputActor extends UntypedActor {
 			if (start != -1)
 				t = (System.currentTimeMillis() - start);
 
-			log.info("" + oid + " elements, processed in " + t + " "
-					+ ((10000.0) / t * 1000) + " o/s");
+			log.info("" + oid + " elements, last chunk processed in " + t
+					+ "ms -> " + ((10000.0) / t * 1000) + " o/s");
 			start = System.currentTimeMillis();
 		}
 

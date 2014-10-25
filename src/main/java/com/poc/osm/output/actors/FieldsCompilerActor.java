@@ -8,6 +8,8 @@ import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+import com.esri.core.geometry.Geometry;
+import com.esri.core.geometry.GeometryEngine;
 import com.esrifrance.fgdbapi.swig.FieldDef;
 import com.esrifrance.fgdbapi.swig.FieldType;
 import com.esrifrance.fgdbapi.swig.Table;
@@ -85,8 +87,10 @@ public class FieldsCompilerActor extends UntypedActor {
 
 				String rs;
 				if (n[i] instanceof GeometryFieldSetter) {
-					rs = ((GeometryFieldSetter) n[i]).setValue(osme
-							.getGeometry());
+					Geometry geometry = osme
+							.getGeometry();
+					// log.info("geometry :" + GeometryEngine.geometryToJson(4326, geometry));
+					rs = ((GeometryFieldSetter) n[i]).setValue(geometry);
 					if (rs != null)
 						sb.append(rs).append("\n");
 

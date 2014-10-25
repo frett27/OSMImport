@@ -297,6 +297,7 @@ public class OSMImport {
 			}
 
 			OpenedGeodatabase openedGeodatabase = geodatabases.get(path);
+			
 
 			Table table = openedGeodatabase.tables.get(oc.tablename);
 
@@ -357,11 +358,13 @@ public class OSMImport {
 
 		// init the reading
 		parsingSubSystem.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
+		
 		Thread.sleep(2000);
 
 		System.out.println("launch the reading");
 		parsingSubSystem.tell(new MessageReadFile(osmInputFile), ActorRef.noSender());
 
+		
 		sys.awaitTermination();
 
 	}

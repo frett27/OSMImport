@@ -9,6 +9,7 @@ import akka.event.LoggingAdapter;
 
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.messages.MessageWay;
+import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 
 /**
@@ -64,8 +65,10 @@ public class ParsingOutput extends UntypedActor {
 				currentState = State.POINTS_HAVE_BEEN_READ;
 				log.info("All Points have been processed");
 			}
+			
+			
 
-		} else {
+		}  else {
 			unhandled(message);
 		}
 
