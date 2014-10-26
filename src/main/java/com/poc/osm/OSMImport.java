@@ -192,6 +192,12 @@ public class OSMImport {
 					System.out.println("creating table " + h.getName()
 							+ " with definition : \n" + tableDef);
 					Table newTable = geodatabase.createTable(tableDef, "");
+					
+					
+					geodatabase.closeTable(newTable);
+					newTable = geodatabase.openTable("\\" + h.getName());
+					
+					
 
 					System.out.println("successfully created");
 

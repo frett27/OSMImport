@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import scala.concurrent.duration.Duration;
-import scala.concurrent.duration.FiniteDuration;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -27,6 +26,9 @@ import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageReadFile;
 import com.poc.osm.regulation.MessageRegulatorStatus;
+import com.yammer.metrics.Metrics;
+import com.yammer.metrics.core.Counter;
+import com.yammer.metrics.core.Timer;
 
 /**
  * Actor handling the file handling
@@ -48,6 +50,10 @@ public class ReadingActor extends UntypedActor {
 
 	private long REG_TIME = 2000;
 
+	private Counter nbofRead;
+
+	private Timer timer;
+
 	public ReadingActor(ActorRef dispatcher, ActorRef flowRegulator) {
 
 		log.debug("starting actor " + getClass().getName());
@@ -63,10 +69,15 @@ public class ReadingActor extends UntypedActor {
 			getContext().watch(r);
 			routees.add(new ActorRefRoutee(r));
 		}
-		
+
 		generatorRouter = new Router(new RoundRobinRoutingLogic(), routees);
 
 		// create dispatcher
+
+		nbofRead = Metrics
+				.newCounter(ReadingActor.class, "Number of file read");
+
+		timer = Metrics.newTimer(ReadingActor.class, "ReadFile time");
 
 	}
 
@@ -99,6 +110,10 @@ public class ReadingActor extends UntypedActor {
 		public double get() {
 			return currentVel;
 		}
+	};
+
+	public void postStop() throws Exception {
+		asyncReading.shutdown();
 	};
 
 	@Override
@@ -137,6 +152,26 @@ public class ReadingActor extends UntypedActor {
 
 			log.info("One more read");
 
+//			asyncReading.submit(new Callable() {
+//
+//				@Override
+//				public Object call() throws Exception {
+//
+//					Thread.sleep(1000 * 60 * 1);
+//
+//					FileInputStream fis = new FileInputStream(currentFile);
+//					try {
+//						final OSMReader reader = new OSMReader();
+//						reader.read(fis, generatorRouter, currentVelGetter);
+//
+//					} finally {
+//						fis.close();
+//					}
+//					return null;
+//				}
+//
+//			});
+
 			asyncReading.submit(new Callable() {
 				@Override
 				public Object call() throws Exception {
@@ -144,7 +179,8 @@ public class ReadingActor extends UntypedActor {
 					dispatcher.tell(
 							MessageParsingSystemStatus.START_READING_FILE,
 							getSelf());
-
+					nbofRead.inc();
+					timer.time();
 					FileInputStream fis = new FileInputStream(currentFile);
 					try {
 
@@ -159,20 +195,23 @@ public class ReadingActor extends UntypedActor {
 
 						log.info("Ask for more read ?");
 
-						
-						
-						
-						getContext().system().scheduler().scheduleOnce(Duration.create(3000, TimeUnit.MILLISECONDS),
-							      dispatcher,  MessageClusterRegistration.ASK_IF_NEED_MORE_READ, getContext().dispatcher(), getSelf());
-						
+						getContext()
+								.system()
+								.scheduler()
+								.scheduleOnce(
+										Duration.create(3000,
+												TimeUnit.MILLISECONDS),
+										dispatcher,
+										MessageClusterRegistration.ASK_IF_NEED_MORE_READ,
+										getContext().dispatcher(), getSelf());
 
-					} catch (Throwable ex)
-					{
+					} catch (Throwable ex) {
 						log.error("error in reading :" + ex.getMessage(), ex);
 
 					} finally {
 						log.info("closing file");
 						fis.close();
+						timer.stop();
 					}
 					return null;
 				}

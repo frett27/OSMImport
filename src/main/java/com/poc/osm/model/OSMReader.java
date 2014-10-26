@@ -134,7 +134,7 @@ public class OSMReader {
 				if (l > 0) {
 					if (l > 2000)
 						l = 5000;
-					System.out.println("sleep :" + l);
+					//System.out.println("sleep :" + l);
 					Thread.sleep(l);
 				}
 			} catch (Exception ex) {
@@ -172,7 +172,7 @@ public class OSMReader {
 		assert is != null;
 		this.currentVelGetter = velGetter;
 		System.out.println("Read file");
-		InputStream input = new BufferedInputStream(is);
+		InputStream input = new BufferedInputStream(is, 20000000);
 		OSMBinaryParser brad = new OSMBinaryParser(r);
 		BlockInputStream blockInputStream = new BlockInputStream(input, brad);
 		blockInputStream.process();

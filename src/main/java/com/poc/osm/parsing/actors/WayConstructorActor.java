@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.UntypedActor;
-import akka.dispatch.BoundedMessageQueueSemantics;
-import akka.dispatch.RequiresMessageQueue;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
@@ -22,6 +19,9 @@ import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
 import com.poc.osm.parsing.actors.messages.MessageOutputRef;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
+import com.poc.osm.regulation.FlowRegulator;
+import com.yammer.metrics.Metrics;
+import com.yammer.metrics.core.Counter;
 
 /**
  * Actor constructing Ways
@@ -49,7 +49,7 @@ public class WayConstructorActor extends UntypedActor {
 	/**
 	 * max way to handle by reading
 	 */
-	private int maxWayToConstruct = 500000;
+	private int maxWayToConstruct = 400000;
 
 	private enum State {
 		REGISTRATION_PHASE, PROCESSING_PHASE
@@ -72,12 +72,16 @@ public class WayConstructorActor extends UntypedActor {
 	 */
 	private boolean needMoreRead = true;
 
-	
 	private ActorRef dispatcher;
-	
-	
+
+	private Counter waysMetrics;
+
 	public WayConstructorActor(ActorRef dispatcher) {
 		this.dispatcher = dispatcher;
+
+		waysMetrics = Metrics.newCounter(FlowRegulator.class, getSelf().path()
+				.name() + " ways number");
+
 	}
 
 	@Override
@@ -91,6 +95,7 @@ public class WayConstructorActor extends UntypedActor {
 					log.debug("emit way " + e);
 				// tell the output there is a new constructed way
 				output.tell(new MessageWay(e), getSelf());
+				waysMetrics.dec();
 			}
 		});
 	}
@@ -159,13 +164,11 @@ public class WayConstructorActor extends UntypedActor {
 
 				MessageNodes mn = (MessageNodes) message;
 				reg.givePoints(mn.getNodes());
-				
+
 				needMoreRead = needMoreRead || reg.getWaysRegistered() > 0;
 
 			} else if (message instanceof MessageWayToConstruct) {
 
-				
-				
 				MessageWayToConstruct mw = (MessageWayToConstruct) message;
 
 				// if block is already handled, skip it
@@ -173,32 +176,31 @@ public class WayConstructorActor extends UntypedActor {
 					// skipped, already processed
 					return;
 				}
-				
-				needMoreRead = needMoreRead || reg.getWaysRegistered() > 0; 
-				
 
-				// the block is not already handled, 
+				needMoreRead = needMoreRead || reg.getWaysRegistered() > 0;
+
+				// the block is not already handled,
 				// check if we have room to handle it
 				if (reg.getWaysRegistered() > maxWayToConstruct) {
 					if (log.isDebugEnabled())
 						log.debug("too much ways left - handled blocks :"
 								+ handledBlocks.size());
-					
-					
+
 					return;
 				}
 
 				// register the block, and prepare for parsing
-				
+
 				List<WayToConstruct> waysToConstruct = mw.getWaysToConstruct();
 				for (WayToConstruct w : waysToConstruct) {
 					reg.register(w);
+					waysMetrics.inc();
 				}
 
 				handledBlocks.add(mw.getBlockid());
 
-				log.info(reg.getWaysRegistered() + " ways registered for actor " 
-						+ getSelf().path());
+				log.info(reg.getWaysRegistered()
+						+ " ways registered for actor " + getSelf().path());
 
 			} else {
 				unhandled(message);
@@ -219,6 +221,5 @@ public class WayConstructorActor extends UntypedActor {
 		currentState = State.REGISTRATION_PHASE;
 		log.debug("current state :" + currentState);
 	}
-
 
 }

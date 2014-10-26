@@ -1,19 +1,19 @@
 package com.poc.osm.output.actors;
 
-import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-import com.esri.core.geometry.Geometry;
-import com.esri.core.geometry.GeometryEngine;
 import com.esrifrance.fgdbapi.swig.Row;
 import com.esrifrance.fgdbapi.swig.Table;
 import com.poc.osm.output.actors.messages.CompiledFieldsMessage;
 import com.poc.osm.output.fields.AbstractFieldSetter;
 import com.poc.osm.regulation.MessageRegulation;
+import com.yammer.metrics.Metrics;
+import com.yammer.metrics.core.Meter;
 
 public class CompiledTableOutputActor extends UntypedActor {
 
@@ -35,11 +35,16 @@ public class CompiledTableOutputActor extends UntypedActor {
 	 * the flow regulator
 	 */
 	private ActorRef flowRegulatorActorRef;
+	
+	private Meter elements;
 
 	public CompiledTableOutputActor(Table t, ActorRef flowRegulator) {
 		assert t != null;
 		this.table = t;
 		this.flowRegulatorActorRef = flowRegulator;
+		
+		elements = Metrics.newMeter(CompiledTableOutputActor.class, getSelf().path().name(),
+				"Pipeline", TimeUnit.SECONDS);
 
 		table.setWriteLock();
 		table.setLoadOnlyMode(true);
@@ -96,6 +101,7 @@ public class CompiledTableOutputActor extends UntypedActor {
 			}
 
 			table.insertRow(r);
+			elements.mark();
 
 			flowRegulatorActorRef.tell(new MessageRegulation(-1), getSelf());
 		} catch (Exception ex) {
