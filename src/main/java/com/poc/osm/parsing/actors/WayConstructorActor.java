@@ -49,7 +49,7 @@ public class WayConstructorActor extends UntypedActor {
 	/**
 	 * max way to handle by reading
 	 */
-	private int maxWayToConstruct = 400000;
+	private int maxWayToConstruct = 100000;
 
 	private enum State {
 		REGISTRATION_PHASE, PROCESSING_PHASE

@@ -16,7 +16,6 @@ public class ParsingSubSystemActor extends UntypedActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-	
 	private ActorRef reading;
 
 	private ActorRef dispatcher;
@@ -29,8 +28,8 @@ public class ParsingSubSystemActor extends UntypedActor {
 				Props.create(ParsingOutput.class, "/user/result"));
 
 		dispatcher = getContext().actorOf(
-				Props.create(ParsingDispatcher.class, parsingOutput),
-				"dispatcher");
+				Props.create(ParsingDispatcher.class, parsingOutput,
+						flowRegulator), "dispatcher");
 
 		// reading actor
 		reading = getContext().actorOf(
@@ -38,13 +37,15 @@ public class ParsingSubSystemActor extends UntypedActor {
 				"reading");
 
 		// init the worker
-		ActorRef worker1 = getContext().actorOf(
-				Props.create(WayConstructorActor.class,dispatcher), "worker1");
-		worker1.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
 
-		ActorRef worker2 = getContext().actorOf(
-				Props.create(WayConstructorActor.class,dispatcher), "worker2");
-		worker2.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
+		for (int i = 0; i < 6; i++) {
+			ActorRef worker = getContext().actorOf(
+					Props.create(WayConstructorActor.class, dispatcher),
+					"worker" + i);
+			worker.tell(MessageParsingSystemStatus.INITIALIZE,
+					ActorRef.noSender());
+
+		}
 
 	}
 
@@ -57,14 +58,12 @@ public class ParsingSubSystemActor extends UntypedActor {
 			for (ActorRef a = it.next(); it.hasNext(); a = it.next()) {
 				a.tell(message, getSelf());
 			}
-			
-			if (MessageParsingSystemStatus.END_JOB == message)
-			{
+
+			if (MessageParsingSystemStatus.END_JOB == message) {
 				log.info("terminate the process");
 				getContext().system().shutdown();
 			}
-			
-			
+
 		} else if (message instanceof MessageReadFile) {
 
 			reading.tell(message, getSelf());

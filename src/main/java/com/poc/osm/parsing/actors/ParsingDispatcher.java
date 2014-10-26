@@ -17,6 +17,7 @@ import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
 import com.poc.osm.parsing.actors.messages.MessageOutputRef;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
+import com.poc.osm.regulation.MessageRegulation;
 
 /**
  * Object that register wayconstruct actors, for each OSM entity, it dispatch
@@ -35,9 +36,12 @@ public class ParsingDispatcher extends UntypedActor {
 
 	private boolean stillneedmoreread = false;
 
-	public ParsingDispatcher(ActorRef outputRef) {
+	private ActorRef flowRegulator;
+
+	public ParsingDispatcher(ActorRef outputRef, ActorRef flowRegulator) {
 		assert outputRef != null;
 		this.outputRef = outputRef;
+		this.flowRegulator = flowRegulator;
 	}
 
 	@Override
@@ -74,10 +78,12 @@ public class ParsingDispatcher extends UntypedActor {
 					getSender().tell(
 							MessageClusterRegistration.ALL_BLOCKS_READ,
 							getSelf());
-					
-					getContext().parent().tell(MessageParsingSystemStatus.END_JOB, getSelf());
-					
-					// getContext().parent().tell(MessageParsingSystemStatus.TERMINATE, getSelf());
+
+					getContext().parent().tell(
+							MessageParsingSystemStatus.END_JOB, getSelf());
+
+					// getContext().parent().tell(MessageParsingSystemStatus.TERMINATE,
+					// getSelf());
 				}
 
 			} else {
@@ -111,18 +117,20 @@ public class ParsingDispatcher extends UntypedActor {
 			MessageWayToConstruct mwtc = (MessageWayToConstruct) message;
 
 			// get the partition number for ways
-			
+
 			assert wayDispatcher.size() > 0;
-			
+
 			int partition = (int) (mwtc.getBlockid() % wayDispatcher.size());
 
 			// inform the right actor
 			ActorRef a = wayDispatcher.toArray(new ActorRef[0])[partition];
 			// send the way to the proper partition
 			a.tell(message, getSelf());
-
+			
+		
 		} else if (message instanceof MessageNodes) {
-
+			
+			
 			outputRef.tell(message, getSelf());
 
 			// send nodes to way construct actors

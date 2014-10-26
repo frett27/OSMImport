@@ -12,7 +12,7 @@ import com.yammer.metrics.core.Meter;
 
 /**
  * Actor that compute a pid regulation for the streams
- *
+ * 
  * @author pfreydiere
  */
 public class FlowRegulator extends UntypedActor {
@@ -35,9 +35,9 @@ public class FlowRegulator extends UntypedActor {
 	private Meter elements;
 
 	private double vel;
-	private double Kp = 0.02;
-	private double Ki = 0.000001;
-	private double Kd = 0.0005;
+	private double Kp = 0.00002;
+	private double Ki = 0.0000002;
+	private double Kd = 0.005;
 
 	public FlowRegulator(String counterName, long consigne) {
 
@@ -54,15 +54,17 @@ public class FlowRegulator extends UntypedActor {
 
 	}
 
-	long previousError = 0;
+	double previousError = 0;
 	long previousTime = System.nanoTime();
 	double integral = 0;
+
+	private int cpt = 0;
 
 	@Override
 	public void onReceive(Object message) throws Exception {
 
 		if (message instanceof MessageRegulation) {
-			
+
 			MessageRegulation mr = (MessageRegulation) message;
 			elements.mark(mr.getCounter());
 
@@ -71,15 +73,32 @@ public class FlowRegulator extends UntypedActor {
 			long s = System.nanoTime();
 			double dt = (s - previousTime) / 1000000.0;
 			long c = elements.count();
-			log.info("current elements count :" + c);
 
-			long error = consigne - c;
-			integral += error * dt;
-			double derivative = (error - previousError) / dt;
-			vel = Kp * error + Ki * integral + Kd * derivative;
+			double error = 1.0 * consigne - c;
 
-			log.info("new computed velocity :" + vel);
+			if (error < -consigne) {
+				// fast fall back
+				vel = 0;
 
+			} else {
+
+				integral += error * dt;
+				double derivative = (error - previousError) / dt;
+				vel = Kp * error + Ki * integral + Kd * derivative;
+
+				if (vel > 1000)
+					vel = 1000;
+
+				if (vel < 0)
+					vel = 0;
+
+			}
+
+			if (cpt++ % 10 == 0) {
+				log.info("new computed velocity :" + vel);
+				log.info("current elements count :" + c);
+			}
+			
 			previousError = error;
 			previousTime = s;
 

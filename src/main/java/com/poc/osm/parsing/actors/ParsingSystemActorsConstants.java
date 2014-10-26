@@ -9,5 +9,7 @@ package com.poc.osm.parsing.actors;
 public class ParsingSystemActorsConstants {
 
 	public final static String DISPATCHER = "dispatcher";
+	
+	public final static int RECORDS_BLOC_EQUIVALENCE = 500;
 
 }

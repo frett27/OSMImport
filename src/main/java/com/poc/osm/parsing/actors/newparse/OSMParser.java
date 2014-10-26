@@ -36,6 +36,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.poc.osm.model.OSMBlock;
 import com.poc.osm.model.OSMContext;
 import com.poc.osm.parsing.actors.OSMObjectGenerator;
+import com.poc.osm.parsing.actors.ParsingSystemActorsConstants;
+import com.poc.osm.regulation.MessageRegulation;
 
 import crosby.binary.Fileformat.Blob;
 import crosby.binary.Osmformat.DenseNodes;
@@ -143,10 +145,10 @@ public class OSMParser extends UntypedActor {
 	public OSMBlock currentBlock = new OSMBlock(cpt++);
 
 	public OSMContext currentContext;
+	
 
 	public OSMParser(Router digger) {
 		this.digger = digger;
-		
 		
 	}
 
@@ -228,7 +230,10 @@ public class OSMParser extends UntypedActor {
 		// System.out.println("flush");
 
 		if (digger != null)
+		{
 			digger.route(currentBlock, ActorRef.noSender());
+		
+		}
 		this.currentBlock = new OSMBlock(cpt++);
 		this.currentBlock.setContext(currentContext);
 	}
@@ -276,6 +281,8 @@ public class OSMParser extends UntypedActor {
 	}
 
 	PrimitiveBlock parsePrimitiveBlock(ByteString datas) throws Exception {
+		
+	
 		return PrimitiveBlock.parseFrom(datas);
 	}
 

@@ -23,6 +23,7 @@ import com.poc.osm.model.OSMEntityGeometry;
 import com.poc.osm.model.OSMEntityPoint;
 import com.poc.osm.model.WayToConstruct;
 import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
+import com.poc.osm.regulation.MessageRegulation;
 
 import crosby.binary.Osmformat.DenseNodes;
 import crosby.binary.Osmformat.Node;
@@ -39,9 +40,12 @@ public class OSMObjectGenerator extends UntypedActor {
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
 	private ActorRef dispatcher;
+	
+	private ActorRef flowRegulator;
 
-	public OSMObjectGenerator(ActorRef dispatcher) {
+	public OSMObjectGenerator(ActorRef dispatcher, ActorRef flowRegulator) {
 		this.dispatcher = dispatcher;
+		this.flowRegulator = flowRegulator;
 	}
 
 	/**
@@ -71,6 +75,12 @@ public class OSMObjectGenerator extends UntypedActor {
 						getSelf());
 			}
 		}
+		
+		// TODO relations
+		
+		// regulate
+		flowRegulator.tell(new MessageRegulation(- ParsingSystemActorsConstants.RECORDS_BLOC_EQUIVALENCE ), getSelf());
+
 
 	}
 

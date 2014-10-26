@@ -277,7 +277,7 @@ public class OSMImport {
 				config.getConfig("osmcluster"));
 		
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
-				"output", 200000L)); // consigne à 200k
+				"output", 150000L)); // consigne
 
 		
 		ActorRef parsingSubSystem = sys.actorOf(Props.create(ParsingSubSystemActor.class,flowRegulator));
