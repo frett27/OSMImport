@@ -38,7 +38,7 @@ public class ParsingSubSystemActor extends UntypedActor {
 
 		// init the worker
 
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 7; i++) {
 			ActorRef worker = getContext().actorOf(
 					Props.create(WayConstructorActor.class, dispatcher),
 					"worker" + i);

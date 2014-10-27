@@ -37,7 +37,7 @@ public class FlowRegulator extends UntypedActor {
 	private double vel;
 	private double Kp = 0.00002;
 	private double Ki = 0.0000002;
-	private double Kd = 0.005;
+	private double Kd = 0.00005;
 
 	public FlowRegulator(String counterName, long consigne) {
 
