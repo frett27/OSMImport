@@ -35,9 +35,9 @@ public class FlowRegulator extends UntypedActor {
 	private Meter elements;
 
 	private double vel;
-	private double Kp = 0.00002;
-	private double Ki = 0.0000002;
-	private double Kd = 0.00005;
+	private double Kp = 0.0002;
+	private double Ki = 0.00002;
+	private double Kd = 0.0005;
 
 	public FlowRegulator(String counterName, long consigne) {
 
@@ -65,6 +65,7 @@ public class FlowRegulator extends UntypedActor {
 
 		if (message instanceof MessageRegulation) {
 
+			
 			MessageRegulation mr = (MessageRegulation) message;
 			elements.mark(mr.getCounter());
 
@@ -72,7 +73,7 @@ public class FlowRegulator extends UntypedActor {
 
 			long s = System.nanoTime();
 			double dt = (s - previousTime) / 1000000.0;
-			long c = elements.count();
+			long c = (long)elements.meanRate();
 
 			double error = 1.0 * consigne - c;
 

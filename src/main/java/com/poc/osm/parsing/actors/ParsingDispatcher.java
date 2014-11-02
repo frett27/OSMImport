@@ -98,7 +98,9 @@ public class ParsingDispatcher extends UntypedActor {
 				return; // worker are initialized an other way
 
 			if (message == MessageParsingSystemStatus.START_READING_FILE) {
+
 				stillneedmoreread = false;
+
 			}
 
 			log.debug("message to all workers :" + message);
@@ -126,11 +128,9 @@ public class ParsingDispatcher extends UntypedActor {
 			ActorRef a = wayDispatcher.toArray(new ActorRef[0])[partition];
 			// send the way to the proper partition
 			a.tell(message, getSelf());
-			
-		
+
 		} else if (message instanceof MessageNodes) {
-			
-			
+
 			outputRef.tell(message, getSelf());
 
 			// send nodes to way construct actors

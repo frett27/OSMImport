@@ -10,6 +10,6 @@ public class ParsingSystemActorsConstants {
 
 	public final static String DISPATCHER = "dispatcher";
 	
-	public final static int RECORDS_BLOC_EQUIVALENCE = 500;
+	public final static int RECORDS_BLOC_EQUIVALENCE = 1000;
 
 }

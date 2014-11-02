@@ -127,6 +127,7 @@ public class ReadingActor extends UntypedActor {
 	};
 
 	public void postStop() throws Exception {
+		log.debug("stopping async reading");
 		asyncReading.shutdown();
 	};
 
@@ -216,8 +217,8 @@ public class ReadingActor extends UntypedActor {
 								.system()
 								.scheduler()
 								.scheduleOnce(
-										Duration.create(3000,
-												TimeUnit.MILLISECONDS),
+										Duration.create(100,
+												TimeUnit.SECONDS),
 										dispatcher,
 										MessageClusterRegistration.ASK_IF_NEED_MORE_READ,
 										getContext().dispatcher(), getSelf());
@@ -267,7 +268,7 @@ public class ReadingActor extends UntypedActor {
 
 			if (t > 0) {
 				// System.out.println("sleep :" + t);
-				Thread.sleep((long) (t * 1000));
+				Thread.sleep((long) (t * 1000) + 20);
 			}
 		} catch (Exception ex) {
 

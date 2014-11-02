@@ -1,9 +1,9 @@
 package com.poc.osm.output.actors;
 
+import java.util.List;
+
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
-import akka.dispatch.BoundedMessageQueueSemantics;
-import akka.dispatch.RequiresMessageQueue;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
@@ -21,15 +21,17 @@ public class StreamProcessingActor extends UntypedActor {
 
 	private Transform transform;
 
-	private ActorRef nextActor;
+	private List<ActorRef> nextRefs;
+
+	private List<ActorRef> others;
 
 	public StreamProcessingActor(Filter filter, Transform transform,
-			ActorRef nextRef) throws Exception {
+			List<ActorRef> nextRefs, List<ActorRef> others) throws Exception {
 
 		this.filter = filter;
 		this.transform = transform;
-		this.nextActor = nextRef;
-
+		this.nextRefs = nextRefs;
+		this.others = others;
 	}
 
 	@Override
@@ -56,6 +58,14 @@ public class StreamProcessingActor extends UntypedActor {
 		try {
 			if (filter != null) {
 				if (!filter.filter(e)) {
+
+					if (others != null) {
+						// call others
+						for (ActorRef r : others) {
+							r.tell(e, getSelf());
+						}
+						
+					}
 					return;
 				}
 			}
@@ -64,7 +74,10 @@ public class StreamProcessingActor extends UntypedActor {
 				e = transform.transform(e);
 			}
 
-			nextActor.tell(e, getSelf());
+			for (ActorRef r : nextRefs) {
+				r.tell(e, getSelf());
+			}
+
 		} catch (Exception ex) {
 			log.error("error in processing the message :" + ex.getMessage(), ex);
 		}

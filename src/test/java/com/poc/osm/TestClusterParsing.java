@@ -23,19 +23,7 @@ import com.poc.osm.output.actors.CompiledFieldsMessageCounter;
 import com.poc.osm.output.actors.CompiledTableOutputActor;
 import com.poc.osm.output.actors.FieldsCompilerActor;
 import com.poc.osm.output.actors.StreamProcessingActor;
-import com.poc.osm.output.actors.TableOutputActor;
 import com.poc.osm.output.model.TableHelper;
-import com.poc.osm.parsing.actors.ParsingDispatcher;
-import com.poc.osm.parsing.actors.ParsingOutput;
-import com.poc.osm.parsing.actors.ReadingActor;
-import com.poc.osm.parsing.actors.ResultActor;
-import com.poc.osm.parsing.actors.WayConstructorActor;
-import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
-import com.poc.osm.parsing.actors.messages.MessageReadFile;
-import com.poc.osm.regulation.FlowRegulator;
-import com.poc.osm.regulation.OSMEntityCounterActor;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 public class TestClusterParsing extends TestCase {
 
@@ -50,62 +38,62 @@ public class TestClusterParsing extends TestCase {
 		f.delete();
 
 	}
-
-	public void testClusterParsing() throws Exception {
-
-		recurseDelete(new File("c:\\temp\\t.gdb"));
-
-		Config config = ConfigFactory.load();
-
-		ActorSystem sys = ActorSystem.create("osmcluster",
-				config.getConfig("osmcluster"));
-
-		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
-				"output", 200000L)); // consigne à 200k
-
-		// parsing result output actor, will redirect the parsing in result
-		ActorRef parsingOutput = sys.actorOf(Props.create(ParsingOutput.class,
-				"/user/result"));
-
-		ActorRef dispatcher = sys.actorOf(
-				Props.create(ParsingDispatcher.class, parsingOutput),
-				"dispatcher");
-
-		// reading actor
-		ActorRef reading = sys.actorOf(
-				Props.create(ReadingActor.class, dispatcher, flowRegulator),
-				"reading");
-
-		// init the worker
-		ActorRef worker1 = sys.actorOf(Props.create(WayConstructorActor.class),
-				"worker1");
-		worker1.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
-
-		// ActorRef worker2 =
-		// sys.actorOf(Props.create(WayConstructorActor.class),
-		// "worker2");
-		// worker2.tell(MessageParsingSystemStatus.INITIALIZE,
-		// ActorRef.noSender());
-
-		// init the output
-		List<ActorRef> abonnees = constructOutputModel(sys, flowRegulator);
-
-		sys.actorOf(Props.create(ResultActor.class, abonnees), "result");
-
-		// init the reading
-		reading.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
-
-		reading.tell(new MessageReadFile(new File(
-				"C:\\Projets\\osmimport\\rhone-alpes-latest.osm.pbf")),
-				ActorRef.noSender());
-
-		while (true) {
-			Thread.sleep(2000);
-
-			System.out.println("current time :" + System.currentTimeMillis());
-		}
-
-	}
+//
+//	public void testClusterParsing() throws Exception {
+//
+//		recurseDelete(new File("c:\\temp\\t.gdb"));
+//
+//		Config config = ConfigFactory.load();
+//
+//		ActorSystem sys = ActorSystem.create("osmcluster",
+//				config.getConfig("osmcluster"));
+//
+//		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
+//				"output", 200000L)); // consigne à 200k
+//
+//		// parsing result output actor, will redirect the parsing in result
+//		ActorRef parsingOutput = sys.actorOf(Props.create(ParsingOutput.class,
+//				"/user/result"));
+//
+//		ActorRef dispatcher = sys.actorOf(
+//				Props.create(ParsingDispatcher.class, parsingOutput),
+//				"dispatcher");
+//
+//		// reading actor
+//		ActorRef reading = sys.actorOf(
+//				Props.create(ReadingActor.class, dispatcher, flowRegulator),
+//				"reading");
+//
+//		// init the worker
+//		ActorRef worker1 = sys.actorOf(Props.create(WayConstructorActor.class),
+//				"worker1");
+//		worker1.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
+//
+//		// ActorRef worker2 =
+//		// sys.actorOf(Props.create(WayConstructorActor.class),
+//		// "worker2");
+//		// worker2.tell(MessageParsingSystemStatus.INITIALIZE,
+//		// ActorRef.noSender());
+//
+//		// init the output
+//		List<ActorRef> abonnees = constructOutputModel(sys, flowRegulator);
+//
+//		sys.actorOf(Props.create(ResultActor.class, abonnees), "result");
+//
+//		// init the reading
+//		reading.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
+//
+//		reading.tell(new MessageReadFile(new File(
+//				"C:\\Projets\\osmimport\\rhone-alpes-latest.osm.pbf")),
+//				ActorRef.noSender());
+//
+//		while (true) {
+//			Thread.sleep(2000);
+//
+//			System.out.println("current time :" + System.currentTimeMillis());
+//		}
+//
+//	}
 
 	private List<ActorRef> constructOutputModel(ActorSystem sys,
 			ActorRef flowRegulator) throws Exception {

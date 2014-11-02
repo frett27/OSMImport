@@ -38,7 +38,7 @@ public class ChainCompiler {
 	 * @return
 	 * @throws Exception
 	 */
-	public ProcessModel compile(File processFile, Stream osmStream)
+	public ProcessModel compile(File processFile, Stream mainStream)
 			throws Exception {
 
 		CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
@@ -55,6 +55,7 @@ public class ChainCompiler {
 				"ESRI_GEOMETRY_POLYGON");
 		icz.addStaticImport("com.esrifrance.fgdbapi.xml.EsriGeometryType",
 				"ESRI_GEOMETRY_MULTI_PATCH");
+		
 
 		compilerConfiguration.addCompilationCustomizers(icz);
 
@@ -63,17 +64,20 @@ public class ChainCompiler {
 		gse.setConfig(compilerConfiguration);
 		Binding binding = new Binding();
 		binding.setVariable("builder", new TBuilder());
-		binding.setVariable("osmstream", osmStream);
+		binding.setVariable("osmstream", mainStream);
+		binding.setVariable("out", System.out);
+		
 
 		Object result = gse.run(processFile.getName(), binding);
 
 		if (result == null || !(result instanceof ProcessModel)) {
 			throw new Exception(
-					"invalid script, it must return the constructed process model, the script return :" + result);
+					"invalid script, it must return the constructed process model, the script return :"
+							+ result);
 		}
 
 		ProcessModel pm = (ProcessModel) result;
-		pm.mainStream = osmStream;
+		pm.mainStream = mainStream;
 
 		return pm;
 	}
@@ -100,7 +104,7 @@ public class ChainCompiler {
 
 		Collection<OutCell> outs = pm.outs;
 		if (outs == null || outs.size() == 0)
-			throw new Exception("no out, invalid model");
+			throw new Exception("no out specified, invalid model");
 
 		for (OutCell c : outs) {
 			Stream[] ss = c.streams;

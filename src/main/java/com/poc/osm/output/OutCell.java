@@ -2,14 +2,17 @@ package com.poc.osm.output;
 
 import java.util.Arrays;
 
-public class OutCell {
+import akka.actor.ActorRef;
+
+public class OutCell extends ModelElement {
 
 	public Stream[] streams;
 
 	public GDBReference gdb;
 
 	public String tablename;
-
+	
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

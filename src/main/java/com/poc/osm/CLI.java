@@ -60,6 +60,7 @@ public class CLI {
 
 		OSMImport osmImport = new OSMImport();
 		
+		// load and compile script to be sur there are no errors in it
 		osmImport.loadAndCompileScript(sf);
 		
 		osmImport.run(inputpbffile);

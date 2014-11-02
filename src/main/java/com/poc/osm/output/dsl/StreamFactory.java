@@ -28,6 +28,12 @@ public class StreamFactory extends AbstractFactory {
 		}
 		
 		Stream s = new Stream();
+		
+		Stream other = new Stream();
+		other.parentStream = s;
+		other.isOther = true;
+		s.other = other;
+		
 		s.parentStream = (Stream)value;
 
 		((TBuilder) builder).processModel.addStream(s);
