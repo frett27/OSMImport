@@ -13,7 +13,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+import com.poc.osm.output.actors.LBActor;
 import com.poc.osm.output.actors.StreamProcessingActor;
+import com.poc.osm.regulation.FlowRegulator;
+import com.poc.osm.regulation.MessageRegulatorRegister;
 import com.poc.osm.tools.Tools;
 
 /**
@@ -184,13 +187,13 @@ public class ProcessModel {
 	}
 
 	private List<ActorRef> getActorRefList(ActorSystem sys,
-			Set<ModelElement> elements) {
+			Set<ModelElement> elements, ActorRef flowRegulator) {
 		if (elements == null)
 			return null;
 
 		List<ActorRef> actors = new ArrayList<ActorRef>();
 		for (ModelElement me : elements) {
-			actors.add(getOrCreateActorRef(sys, me));
+			actors.add(getOrCreateActorRef(sys, me, flowRegulator));
 		}
 		return actors;
 	}
@@ -202,7 +205,8 @@ public class ProcessModel {
 	 * @param s
 	 * @return
 	 */
-	public ActorRef getOrCreateActorRef(ActorSystem sys, ModelElement s) {
+	public ActorRef getOrCreateActorRef(ActorSystem sys, ModelElement s,
+			ActorRef flowRegulator) {
 		if (s == null)
 			throw new IllegalArgumentException();
 
@@ -218,17 +222,32 @@ public class ProcessModel {
 		// create the actor
 
 		List<ActorRef> childrenActorRefList = getActorRefList(sys,
-				childrens.get(ss));
+				childrens.get(ss), flowRegulator);
 
 		List<ActorRef> othersActorRefList = getActorRefList(sys,
-				childrenOthers.get(ss));
+				childrenOthers.get(ss), flowRegulator);
 
 		System.out.println("Create actor " + ss.getKey() + " following "
 				+ childrenActorRefList + "," + othersActorRefList);
 
-		return sys.actorOf(Props.create(StreamProcessingActor.class, ss.filter,
-				ss.transform, childrenActorRefList, othersActorRefList), Tools
-				.toActorName(ss.getKey()));
+		List<ActorRef> actors = new ArrayList<ActorRef>();
+
+		for (int i = 0; i < 4; i++) {
+			// create the stream processing actor
+			ActorRef r = sys.actorOf(Props.create(StreamProcessingActor.class,
+					ss.filter, ss.transform, childrenActorRefList,
+					othersActorRefList), Tools.toActorName(ss.getKey()) + "_" + i);
+			flowRegulator
+			.tell(new MessageRegulatorRegister(r), ActorRef.noSender());
+			actors.add(r);
+		}
+
+		ActorRef a = sys.actorOf(Props.create(LBActor.class, actors), "D_" + Tools.toActorName(ss.getKey()));
+
+		flowRegulator
+		.tell(new MessageRegulatorRegister(a), ActorRef.noSender());
+
+		return a;
 
 	}
 

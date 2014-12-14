@@ -2,7 +2,9 @@ package com.poc.osm.regulation;
 
 import java.io.Serializable;
 
-public class MessageRegulatorStatus implements Serializable{
+import akka.dispatch.ControlMessage;
+
+public class MessageRegulatorStatus implements Serializable, ControlMessage{
 	
 	/**
 	 * 

@@ -7,32 +7,29 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import scala.concurrent.duration.Duration;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.dispatch.ControlMessage;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-import akka.routing.ActorRefRoutee;
-import akka.routing.RoundRobinRoutingLogic;
-import akka.routing.Routee;
-import akka.routing.Router;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.poc.osm.model.OSMReader;
+import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.model.OSMReader.VelGetter;
 import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageReadFile;
-import com.poc.osm.parsing.actors.newparse.OSMBlockParsingActor;
+import com.poc.osm.parsing.actors.newparse.BlobMessageWithNo;
+import com.poc.osm.parsing.actors.newparse.OSMParser;
 import com.poc.osm.regulation.MessageRegulatorStatus;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;
@@ -47,27 +44,33 @@ import crosby.binary.Fileformat.Blob;
  * @author pfreydiere
  * 
  */
-public class ReadingActor extends UntypedActor {
+public class ReadingActor extends MeasuredActor {
 
-	private static final String TICK_FOR_PID_UPDATE = "tick";
+	private static final RegulationMessage TICK_FOR_PID_UPDATE = new RegulationMessage();
+
+	private static class RegulationMessage implements ControlMessage {
+
+	}
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-	private Router generatorRouter;
+	// private Router generatorRouter;
 
 	private ActorRef dispatcher;
 
 	private ActorRef flowRegulator;
 
-	private ActorRef newParsingActors;
-
-	private long REG_TIME = 200;
+	private long REG_TIME = 100;
 
 	private Counter nbofRead;
 
 	private Timer timer;
 
+	private BlockingQueue<ActorRef> generators = new LinkedBlockingQueue<ActorRef>();
+
 	public ReadingActor(ActorRef dispatcher, ActorRef flowRegulator) {
+
+		// setTerminal = true;
 
 		log.debug("starting actor " + getClass().getName());
 
@@ -75,18 +78,16 @@ public class ReadingActor extends UntypedActor {
 
 		this.flowRegulator = flowRegulator;
 
-		List<Routee> routees = new ArrayList<Routee>();
 		for (int i = 0; i < 5; i++) {
-			ActorRef r = getContext().actorOf(
-					Props.create(OSMObjectGenerator.class, dispatcher, flowRegulator));
-			getContext().watch(r);
-			routees.add(new ActorRefRoutee(r));
+			ActorRef objectGenerator = getContext().actorOf(
+					Props.create(OSMObjectGenerator.class, dispatcher,
+							flowRegulator));
+
+			ActorRef parser = getContext().actorOf(
+					Props.create(OSMParser.class, objectGenerator));
+			generators.add(parser);
+
 		}
-
-		generatorRouter = new Router(new RoundRobinRoutingLogic(), routees);
-
-		newParsingActors = getContext().actorOf(
-				Props.create(OSMBlockParsingActor.class, generatorRouter, flowRegulator));
 
 		nbofRead = Metrics
 				.newCounter(ReadingActor.class, "Number of file read");
@@ -112,10 +113,8 @@ public class ReadingActor extends UntypedActor {
 		getContext()
 				.system()
 				.scheduler()
-				.scheduleOnce(
-						Duration.create(REG_TIME * 3, TimeUnit.MILLISECONDS),
-						getSelf(), TICK_FOR_PID_UPDATE,
-						getContext().dispatcher(), null);
+				.scheduleOnce(Duration.create(10, TimeUnit.SECONDS), getSelf(),
+						TICK_FOR_PID_UPDATE, getContext().dispatcher(), null);
 	}
 
 	// ioc for velocity getting in the reader
@@ -135,6 +134,7 @@ public class ReadingActor extends UntypedActor {
 	public void onReceive(Object message) throws Exception {
 
 		if (TICK_FOR_PID_UPDATE.equals(message)) {
+			// don't count
 			getContext()
 					.system()
 					.scheduler()
@@ -144,9 +144,17 @@ public class ReadingActor extends UntypedActor {
 							getContext().dispatcher(), null);
 
 			// ask for the regulation status
-			flowRegulator.tell(new MessageRegulatorStatus(), getSelf());
+			tell(flowRegulator, new MessageRegulatorStatus(), getSelf());
+			return;
+		}
 
-		} else if (message instanceof MessageRegulatorStatus) {
+		super.onReceive(message);
+	}
+
+	@Override
+	public void onReceiveMeasured(Object message) throws Exception {
+
+		if (message instanceof MessageRegulatorStatus) {
 
 			MessageRegulatorStatus s = (MessageRegulatorStatus) message;
 
@@ -171,7 +179,7 @@ public class ReadingActor extends UntypedActor {
 				@Override
 				public Object call() throws Exception {
 					log.info("start reading file");
-					dispatcher.tell(
+					tell(dispatcher,
 							MessageParsingSystemStatus.START_READING_FILE,
 							getSelf());
 					nbofRead.inc();
@@ -184,14 +192,14 @@ public class ReadingActor extends UntypedActor {
 
 					FileInputStream fis = new FileInputStream(currentFile);
 					try {
-
+						int cpt = 0;
 						BufferedInputStream bfis = new BufferedInputStream(fis,
 								10000000);
 						try {
 
 							DataInputStream datinput = new DataInputStream(bfis);
 							while (true) {
-								readChunk(datinput, newParsingActors);
+								readChunk(datinput, cpt++);
 							}
 
 						} catch (EOFException eof) {
@@ -207,7 +215,7 @@ public class ReadingActor extends UntypedActor {
 
 						log.info("reading file ended");
 
-						dispatcher.tell(
+						tell(dispatcher,
 								MessageParsingSystemStatus.END_READING_FILE,
 								getSelf());
 
@@ -217,8 +225,7 @@ public class ReadingActor extends UntypedActor {
 								.system()
 								.scheduler()
 								.scheduleOnce(
-										Duration.create(100,
-												TimeUnit.SECONDS),
+										Duration.create(10, TimeUnit.SECONDS),
 										dispatcher,
 										MessageClusterRegistration.ASK_IF_NEED_MORE_READ,
 										getContext().dispatcher(), getSelf());
@@ -247,8 +254,7 @@ public class ReadingActor extends UntypedActor {
 	 * @throws IOException
 	 * @throws InvalidProtocolBufferException
 	 */
-	private void readChunk(DataInputStream datinput, ActorRef p)
-			throws Exception {
+	private void readChunk(DataInputStream datinput, int cpt) throws Exception {
 
 		try {
 			// Thread.sleep(1000); // pression nominale pour
@@ -259,17 +265,25 @@ public class ReadingActor extends UntypedActor {
 			// velocity between 0 and 1000
 
 			double maxTimeToWaitIf0 = 5.0;
-			
-			double t = maxTimeToWaitIf0 - maxTimeToWaitIf0 / 1000.0 * v;
+			double timeToWaitif1000 = 0.005;
+
+			double t = maxTimeToWaitIf0 - maxTimeToWaitIf0 / 1000.0 * v
+					+ timeToWaitif1000;
 			if (t > maxTimeToWaitIf0)
 				t = maxTimeToWaitIf0;
 			if (t < 0)
 				t = 0;
 
-			if (t > 0) {
-				// System.out.println("sleep :" + t);
-				Thread.sleep((long) (t * 1000) + 20);
-			}
+			do {
+
+				if (t > 0.1) {
+					System.out.println("Velocity :" + v);
+					System.out.println("SlowDown the input reading :" + t);
+				}
+				Thread.sleep((long) (t * 1000));
+
+			} while (currentVelGetter.get() < 1);
+
 		} catch (Exception ex) {
 
 		}
@@ -292,18 +306,15 @@ public class ReadingActor extends UntypedActor {
 
 		Blob blob = Fileformat.Blob.parseFrom(b);
 
-		// System.out.println(blob);
-		// System.out.println("has lzmaData :" + blob.hasLzmaData());
-		// System.out.println("has zlibData :" + blob.hasZlibData());
-		// System.out.println("raw size :" + blob.getRawSize());
-		// ByteString zlibData = blob.getZlibData();
-		// System.out.println("zlibdata :" + zlibData.size());
-
 		if ("OSMData".equals(header.getType())) {
-			p.tell(blob, ActorRef.noSender());
-			
-			
-			
+
+			ActorRef next = generators.take();
+			try {
+				tell(next, new BlobMessageWithNo(blob, cpt),
+						ActorRef.noSender());
+			} finally {
+				generators.add(next);
+			}
 		}
 
 	}
@@ -315,7 +326,7 @@ public class ReadingActor extends UntypedActor {
 		log.info("Read file :" + f);
 		this.currentFile = f;
 
-		dispatcher.tell(MessageParsingSystemStatus.START_JOB, getSelf());
+		tell(dispatcher, MessageParsingSystemStatus.START_JOB, getSelf());
 
 		onReceive(MessageClusterRegistration.NEED_MORE_READ);
 	}

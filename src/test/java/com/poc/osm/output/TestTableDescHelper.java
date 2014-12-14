@@ -3,13 +3,13 @@ package com.poc.osm.output;
 import java.io.File;
 import java.util.Random;
 
-import com.esrifrance.fgdbapi.swig.EsriFileGdb;
-import com.esrifrance.fgdbapi.swig.Geodatabase;
-import com.esrifrance.fgdbapi.xml.DETable;
-import com.esrifrance.fgdbapi.xml.EsriGeometryType;
-import com.poc.osm.output.model.TableHelper;
-
 import junit.framework.TestCase;
+
+import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
+import org.fgdbapi.thindriver.swig.Geodatabase;
+import org.fgdbapi.thindriver.xml.EsriGeometryType;
+
+import com.poc.osm.output.model.TableHelper;
 
 public class TestTableDescHelper extends TestCase {
 
@@ -22,7 +22,7 @@ public class TestTableDescHelper extends TestCase {
 		File f = File.createTempFile("testgdb", ".gdb");
 		f.delete();
 
-		g = EsriFileGdb.createGeodatabase(f.getAbsolutePath());
+		g = FGDBJNIWrapper.createGeodatabase(f.getAbsolutePath());
 
 		System.out.println("geodatabase created in :" + f.getAbsolutePath());
 

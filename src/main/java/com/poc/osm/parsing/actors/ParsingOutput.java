@@ -1,15 +1,13 @@
 package com.poc.osm.parsing.actors;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.UntypedActor;
-import akka.dispatch.BoundedMessageQueueSemantics;
-import akka.dispatch.RequiresMessageQueue;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.messages.MessageWay;
-import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 
 /**
@@ -18,14 +16,14 @@ import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
  * @author use
  * 
  */
-public class ParsingOutput extends UntypedActor {
+public class ParsingOutput extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-	private ActorSelection resultSendingActors;
+	private ActorRef resultSendingActors;
 
-	public ParsingOutput(String resultPath) {
-		resultSendingActors = getContext().actorSelection(resultPath);
+	public ParsingOutput(ActorRef output) {
+		resultSendingActors = output;
 	}
 
 	private enum State {
@@ -39,7 +37,7 @@ public class ParsingOutput extends UntypedActor {
 	 * @see akka.actor.UntypedActor#onReceive(java.lang.Object)
 	 */
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceiveMeasured(Object message) throws Exception {
 
 		if (log.isDebugEnabled()) {
 			log.debug("message received :" + message);
@@ -49,13 +47,14 @@ public class ParsingOutput extends UntypedActor {
 
 			if (currentState == State.READING_POINTS) {
 				// first read, we send the points to the output for handling
-				resultSendingActors.tell(message, getSelf());
+				tell(resultSendingActors,message, getSelf());
 			}
+			
 			// else points have already been sent, don't resend them ...
 
 		} else if (message instanceof MessageWay) {
 			
-			resultSendingActors.tell(message, getSelf());
+			tell(resultSendingActors,message, getSelf());
 
 		} else if (message instanceof MessageParsingSystemStatus) {
 			

@@ -3,6 +3,8 @@ package com.poc.osm.output.dsl
 import java.util.Map
 
 import com.poc.osm.output.ClosureFilter;
+import com.poc.osm.output.Filter;
+import com.poc.osm.output.Transform;
 
 import groovy.util.AbstractFactory;
 import groovy.util.FactoryBuilderSupport;
@@ -16,7 +18,14 @@ import groovy.util.FactoryBuilderSupport;
 class UnaryClosureFactory extends AbstractFactory {
 
 
+	/**
+	 * underlying class
+	 */
 	Class clazz;
+	
+	/**
+	 * factory member name
+	 */
 	String memberName;
 
 
@@ -28,6 +37,12 @@ class UnaryClosureFactory extends AbstractFactory {
 	public Object newInstance(FactoryBuilderSupport builder, Object name,
 	Object value, Map attributes) throws InstantiationException,
 	IllegalAccessException {
+		
+		if (value != null && (value instanceof Filter || value instanceof Transform))
+		{
+			return value;
+		}
+		
 		return clazz.newInstance()
 	}
 
@@ -37,7 +52,7 @@ class UnaryClosureFactory extends AbstractFactory {
 	}
 
 	void onNodeCompleted(FactoryBuilderSupport builder,  parent,  child) {
-		if (parent != null && parent.hasProperty(memberName)) {
+		if (parent != null && parent.hasProperty(memberName) ) {
 			parent[memberName] = child;
 		}
 	}

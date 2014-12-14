@@ -9,6 +9,7 @@ import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.messages.MessageWay;
 import com.poc.osm.model.OSMEntity;
@@ -29,7 +30,7 @@ import com.yammer.metrics.core.Counter;
  * @author pfreydiere
  * 
  */
-public class WayConstructorActor extends UntypedActor {
+public class WayConstructorActor extends MeasuredActor {
 
 	/**
 	 * logger
@@ -49,7 +50,7 @@ public class WayConstructorActor extends UntypedActor {
 	/**
 	 * max way to handle by reading
 	 */
-	private int maxWayToConstruct = 100000;
+	private int maxWayToConstruct = 50000;
 
 	private enum State {
 		REGISTRATION_PHASE, PROCESSING_PHASE
@@ -71,6 +72,8 @@ public class WayConstructorActor extends UntypedActor {
 	 * necessary
 	 */
 	private boolean needMoreRead = true;
+
+	private boolean hasinformed = false;
 
 	private ActorRef dispatcher;
 
@@ -94,7 +97,7 @@ public class WayConstructorActor extends UntypedActor {
 				if (log.isDebugEnabled())
 					log.debug("emit way " + e);
 				// tell the output there is a new constructed way
-				output.tell(new MessageWay(e), getSelf());
+				tell(output, new MessageWay(e), getSelf());
 				waysMetrics.dec();
 			}
 		});
@@ -107,7 +110,7 @@ public class WayConstructorActor extends UntypedActor {
 	}
 
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceiveMeasured(Object message) throws Exception {
 
 		if (currentState == State.REGISTRATION_PHASE) {
 
@@ -116,9 +119,10 @@ public class WayConstructorActor extends UntypedActor {
 				MessageParsingSystemStatus m = (MessageParsingSystemStatus) message;
 				if (m == MessageParsingSystemStatus.INITIALIZE) {
 					// launch registration
-					dispatcher
-							.tell(MessageClusterRegistration.ASK_FOR_WAY_REGISTRATION,
-									getSelf());
+
+					tell(dispatcher,
+							MessageClusterRegistration.ASK_FOR_WAY_REGISTRATION,
+							getSelf());
 				}
 
 			} else if (message instanceof MessageOutputRef) {
@@ -140,14 +144,17 @@ public class WayConstructorActor extends UntypedActor {
 					this.needMoreRead = false;
 					// a read started
 
+					hasinformed = false;
+
 				} else if (message == MessageParsingSystemStatus.END_READING_FILE) {
 
 					if (needMoreRead || (reg.getWaysRegistered() > 0)) {
-						dispatcher.tell(
+						tell(dispatcher,
 								MessageClusterRegistration.NEED_MORE_READ,
 								getSelf());
+						log.info("I need more read");
 					} else {
-						dispatcher.tell(
+						tell(dispatcher,
 								MessageClusterRegistration.ALL_BLOCKS_READ,
 								getSelf());
 					}
@@ -195,6 +202,12 @@ public class WayConstructorActor extends UntypedActor {
 				for (WayToConstruct w : waysToConstruct) {
 					reg.register(w);
 					waysMetrics.inc();
+				}
+
+				if (!hasinformed) {
+					tell(dispatcher, MessageClusterRegistration.NEED_MORE_READ,
+							getSelf());
+					hasinformed = true;
 				}
 
 				handledBlocks.add(mw.getBlockid());

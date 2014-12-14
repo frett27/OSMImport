@@ -1,22 +1,5 @@
 package com.poc.osm.parsing.actors.newparse;
 
-/** Copyright (c) 2010 Scott A. Crosby. <scott@sacrosby.com>
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as 
- published by the Free Software Foundation, either version 3 of the 
- License, or (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- */
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,36 +7,21 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.actor.UntypedActor;
-import akka.routing.ActorRefRoutee;
-import akka.routing.RoundRobinRoutingLogic;
-import akka.routing.Routee;
-import akka.routing.Router;
 
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.model.OSMBlock;
 import com.poc.osm.model.OSMContext;
-import com.poc.osm.parsing.actors.OSMObjectGenerator;
-import com.poc.osm.parsing.actors.ParsingSystemActorsConstants;
-import com.poc.osm.regulation.MessageRegulation;
 
-import crosby.binary.Fileformat.Blob;
+import crosby.binary.Fileformat;
+import crosby.binary.Osmformat;
 import crosby.binary.Osmformat.DenseNodes;
-import crosby.binary.Osmformat.HeaderBlock;
 import crosby.binary.Osmformat.Node;
 import crosby.binary.Osmformat.PrimitiveBlock;
 import crosby.binary.Osmformat.Relation;
 import crosby.binary.Osmformat.Way;
-import crosby.binary.BinaryParser;
-import crosby.binary.Fileformat;
-import crosby.binary.Osmformat;
-import crosby.binary.file.BlockReaderAdapter;
-import crosby.binary.file.FileBlock;
-import crosby.binary.file.FileBlockPosition;
 
-public class OSMParser extends UntypedActor {
+public class OSMParser extends MeasuredActor {
 
 	protected int granularity;
 	private long lat_offset;
@@ -138,18 +106,15 @@ public class OSMParser extends UntypedActor {
 		}
 	}
 
-	public int cpt = 0;
+	public ActorRef digger;
 
-	public Router digger;
-
-	public OSMBlock currentBlock = new OSMBlock(cpt++);
+	public OSMBlock currentBlock;
 
 	public OSMContext currentContext;
-	
 
-	public OSMParser(Router digger) {
+	public OSMParser(ActorRef digger) {
 		this.digger = digger;
-		
+
 	}
 
 	protected void parseRelations(List<Relation> rels) {
@@ -202,7 +167,7 @@ public class OSMParser extends UntypedActor {
 
 	}
 
-	public void parse(PrimitiveBlock block) {
+	public void parse(PrimitiveBlock block, int cpt) {
 
 		Osmformat.StringTable stablemessage = block.getStringtable();
 		String[] strings = new String[stablemessage.getSCount()];
@@ -218,6 +183,8 @@ public class OSMParser extends UntypedActor {
 
 		OSMContext ctx = new OSMContext(granularity, lat_offset, lon_offset,
 				date_granularity, strings);
+
+		this.currentBlock = new OSMBlock(cpt++);
 		currentContext = ctx;
 		currentBlock.setContext(currentContext);
 
@@ -229,13 +196,11 @@ public class OSMParser extends UntypedActor {
 	protected void flush() {
 		// System.out.println("flush");
 
-		if (digger != null)
-		{
-			digger.route(currentBlock, ActorRef.noSender());
-		
+		if (digger != null) {
+			tell(digger, currentBlock, ActorRef.noSender());
+
 		}
-		this.currentBlock = new OSMBlock(cpt++);
-		this.currentBlock.setContext(currentContext);
+
 	}
 
 	public void complete() {
@@ -243,10 +208,12 @@ public class OSMParser extends UntypedActor {
 	}
 
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceiveMeasured(Object message) throws Exception {
 
-		if (message instanceof Blob) {
-			parse(parseData((Blob) message));
+		if (message instanceof BlobMessageWithNo) {
+			BlobMessageWithNo bwc = (BlobMessageWithNo) message;
+			PrimitiveBlock pb = parseData(bwc.blob);
+			parse(pb, bwc.cpt);
 		} else {
 			unhandled(message);
 		}
@@ -281,8 +248,7 @@ public class OSMParser extends UntypedActor {
 	}
 
 	PrimitiveBlock parsePrimitiveBlock(ByteString datas) throws Exception {
-		
-	
+
 		return PrimitiveBlock.parseFrom(datas);
 	}
 

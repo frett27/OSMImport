@@ -6,9 +6,9 @@ import groovy.util.FactoryBuilderSupport;
 import java.util.List;
 import java.util.Map;
 
-import com.esrifrance.fgdbapi.xml.EsriGeometryType;
+import org.fgdbapi.thindriver.xml.EsriGeometryType;
+
 import com.poc.osm.output.GDBReference;
-import com.poc.osm.output.dsl.TBuilder;
 import com.poc.osm.output.model.TableHelper;
 
 /**

@@ -7,27 +7,27 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 
-import com.esrifrance.fgdbapi.xml.ArrayOfField;
-import com.esrifrance.fgdbapi.xml.ArrayOfIndex;
-import com.esrifrance.fgdbapi.xml.ArrayOfPropertySetProperty;
-import com.esrifrance.fgdbapi.xml.DEFeatureClass;
-import com.esrifrance.fgdbapi.xml.DETable;
-import com.esrifrance.fgdbapi.xml.DataElement;
-import com.esrifrance.fgdbapi.xml.Envelope;
-import com.esrifrance.fgdbapi.xml.EnvelopeN;
-import com.esrifrance.fgdbapi.xml.EsriDatasetType;
-import com.esrifrance.fgdbapi.xml.EsriFeatureType;
-import com.esrifrance.fgdbapi.xml.EsriFieldType;
-import com.esrifrance.fgdbapi.xml.EsriGeometryType;
-import com.esrifrance.fgdbapi.xml.Field;
-import com.esrifrance.fgdbapi.xml.Fields;
-import com.esrifrance.fgdbapi.xml.GeographicCoordinateSystem;
-import com.esrifrance.fgdbapi.xml.GeometryDef;
-import com.esrifrance.fgdbapi.xml.Index;
-import com.esrifrance.fgdbapi.xml.Indexes;
-import com.esrifrance.fgdbapi.xml.ObjectFactory;
-import com.esrifrance.fgdbapi.xml.PropertySet;
-import com.esrifrance.fgdbapi.xml.SpatialReference;
+import org.fgdbapi.thindriver.xml.ArrayOfField;
+import org.fgdbapi.thindriver.xml.ArrayOfIndex;
+import org.fgdbapi.thindriver.xml.ArrayOfPropertySetProperty;
+import org.fgdbapi.thindriver.xml.DEFeatureClass;
+import org.fgdbapi.thindriver.xml.DETable;
+import org.fgdbapi.thindriver.xml.DataElement;
+import org.fgdbapi.thindriver.xml.EnvelopeN;
+import org.fgdbapi.thindriver.xml.EsriDatasetType;
+import org.fgdbapi.thindriver.xml.EsriFeatureType;
+import org.fgdbapi.thindriver.xml.EsriFieldType;
+import org.fgdbapi.thindriver.xml.EsriGeometryType;
+import org.fgdbapi.thindriver.xml.Field;
+import org.fgdbapi.thindriver.xml.Fields;
+import org.fgdbapi.thindriver.xml.GeographicCoordinateSystem;
+import org.fgdbapi.thindriver.xml.GeometryDef;
+import org.fgdbapi.thindriver.xml.Index;
+import org.fgdbapi.thindriver.xml.Indexes;
+import org.fgdbapi.thindriver.xml.ObjectFactory;
+import org.fgdbapi.thindriver.xml.PropertySet;
+import org.fgdbapi.thindriver.xml.SpatialReference;
+
 import com.sun.xml.internal.bind.marshaller.NamespacePrefixMapper;
 
 /**

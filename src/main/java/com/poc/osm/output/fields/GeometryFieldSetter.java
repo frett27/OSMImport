@@ -1,8 +1,9 @@
 package com.poc.osm.output.fields;
 
+import org.fgdbapi.thindriver.swig.Row;
+
 import com.esri.core.geometry.Geometry;
 import com.esri.core.geometry.GeometryEngine;
-import com.esrifrance.fgdbapi.swig.Row;
 
 public class GeometryFieldSetter extends AbstractFieldSetter {
 

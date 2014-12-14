@@ -1,12 +1,15 @@
 package com.poc.osm.regulation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+import com.poc.osm.actors.ControlMessageMetrics;
+import com.poc.osm.actors.MeasuredActor;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Meter;
 
@@ -15,37 +18,22 @@ import com.yammer.metrics.core.Meter;
  * 
  * @author pfreydiere
  */
-public class FlowRegulator extends UntypedActor {
-
-	private static final String TICK2 = "tick";
+public class FlowRegulator extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
 	/**
-	 * actors that provide some measures
-	 */
-	private ActorRef[] actors;
-
-	/**
 	 * current number of elements
 	 */
-
 	private long consigne;
 
-	private Meter elements;
-
 	private double vel;
-	private double Kp = 0.0002;
-	private double Ki = 0.00002;
-	private double Kd = 0.0005;
+	private double Kp = 0.0004;
+	private double Ki = 0.000004;
+	private double Kd = 0.00005;
 
 	public FlowRegulator(String counterName, long consigne) {
-
 		this.consigne = consigne;
-
-		elements = Metrics.newMeter(FlowRegulator.class, counterName,
-				"Pipeline", TimeUnit.SECONDS);
-
 	}
 
 	@Override
@@ -60,20 +48,30 @@ public class FlowRegulator extends UntypedActor {
 
 	private int cpt = 0;
 
+	private ArrayList<ActorRef> registeredActors = new ArrayList<ActorRef>();
+
 	@Override
-	public void onReceive(Object message) throws Exception {
+	protected List<ActorRef> metricsChildrens() {
+		List<ActorRef> l = super.metricsChildrens();
+		l.addAll(registeredActors);
+		return l;
+	}
 
-		if (message instanceof MessageRegulation) {
+	@Override
+	public void onReceiveMeasured(Object message) throws Exception {
 
-			
-			MessageRegulation mr = (MessageRegulation) message;
-			elements.mark(mr.getCounter());
+		if (message instanceof MessageRegulatorRegister) {
+
+			registeredActors.add(((MessageRegulatorRegister) message)
+					.getActor());
 
 		} else if (message instanceof MessageRegulatorStatus) {
 
 			long s = System.nanoTime();
 			double dt = (s - previousTime) / 1000000.0;
-			long c = (long)elements.meanRate();
+
+		
+			long c = computeMessageNumber();
 
 			double error = 1.0 * consigne - c;
 
@@ -96,17 +94,17 @@ public class FlowRegulator extends UntypedActor {
 			}
 
 			if (cpt++ % 10 == 0) {
-				log.info("new computed velocity :" + vel);
-				log.info("current elements count :" + c);
+				log.info("new computed velocity :" + vel + "(" + c + " elements)");
+				// consolidateAllMessages().dump();
 			}
-			
+
 			previousError = error;
 			previousTime = s;
 
 			MessageRegulatorStatus messageRegulatorStatus = new MessageRegulatorStatus();
 			messageRegulatorStatus.setNewVelocity(vel);
 
-			getSender().tell(messageRegulatorStatus, getSelf());
+			tell(getSender(), messageRegulatorStatus, getSelf());
 
 		} else {
 			unhandled(message);

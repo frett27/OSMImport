@@ -3,17 +3,17 @@ package com.poc.osm.output.actors;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.fgdbapi.thindriver.swig.FieldDef;
+import org.fgdbapi.thindriver.swig.FieldType;
+import org.fgdbapi.thindriver.swig.Table;
+import org.fgdbapi.thindriver.swig.VectorOfFieldDef;
+
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
 import com.esri.core.geometry.Geometry;
-import com.esri.core.geometry.GeometryEngine;
-import com.esrifrance.fgdbapi.swig.FieldDef;
-import com.esrifrance.fgdbapi.swig.FieldType;
-import com.esrifrance.fgdbapi.swig.Table;
-import com.esrifrance.fgdbapi.swig.VectorOfFieldDef;
+import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.model.OSMEntity;
 import com.poc.osm.output.actors.messages.CompiledFieldsMessage;
 import com.poc.osm.output.fields.AbstractFieldSetter;
@@ -21,7 +21,7 @@ import com.poc.osm.output.fields.GeometryFieldSetter;
 import com.poc.osm.output.fields.IntegerFieldSetter;
 import com.poc.osm.output.fields.StringFieldSetter;
 
-public class FieldsCompilerActor extends UntypedActor {
+public class FieldsCompilerActor extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
@@ -72,7 +72,7 @@ public class FieldsCompilerActor extends UntypedActor {
 	}
 
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceiveMeasured(Object message) throws Exception {
 
 		if (message instanceof OSMEntity) {
 
@@ -115,7 +115,7 @@ public class FieldsCompilerActor extends UntypedActor {
 						+ sb.toString());
 			}
 
-			compiledOutputActor.tell(new CompiledFieldsMessage(n), getSelf());
+			tell(compiledOutputActor,new CompiledFieldsMessage(n), getSelf());
 
 		}
 

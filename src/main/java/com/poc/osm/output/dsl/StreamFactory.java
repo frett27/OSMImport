@@ -36,11 +36,21 @@ public class StreamFactory extends AbstractFactory {
 		
 		s.parentStream = (Stream)value;
 
+		
+		
 		((TBuilder) builder).processModel.addStream(s);
 		
 		
 		return s;
 
 	}
+	
+	@Override
+	public void onNodeCompleted(FactoryBuilderSupport builder, Object parent,
+			Object node) {
+		// TODO Auto-generated method stub
+		super.onNodeCompleted(builder, parent, node);
+	}
+	
 
 }

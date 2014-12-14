@@ -7,21 +7,20 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
+
+import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
+import org.fgdbapi.thindriver.swig.Geodatabase;
+import org.fgdbapi.thindriver.swig.Table;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
-import com.esrifrance.fgdbapi.swig.EsriFileGdb;
-import com.esrifrance.fgdbapi.swig.Geodatabase;
-import com.esrifrance.fgdbapi.swig.Table;
 import com.poc.osm.output.GDBReference;
 import com.poc.osm.output.OutCell;
 import com.poc.osm.output.ProcessModel;
 import com.poc.osm.output.Stream;
 import com.poc.osm.output.actors.ChainCompiler;
-import com.poc.osm.output.actors.CompiledFieldsMessageCounter;
-import com.poc.osm.output.actors.CompiledTableOutputActor;
-import com.poc.osm.output.actors.FieldsCompilerActor;
 import com.poc.osm.output.actors.StreamProcessingActor;
 import com.poc.osm.output.model.TableHelper;
 
@@ -139,7 +138,7 @@ public class TestClusterParsing extends TestCase {
 				System.out.println("create geodatabase " + path);
 				// create the GDB
 				
-				geodatabase = EsriFileGdb.createGeodatabase(path);
+				geodatabase = FGDBJNIWrapper.createGeodatabase(path);
 				geodatabaseRefs.put(path, geodatabase);
 
 				for (TableHelper h : r.listTables()) {
@@ -157,25 +156,25 @@ public class TestClusterParsing extends TestCase {
 //							toActorName("T__" + h.getName()));
 					
 					
-					ActorRef tableCompiledOutputActor = sys.actorOf(Props.create(
-							CompiledTableOutputActor.class, newTable, flowRegulator),
-							toActorName("T__" + h.getName()));
-					
-					// wrap counter at front of the table output
-					ActorRef counter = sys.actorOf(Props
-							.create(CompiledFieldsMessageCounter.class, tableCompiledOutputActor,
-									flowRegulator));
-					
-					
-					ActorRef fieldsCompiler = sys.actorOf(Props.create(
-							FieldsCompilerActor.class, newTable, counter),
-							toActorName("FC__" + h.getName()));
+//					ActorRef tableCompiledOutputActor = sys.actorOf(Props.create(
+//							CompiledTableOutputActor.class, newTable, flowRegulator),
+//							toActorName("T__" + h.getName()));
+//					
+//					// wrap counter at front of the table output
+//					ActorRef counter = sys.actorOf(Props
+//							.create(CompiledFieldsMessageCounter.class, tableCompiledOutputActor,
+//									flowRegulator));
+//					
+//					
+//					ActorRef fieldsCompiler = sys.actorOf(Props.create(
+//							FieldsCompilerActor.class, newTable, counter),
+//							toActorName("FC__" + h.getName()));
 					
 
-					if (oc.tablename.equals(h.getName())) {
-						// wrap the counter for the output
-						tableOutput = fieldsCompiler;
-					}
+//					if (oc.tablename.equals(h.getName())) {
+//						// wrap the counter for the output
+//						tableOutput = fieldsCompiler;
+//					}
 
 				}
 

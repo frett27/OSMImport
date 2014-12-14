@@ -1,7 +1,21 @@
 import com.esri.core.geometry.Geometry;
 import com.poc.osm.model.OSMEntity;
+import com.poc.osm.output.Filter;
+import com.poc.osm.output.Transform;
+
 import groovy.util.XmlSlurper;
 
+
+class FilterKeyExist extends Filter {
+	
+	 Geometry.Type geomType;
+	 String name;
+	
+	boolean filter(OSMEntity e){
+		return ((e.geometryType == geomType) && e.fields != null && e.fields[name] != null) as boolean
+	}
+	
+}
 
 // construction de la chaine
 builder.build(osmstream) {
@@ -72,17 +86,15 @@ builder.build(osmstream) {
 	
 	def lastStream = osmstream;
 	
+	
+	
 	for (l in wished) {
 	
 		// a stream
-		pts[l] = stream(lastStream) {
+		pts[l] = builder.stream(lastStream) {
 			
-			def k = "" + l
 	
-			filter {
-				OSMEntity e ->
-				   (e.geometryType == Geometry.Type.Point) && e.fields && e.fields[k]
-			}
+			filter(new FilterKeyExist(geomType:Geometry.Type.Point,name:l))
 			
 			transform { OSMEntity e ->
 				String t = e.fields[k];
@@ -90,29 +102,26 @@ builder.build(osmstream) {
 				e.setValue("id",e.id);
 				e.setValue("type",t);
 				return e;
-			}
+			} 
 	
 		}
 		
 		lastStream = pts[l].other
 		
 		// a stream
-		lines[l] = stream(pts[l].other) {
+		lines[l] = builder.stream(pts[l].other) {
 			
-			def k = "" + l
+			def k = "" + l;
 	
-			filter {
-				OSMEntity e ->
-				   (e.geometryType == Geometry.Type.Polyline) && e.fields && e.fields[k]
-			}
+			filter(new FilterKeyExist(geomType:Geometry.Type.Polyline,name:k))
 			
-			transform { OSMEntity e ->
+			transform  { OSMEntity e ->
 				String t = e.fields[k];
 				e.getFields()?.clear();
 				e.setValue("id",e.id);
 				e.setValue("type",t);
 				return e;
-			}
+			} 
 	
 		}
 		

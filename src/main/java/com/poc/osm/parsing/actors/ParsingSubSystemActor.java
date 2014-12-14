@@ -1,18 +1,19 @@
 package com.poc.osm.parsing.actors;
 
+import java.util.concurrent.TimeUnit;
+
 import scala.collection.Iterator;
-import scala.collection.immutable.Iterable;
+import scala.concurrent.duration.FiniteDuration;
 import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageReadFile;
 
-public class ParsingSubSystemActor extends UntypedActor {
+public class ParsingSubSystemActor extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
@@ -20,16 +21,13 @@ public class ParsingSubSystemActor extends UntypedActor {
 
 	private ActorRef dispatcher;
 
-	private ActorRef parsingOutput;
+	public ParsingSubSystemActor(ActorRef flowRegulator, ActorRef output) {
 
-	public ParsingSubSystemActor(ActorRef flowRegulator) {
-
-		parsingOutput = getContext().actorOf(
-				Props.create(ParsingOutput.class, "/user/result"));
+		// setTerminal = true;
 
 		dispatcher = getContext().actorOf(
-				Props.create(ParsingDispatcher.class, parsingOutput,
-						flowRegulator), "dispatcher");
+				Props.create(ParsingDispatcher.class, output, flowRegulator),
+				"dispatcher");
 
 		// reading actor
 		reading = getContext().actorOf(
@@ -38,11 +36,11 @@ public class ParsingSubSystemActor extends UntypedActor {
 
 		// init the worker
 
-		for (int i = 0; i < 7; i++) {
+		for (int i = 0; i < 5; i++) {
 			ActorRef worker = getContext().actorOf(
 					Props.create(WayConstructorActor.class, dispatcher),
 					"worker" + i);
-			worker.tell(MessageParsingSystemStatus.INITIALIZE,
+			tell(worker, MessageParsingSystemStatus.INITIALIZE,
 					ActorRef.noSender());
 
 		}
@@ -50,23 +48,38 @@ public class ParsingSubSystemActor extends UntypedActor {
 	}
 
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceiveMeasured(Object message) throws Exception {
 
 		if (message instanceof MessageParsingSystemStatus) {
 
 			Iterator<ActorRef> it = getContext().children().iterator();
 			for (ActorRef a = it.next(); it.hasNext(); a = it.next()) {
-				a.tell(message, getSelf());
+				tell(a, message, getSelf());
 			}
 
 			if (MessageParsingSystemStatus.END_JOB == message) {
 				log.info("terminate the process");
-				getContext().system().shutdown();
+
+				// wait for all remaining events to be handled
+				getContext()
+						.system()
+						.scheduler()
+						.scheduleOnce(
+								new FiniteDuration(1, TimeUnit.MINUTES),
+								new Runnable() {
+
+									@Override
+									public void run() {
+										System.out.println("ShutDown the process");
+										getContext().system().shutdown();
+									}
+								}, getContext().system().dispatcher());
+
 			}
 
 		} else if (message instanceof MessageReadFile) {
 
-			reading.tell(message, getSelf());
+			tell(reading, message, getSelf());
 
 		}
 
@@ -74,5 +87,4 @@ public class ParsingSubSystemActor extends UntypedActor {
 			unhandled(message);
 		}
 	}
-
 }

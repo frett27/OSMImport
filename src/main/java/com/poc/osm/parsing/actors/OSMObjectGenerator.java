@@ -1,20 +1,16 @@
 package com.poc.osm.parsing.actors;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import akka.dispatch.BoundedMessageQueueSemantics;
-import akka.dispatch.RequiresMessageQueue;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
 import com.esri.core.geometry.Point;
+import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.model.OSMBlock;
 import com.poc.osm.model.OSMContext;
@@ -23,7 +19,6 @@ import com.poc.osm.model.OSMEntityGeometry;
 import com.poc.osm.model.OSMEntityPoint;
 import com.poc.osm.model.WayToConstruct;
 import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
-import com.poc.osm.regulation.MessageRegulation;
 
 import crosby.binary.Osmformat.DenseNodes;
 import crosby.binary.Osmformat.Node;
@@ -35,7 +30,7 @@ import crosby.binary.Osmformat.Way;
  * @author pfreydiere
  * 
  */
-public class OSMObjectGenerator extends UntypedActor {
+public class OSMObjectGenerator extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
@@ -62,7 +57,7 @@ public class OSMObjectGenerator extends UntypedActor {
 
 		List<OSMEntity> allNodes = constructNodesTreeSet(b);
 		if (allNodes != null) {
-			dispatcher.tell(new MessageNodes(allNodes), getSelf());
+			tell(dispatcher,new MessageNodes(allNodes), getSelf());
 		}
 
 		// emit the nodes received ...
@@ -70,7 +65,7 @@ public class OSMObjectGenerator extends UntypedActor {
 		ArrayList<WayToConstruct> ways = constructWays(b);
 		if (ways != null) {
 			if (allNodes != null) {
-				dispatcher.tell(
+				tell(dispatcher, 
 						new MessageWayToConstruct(b.getCounter(), ways),
 						getSelf());
 			}
@@ -78,9 +73,7 @@ public class OSMObjectGenerator extends UntypedActor {
 		
 		// TODO relations
 		
-		// regulate
-		flowRegulator.tell(new MessageRegulation(- ParsingSystemActorsConstants.RECORDS_BLOC_EQUIVALENCE ), getSelf());
-
+		
 
 	}
 
@@ -252,7 +245,7 @@ public class OSMObjectGenerator extends UntypedActor {
 	}
 
 	@Override
-	public void onReceive(Object message) throws Exception {
+	public void onReceiveMeasured(Object message) throws Exception {
 
 		if (message instanceof OSMBlock) {
 			OSMBlock nds = (OSMBlock) message;

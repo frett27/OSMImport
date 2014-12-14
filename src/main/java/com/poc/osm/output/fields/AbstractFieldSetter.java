@@ -1,6 +1,6 @@
 package com.poc.osm.output.fields;
 
-import com.esrifrance.fgdbapi.swig.Row;
+import org.fgdbapi.thindriver.swig.Row;
 
 public abstract class AbstractFieldSetter {
 

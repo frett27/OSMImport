@@ -21,6 +21,7 @@ import com.poc.osm.output.dsl.TableFactory;
  *
  */
 class TBuilder extends FactoryBuilderSupport {
+	
 
 	protected ProcessModel processModel= new ProcessModel();
 
@@ -33,13 +34,29 @@ class TBuilder extends FactoryBuilderSupport {
 
 
 	def registerSupportNodes() {
+		
+		registerExplicitProperty("filter", 	null, 	
+			   { 	value -> 	
+			           Stream s = getContext()["_CURRENT_NODE_"]
+					  s.filter = value
+					    })
+		registerExplicitProperty("transform", 	null ,
+			{ 	value ->
+					Stream s = getContext()["_CURRENT_NODE_"] 
+				    s.transform = value
+					 })
+		
 		registerFactory("filter",
 				new UnaryClosureFactory(clazz:ClosureFilter,
 				memberName : "filter"))
+		
+		
 		registerFactory("stream", new StreamFactory())
+		
 		registerFactory("transform",
 				new UnaryClosureFactory(clazz:ClosureTransform,
 				memberName : "transform"))
+		
 		registerFactory("gdb", new GdbFactory());
 		registerFactory("out", new OutGdbFactory());
 
@@ -50,6 +67,12 @@ class TBuilder extends FactoryBuilderSupport {
 		registerFactory("_double", new FieldFactory());
 	}
 
+	/**
+	 * Build the process model
+	 * @param osmentity
+	 * @param c
+	 * @return
+	 */
 	public ProcessModel build(Stream osmentity, Closure c ) {
 
 		processModel.mainStream = osmentity;

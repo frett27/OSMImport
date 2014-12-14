@@ -3,24 +3,22 @@ package com.poc.osm;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+
+import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
+import org.fgdbapi.thindriver.swig.Geodatabase;
+import org.fgdbapi.thindriver.swig.Table;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
-import com.esrifrance.fgdbapi.swig.EsriFileGdb;
-import com.esrifrance.fgdbapi.swig.Geodatabase;
-import com.esrifrance.fgdbapi.swig.Table;
 import com.poc.osm.output.GDBReference;
 import com.poc.osm.output.OutCell;
 import com.poc.osm.output.ProcessModel;
 import com.poc.osm.output.Stream;
 import com.poc.osm.output.actors.ChainCompiler;
 import com.poc.osm.output.actors.ChainCompiler.ValidateResult;
-import com.poc.osm.output.actors.CompiledFieldsMessageCounter;
 import com.poc.osm.output.actors.CompiledTableOutputActor;
 import com.poc.osm.output.actors.FieldsCompilerActor;
 import com.poc.osm.output.model.TableHelper;
@@ -28,6 +26,7 @@ import com.poc.osm.parsing.actors.ParsingSubSystemActor;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageReadFile;
 import com.poc.osm.regulation.FlowRegulator;
+import com.poc.osm.regulation.MessageRegulatorRegister;
 import com.poc.osm.tools.Tools;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -46,7 +45,6 @@ public class OSMImport {
 
 	private Map<String, OpenedGeodatabase> geodatabases;
 	private ProcessModel pm;
-	private Set<Stream> frontStreams;
 
 	public void loadAndCompileScript(File script) throws Exception {
 		assert script != null;
@@ -64,7 +62,7 @@ public class OSMImport {
 		}
 
 		this.pm = pm;
-		this.frontStreams = new HashSet<Stream>(Arrays.asList(v.frontStreams));
+		
 	}
 
 	private static class OpenedGeodatabase {
@@ -92,8 +90,7 @@ public class OSMImport {
 			GDBReference r = oc.gdb;
 			String path = r.getPath();
 
-			ActorRef tableOutput = null;
-
+			
 			Geodatabase geodatabase;
 
 			if (!g.containsKey(path)) {
@@ -104,7 +101,7 @@ public class OSMImport {
 				System.out.println("create geodatabase " + path);
 				// create the GDB
 
-				geodatabase = EsriFileGdb.createGeodatabase(path);
+				geodatabase = FGDBJNIWrapper.createGeodatabase(path);
 				og.geodatabase = geodatabase;
 
 				for (TableHelper h : r.listTables()) {
@@ -137,7 +134,6 @@ public class OSMImport {
 	public void run(File osmInputFile) throws Exception {
 
 		assert pm != null;
-		assert frontStreams != null && frontStreams.size() > 0;
 		// constructing the actor system
 
 		Config config = ConfigFactory.load();
@@ -146,11 +142,9 @@ public class OSMImport {
 				config.getConfig("osmcluster"));
 
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
-				"output", 1000L)); // consigne
+				"output", 600000L)); // consigne
 
-		ActorRef parsingSubSystem = sys.actorOf(Props.create(
-				ParsingSubSystemActor.class, flowRegulator));
-
+		
 		createGeodatabasesAndTables();
 
 		// for each out, create the output actor
@@ -160,7 +154,6 @@ public class OSMImport {
 			GDBReference r = oc.gdb;
 			String path = r.getPath();
 
-			
 
 			if (!geodatabases.containsKey(path)) {
 				throw new Exception("geodatabase " + path + " not found");
@@ -179,20 +172,13 @@ public class OSMImport {
 					Props.create(CompiledTableOutputActor.class, table,
 							flowRegulator).withDispatcher("pdisp"),
 					Tools.toActorName("T__" + keyname));
+			flowRegulator.tell(new MessageRegulatorRegister(tableCompiledOutputActor), ActorRef.noSender());
 
-			// wrap counter at front of the table output
-			ActorRef counter = sys.actorOf(Props.create(
-					CompiledFieldsMessageCounter.class,
-					tableCompiledOutputActor, flowRegulator));
-
+			
 			ActorRef fieldsCompiler = sys.actorOf(
-					Props.create(FieldsCompilerActor.class, table, counter),
+					Props.create(FieldsCompilerActor.class, table, tableCompiledOutputActor),
 					Tools.toActorName("FC__" + keyname));
-
-			// all tables has been processed
-
-			// each output tables have a router actor and the streams connect to
-			// it
+			flowRegulator.tell(new MessageRegulatorRegister(fieldsCompiler), ActorRef.noSender());
 
 			oc._actorRef = fieldsCompiler;
 
@@ -201,7 +187,12 @@ public class OSMImport {
 		pm.computeChildrens();
 		pm.compactAndExtractOthers();
 
-		ActorRef resultActor = pm.getOrCreateActorRef(sys, pm.mainStream);
+		ActorRef resultActor = pm.getOrCreateActorRef(sys, pm.mainStream, flowRegulator);
+		
+		ActorRef parsingSubSystem = sys.actorOf(Props.create(
+				ParsingSubSystemActor.class, flowRegulator, resultActor));
+		flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem), ActorRef.noSender());
+
 
 		// init the reading
 		parsingSubSystem.tell(MessageParsingSystemStatus.INITIALIZE,

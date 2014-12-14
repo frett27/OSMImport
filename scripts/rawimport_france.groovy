@@ -40,7 +40,7 @@ builder.build(osmstream) {
 
 	}
 	// a stream
-	l = stream(osmstream, label:"modification 2") {
+	l = stream(t.others, label:"modification 2") {
 
 		filter {
 			OSMEntity e ->

@@ -11,7 +11,25 @@ osmcluster {
 	 	  type = PinnedDispatcher
 		  executor = "thread-pool-executor"
 	}
-	
+#my-dispatcher {
+#  # Dispatcher is the name of the event-based dispatcher
+#  type = Dispatcher
+#  # What kind of ExecutionService to use
+#  executor = "fork-join-executor"
+#  # Configuration for the fork join pool
+#  fork-join-executor {
+#    # Min number of threads to cap factor-based parallelism number to
+#    parallelism-min = 2
+#    # Parallelism (threads) ... ceil(available processors * factor)
+#    parallelism-factor = 2.0
+#    # Max number of threads to cap factor-based parallelism number to
+#    parallelism-max = 10
+#  }
+#  # Throughput defines the maximum number of messages to be
+#  # processed per actor before the thread jumps to the next actor.
+#  # Set to 1 for as fair as possible.
+#  throughput = 100
+#}	
 	my-dispatcher {
 	     # Dispatcher is the name of the event-based dispatcher
 		  type = PinnedDispatcher
@@ -39,29 +57,47 @@ osmcluster {
 		  # Log level used by the configured loggers (see "loggers") as soon
 		  # as they have been started; before that, see "stdout-loglevel"
 		  # Options: OFF, ERROR, WARNING, INFO, DEBUG
-		  loglevel = "DEBUG"
+		  loglevel = "INFO"
 		 
 		  # Log level for the very basic logger activated during ActorSystem startup.
 		  # This logger prints the log messages to stdout (System.out).
 		  # Options: OFF, ERROR, WARNING, INFO, DEBUG
 		  stdout-loglevel = "INFO"
-	 
-	 
+		  log-dead-letters = 10
+		  log-dead-letters-during-shutdown = on 
+
+		
+ 
 	   actor   {
  	   		mailbox.requirements {
   					 "akka.dispatch.BoundedMessageQueueSemantics" = bounded-mailbox
 			}
-			
+		 default-dispatcher {
+		      # Throughput for default Dispatcher, set to 1 for as fair as possible
+				type=Dispatcher
+			  executor = "thread-pool-executor"
+				  # Configuration for the thread pool
+				  thread-pool-executor {
+				    # minimum number of threads to cap factor-based core number to
+				    core-pool-size-min = 40
+				    # No of core threads ... ceil(available processors * factor)
+				    core-pool-size-factor = 2.0
+				    # maximum number of threads to cap factor-based number to
+				    core-pool-size-max = 100
+				  }
+				  # Throughput defines the maximum number of messages to be
+				  # processed per actor before the thread jumps to the next actor.
+				  # Set to 1 for as fair as possible.
+				  throughput = 100
+					mailbox-type="akka.dispatch.UnboundedControlAwareMailbox"
+		    }	
+	  	
 			deployment {
 			
-				
-				/T__matable {
-					dispatcher = pdisp
-				}
-				
-				/reading {
-					dispatcher = pdisp
-				}
+				default {
+
+
+				}		
 				
 			}
 			
@@ -73,22 +109,4 @@ osmcluster {
 
 
 }
-
-# old stuff
- deployment { 
-	 						 
-							 /output {
-							 	mailbox = bounded-mailbox
-							 }
-							 
-							 /dispatcher {
-							 	mailbox = bounded-mailbox
-							 }
-							 
-							 /worker1
-							 {
-							 	mailbox = bounded-mailbox
-							 }
-							 
-	 				  }
 

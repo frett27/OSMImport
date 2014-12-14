@@ -44,16 +44,16 @@ public class ChainCompiler {
 		CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
 
 		ImportCustomizer icz = new ImportCustomizer();
-		icz.addStarImports("com.esrifrance.osm", "com.esri.core.geometry");
-		icz.addStaticImport("com.esrifrance.fgdbapi.xml.EsriGeometryType",
+		icz.addStarImports("org.esrifrance.osm", "com.esri.core.geometry");
+		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
 				"ESRI_GEOMETRY_POINT");
-		icz.addStaticImport("com.esrifrance.fgdbapi.xml.EsriGeometryType",
+		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
 				"ESRI_GEOMETRY_MULTIPOINT");
-		icz.addStaticImport("com.esrifrance.fgdbapi.xml.EsriGeometryType",
+		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
 				"ESRI_GEOMETRY_POLYLINE");
-		icz.addStaticImport("com.esrifrance.fgdbapi.xml.EsriGeometryType",
+		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
 				"ESRI_GEOMETRY_POLYGON");
-		icz.addStaticImport("com.esrifrance.fgdbapi.xml.EsriGeometryType",
+		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
 				"ESRI_GEOMETRY_MULTI_PATCH");
 		
 
@@ -79,12 +79,14 @@ public class ChainCompiler {
 		ProcessModel pm = (ProcessModel) result;
 		pm.mainStream = mainStream;
 
+		System.out.println("compiled model :" + pm.toString());
+		
+		
 		return pm;
 	}
 
 	public static class ValidateResult {
 		public String[] warnings;
-		public Stream[] frontStreams;
 	}
 
 	/**
@@ -100,8 +102,7 @@ public class ChainCompiler {
 
 		HashSet<Stream> markedStreams = new HashSet<Stream>();
 
-		HashSet<Stream> frontStreams = new HashSet<Stream>();
-
+		
 		Collection<OutCell> outs = pm.outs;
 		if (outs == null || outs.size() == 0)
 			throw new Exception("no out specified, invalid model");
@@ -136,17 +137,13 @@ public class ChainCompiler {
 					warnings.add("null parent, and the following streams [ "
 							+ analyzedStack
 							+ " ]are not connected to main stream");
-				} else {
-					// front stream
-					frontStreams.add(current);
-				}
+				} 
 
 			} // for streams
 
 		} // outcells
 
 		ValidateResult r = new ValidateResult();
-		r.frontStreams = frontStreams.toArray(new Stream[0]);
 		r.warnings = warnings.toArray(new String[0]);
 		return r;
 	}
