@@ -8,6 +8,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
 import org.fgdbapi.thindriver.swig.Geodatabase;
 import org.fgdbapi.thindriver.swig.Table;
@@ -22,7 +23,6 @@ import com.poc.osm.output.ProcessModel;
 import com.poc.osm.output.Stream;
 import com.poc.osm.output.actors.ChainCompiler;
 import com.poc.osm.output.actors.StreamProcessingActor;
-import com.poc.osm.output.model.TableHelper;
 
 public class TestClusterParsing extends TestCase {
 

@@ -6,10 +6,10 @@ import groovy.util.FactoryBuilderSupport;
 import java.util.List;
 import java.util.Map;
 
+import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.xml.EsriGeometryType;
 
 import com.poc.osm.output.GDBReference;
-import com.poc.osm.output.model.TableHelper;
 
 /**
  * factory for a feature class

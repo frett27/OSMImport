@@ -36,10 +36,13 @@ public class ParsingSubSystemActor extends MeasuredActor {
 
 		// init the worker
 
-		for (int i = 0; i < 5; i++) {
+		long maxwaysToConstruct = (long) ((Runtime.getRuntime().maxMemory() * 1.0 - 3000000000.0) / 2000000000.0 * 80000 * 5);
+
+		long nbofworkers = 5;
+		for (int i = 0; i < nbofworkers; i++) {
 			ActorRef worker = getContext().actorOf(
-					Props.create(WayConstructorActor.class, dispatcher),
-					"worker" + i);
+					Props.create(WayConstructorActor.class, dispatcher,
+							maxwaysToConstruct / nbofworkers), "worker" + i);
 			tell(worker, MessageParsingSystemStatus.INITIALIZE,
 					ActorRef.noSender());
 
@@ -64,13 +67,13 @@ public class ParsingSubSystemActor extends MeasuredActor {
 				getContext()
 						.system()
 						.scheduler()
-						.scheduleOnce(
-								new FiniteDuration(1, TimeUnit.MINUTES),
+						.scheduleOnce(new FiniteDuration(1, TimeUnit.MINUTES),
 								new Runnable() {
 
 									@Override
 									public void run() {
-										System.out.println("ShutDown the process");
+										System.out
+												.println("ShutDown the process");
 										getContext().system().shutdown();
 									}
 								}, getContext().system().dispatcher());

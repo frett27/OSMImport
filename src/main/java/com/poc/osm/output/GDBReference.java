@@ -3,7 +3,7 @@ package com.poc.osm.output;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.poc.osm.output.model.TableHelper;
+import org.fgdbapi.thindriver.TableHelper;
 
 /**
  * Reference of a file geodatabase, and associated tables in it

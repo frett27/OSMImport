@@ -50,11 +50,10 @@ public class WayConstructorActor extends MeasuredActor {
 	/**
 	 * max way to handle by reading
 	 */
-	private int maxWayToConstruct = 50000;
+	private long maxWayToConstruct = 80000; 
 
 	private enum State {
 		REGISTRATION_PHASE, PROCESSING_PHASE
-
 	}
 
 	/**
@@ -79,9 +78,12 @@ public class WayConstructorActor extends MeasuredActor {
 
 	private Counter waysMetrics;
 
-	public WayConstructorActor(ActorRef dispatcher) {
+	public WayConstructorActor(ActorRef dispatcher, long maxWaysToConstruct) {
 		this.dispatcher = dispatcher;
+		this.maxWayToConstruct = maxWaysToConstruct;
 
+		log.info("take " + maxWaysToConstruct + " for ways constructions");
+		
 		waysMetrics = Metrics.newCounter(FlowRegulator.class, getSelf().path()
 				.name() + " ways number");
 

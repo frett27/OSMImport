@@ -1,19 +1,11 @@
 package com.poc.osm.output.dsl;
 
-import groovy.lang.Closure;
-import groovy.util.FactoryBuilderSupport;
+import org.fgdbapi.thindriver.TableHelper
 
-import com.poc.osm.output.ClosureFilter;
-import com.poc.osm.output.ClosureTransform;
-import com.poc.osm.output.ProcessModel;
-import com.poc.osm.output.Stream;
-import com.poc.osm.output.model.TableHelper;
-import com.poc.osm.output.dsl.FeatureClassFactory;
-import com.poc.osm.output.dsl.FieldFactory;
-import com.poc.osm.output.dsl.GdbFactory;
-import com.poc.osm.output.dsl.OutGdbFactory;
-import com.poc.osm.output.dsl.StreamFactory;
-import com.poc.osm.output.dsl.TableFactory;
+import com.poc.osm.output.ClosureFilter
+import com.poc.osm.output.ClosureTransform
+import com.poc.osm.output.ProcessModel
+import com.poc.osm.output.Stream
 
 /**
  * Builder for constructing the transform pipeline

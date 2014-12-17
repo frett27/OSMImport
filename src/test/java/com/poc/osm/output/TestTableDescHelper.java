@@ -5,11 +5,10 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
+import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
 import org.fgdbapi.thindriver.swig.Geodatabase;
 import org.fgdbapi.thindriver.xml.EsriGeometryType;
-
-import com.poc.osm.output.model.TableHelper;
 
 public class TestTableDescHelper extends TestCase {
 

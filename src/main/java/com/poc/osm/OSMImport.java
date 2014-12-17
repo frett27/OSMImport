@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
 import org.fgdbapi.thindriver.swig.Geodatabase;
 import org.fgdbapi.thindriver.swig.Table;
@@ -21,7 +22,6 @@ import com.poc.osm.output.actors.ChainCompiler;
 import com.poc.osm.output.actors.ChainCompiler.ValidateResult;
 import com.poc.osm.output.actors.CompiledTableOutputActor;
 import com.poc.osm.output.actors.FieldsCompilerActor;
-import com.poc.osm.output.model.TableHelper;
 import com.poc.osm.parsing.actors.ParsingSubSystemActor;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageReadFile;
@@ -138,11 +138,13 @@ public class OSMImport {
 
 		Config config = ConfigFactory.load();
 
+		Config osmclusterconfig = config.getConfig("osmcluster");
+		
 		ActorSystem sys = ActorSystem.create("osmcluster",
-				config.getConfig("osmcluster"));
-
+				osmclusterconfig);
+		
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
-				"output", 600000L)); // consigne
+				"output", osmclusterconfig.getLong("eventbuffer"))); 
 
 		
 		createGeodatabasesAndTables();
