@@ -76,3 +76,5 @@ public abstract class OSMEntity implements Externalizable {
 	}
 
 }
+
+

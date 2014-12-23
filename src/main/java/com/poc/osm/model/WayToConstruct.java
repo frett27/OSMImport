@@ -1,12 +1,11 @@
 package com.poc.osm.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 
+import com.esri.core.geometry.MultiPath;
 import com.esri.core.geometry.Point;
+import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.Polyline;
 
 public class WayToConstruct implements Serializable {
@@ -102,19 +101,31 @@ public class WayToConstruct implements Serializable {
 
 	public OSMEntity constructOSMEntity() {
 
-		Polyline p = new Polyline();
+		String area = null;
+		if (fields != null) {
+			area = (String) fields.get("area");
+		}
+		
+		MultiPath multiPath;
+
+		if (area != null) {
+			multiPath = new Polygon();
+		} else {
+			multiPath = new Polyline();
+		}
+
 		boolean started = false;
 		for (OSMEntity e : associatedPoints) {
 			assert e != null;
 			if (!started) {
-				p.startPath((Point) e.getGeometry());
+				multiPath.startPath((Point) e.getGeometry());
 				started = true;
 			} else {
-				p.lineTo((Point) e.getGeometry());
+				multiPath.lineTo((Point) e.getGeometry());
 			}
 		}
 
-		return new OSMEntityGeometry(id, p, fields);
+		return new OSMEntityGeometry(id, multiPath, fields);
 
 	}
 

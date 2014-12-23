@@ -236,16 +236,20 @@ public class ProcessModel {
 			// create the stream processing actor
 			ActorRef r = sys.actorOf(Props.create(StreamProcessingActor.class,
 					ss.filter, ss.transform, childrenActorRefList,
-					othersActorRefList), Tools.toActorName(ss.getKey()) + "_" + i);
-			flowRegulator
-			.tell(new MessageRegulatorRegister(r), ActorRef.noSender());
+					othersActorRefList), Tools.toActorName(ss.getKey()) + "_"
+					+ i);
+			flowRegulator.tell(new MessageRegulatorRegister(r),
+					ActorRef.noSender());
 			actors.add(r);
 		}
 
-		ActorRef a = sys.actorOf(Props.create(LBActor.class, actors), "D_" + Tools.toActorName(ss.getKey()));
+		ActorRef a = sys.actorOf(Props.create(LBActor.class, actors), "D_"
+				+ Tools.toActorName(ss.getKey()));
 
 		flowRegulator
-		.tell(new MessageRegulatorRegister(a), ActorRef.noSender());
+				.tell(new MessageRegulatorRegister(a), ActorRef.noSender());
+
+		s._actorRef = a;
 
 		return a;
 

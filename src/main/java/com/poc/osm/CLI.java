@@ -24,6 +24,10 @@ public class CLI {
 
 		System.out.println("Launching OSM Import Tools");
 
+		if (Runtime.getRuntime().maxMemory() < 5000000000L)
+			throw new Exception(
+					"Command line must be launched with a least 5go of memory, using -Xmx5g");
+
 		GnuParser p = new GnuParser();
 		Options options = new Options();
 		Option input = OptionBuilder.withArgName("inputpbf").hasArg()
@@ -43,7 +47,7 @@ public class CLI {
 			CommandLine c = p.parse(options, args);
 
 			String inputfile = c.getOptionValue('i');
-			 inputpbffile = new File(inputfile);
+			inputpbffile = new File(inputfile);
 			if (!inputpbffile.exists())
 				throw new Exception("" + inputpbffile + " doesn't exist");
 
@@ -59,12 +63,11 @@ public class CLI {
 		}
 
 		OSMImport osmImport = new OSMImport();
-		
+
 		// load and compile script to be sur there are no errors in it
 		osmImport.loadAndCompileScript(sf);
-		
+
 		osmImport.run(inputpbffile);
-		
-		
+
 	}
 }

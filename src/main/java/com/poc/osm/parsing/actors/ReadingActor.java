@@ -264,7 +264,7 @@ public class ReadingActor extends MeasuredActor {
 
 			// velocity between 0 and 1000
 
-			double maxTimeToWaitIf0 = 5.0;
+			double maxTimeToWaitIf0 = 1.0;
 			double timeToWaitif1000 = 0.005;
 
 			double t = maxTimeToWaitIf0 - maxTimeToWaitIf0 / 1000.0 * v

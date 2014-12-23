@@ -6,6 +6,12 @@ import com.poc.osm.model.OSMEntity;
 
 public class MessageWay implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6643032739961435923L;
+	
+	
 	private OSMEntity entity;
 	
 	public MessageWay(OSMEntity entity)

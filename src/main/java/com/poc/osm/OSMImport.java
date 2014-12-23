@@ -99,11 +99,10 @@ public class OSMImport {
 				OpenedGeodatabase og = new OpenedGeodatabase();
 
 				System.out.println("create geodatabase " + path);
+				
 				// create the GDB
-
 				geodatabase = FGDBJNIWrapper.createGeodatabase(path);
 				og.geodatabase = geodatabase;
-
 				for (TableHelper h : r.listTables()) {
 
 					String tableDef = h.buildAsString();
@@ -113,11 +112,19 @@ public class OSMImport {
 					Table newTable = geodatabase.createTable(tableDef, "");
 
 					System.out.println("table " + h.getName() + " created");
+					
+					// closing table to be sur the definition is correctly stored
+					
+					geodatabase.closeTable(newTable);
+					
+					System.out.println("open the table " + h.getName());
+
+					newTable = geodatabase.openTable(h.getName());
 
 					og.tables.put(h.getName(), newTable);
 
 					System.out.println("successfully created");
-
+				
 				}
 
 				g.put(path, og);
@@ -164,6 +171,10 @@ public class OSMImport {
 			OpenedGeodatabase openedGeodatabase = geodatabases.get(path);
 
 			Table table = openedGeodatabase.tables.get(oc.tablename);
+			
+			if (table == null)
+				throw new Exception("table " + oc.tablename + " not found");
+			
 
 			String keyname = path + "_" + oc.tablename;
 

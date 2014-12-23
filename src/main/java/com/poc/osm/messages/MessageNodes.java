@@ -12,6 +12,12 @@ import com.poc.osm.model.OSMEntity;
  */
 public class MessageNodes implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 521510126270071270L;
+	
+	
 	private List<OSMEntity> nodes;
 
 	public MessageNodes(List<OSMEntity> nodes) {

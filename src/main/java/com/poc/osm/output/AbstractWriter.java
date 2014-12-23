@@ -10,7 +10,6 @@ public abstract class AbstractWriter implements Closeable {
 	
 	private long writtenCount = 0;
 	
-	
 	public abstract void write(OSMEntity entity) throws Exception;
 
 	public abstract void close() throws IOException;

@@ -4,6 +4,12 @@ import java.util.Arrays;
 
 import akka.actor.ActorRef;
 
+/**
+ * Cell definition for the output
+ * 
+ * @author pfreydiere
+ *
+ */
 public class OutCell extends ModelElement {
 
 	public Stream[] streams;

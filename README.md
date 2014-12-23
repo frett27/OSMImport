@@ -9,3 +9,12 @@ Using the actor systems, also permit to use a simple "command line" process to d
 
 NOTA : still an ongoing project, dev skills highly required
 
+# TODO
+
+- handling polygon
+- handling relationships
+- error logs, and feedbacks
+- clean logs
+- check distributed execution
+- handling all kind of fields (only integer, string, long)
+

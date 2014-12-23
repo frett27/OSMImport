@@ -38,7 +38,6 @@ public class CompiledTableOutputActor extends MeasuredActor {
 		this.table = t;
 		this.flowRegulatorActorRef = flowRegulator;
 		
-		
 
 		table.setWriteLock();
 		table.setLoadOnlyMode(true);

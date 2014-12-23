@@ -28,9 +28,9 @@ public class FlowRegulator extends MeasuredActor {
 	private long consigne;
 
 	private double vel;
-	private double Kp = 0.0004;
-	private double Ki = 0.000004;
-	private double Kd = 0.00005;
+	private double Kp = 0.000004;
+	private double Ki = 0.0000004;
+	private double Kd = 0.000005;
 
 	public FlowRegulator(String counterName, long consigne) {
 		this.consigne = consigne;
@@ -68,7 +68,7 @@ public class FlowRegulator extends MeasuredActor {
 		} else if (message instanceof MessageRegulatorStatus) {
 
 			long s = System.nanoTime();
-			double dt = (s - previousTime) / 1000000.0;
+			double dt = (s - previousTime) / 1000000.0; // per second
 
 		
 			long c = computeMessageNumber();

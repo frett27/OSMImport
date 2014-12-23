@@ -41,8 +41,11 @@ public class ChainCompiler {
 	public ProcessModel compile(File processFile, Stream mainStream)
 			throws Exception {
 
+		assert processFile != null;
+		
 		CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
 
+		// custom imports for ease the use of the geometry types
 		ImportCustomizer icz = new ImportCustomizer();
 		icz.addStarImports("org.esrifrance.osm", "com.esri.core.geometry");
 		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
@@ -108,13 +111,16 @@ public class ChainCompiler {
 			throw new Exception("no out specified, invalid model");
 
 		for (OutCell c : outs) {
+			
 			Stream[] ss = c.streams;
+			
 			if (ss == null) {
-				warnings.add("unused out, because there are no streams :" + c);
+				warnings.add("unused out " + c + ", because there are no linked streams");
 				continue;
 			}
 
 			for (Stream s : ss) {
+				
 				if (s == null) {
 					warnings.add("null stream in collection for " + c);
 					continue;

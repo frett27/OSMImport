@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+import com.esri.core.geometry.Geometry;
+import com.esri.core.geometry.Polygon;
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.messages.MessageWay;
@@ -50,7 +51,7 @@ public class WayConstructorActor extends MeasuredActor {
 	/**
 	 * max way to handle by reading
 	 */
-	private long maxWayToConstruct = 80000; 
+	private long maxWayToConstruct = 80000;
 
 	private enum State {
 		REGISTRATION_PHASE, PROCESSING_PHASE
@@ -83,7 +84,7 @@ public class WayConstructorActor extends MeasuredActor {
 		this.maxWayToConstruct = maxWaysToConstruct;
 
 		log.info("take " + maxWaysToConstruct + " for ways constructions");
-		
+
 		waysMetrics = Metrics.newCounter(FlowRegulator.class, getSelf().path()
 				.name() + " ways number");
 
@@ -98,6 +99,7 @@ public class WayConstructorActor extends MeasuredActor {
 			public void signalWayOSMEntity(OSMEntity e) {
 				if (log.isDebugEnabled())
 					log.debug("emit way " + e);
+				
 				// tell the output there is a new constructed way
 				tell(output, new MessageWay(e), getSelf());
 				waysMetrics.dec();
@@ -182,7 +184,7 @@ public class WayConstructorActor extends MeasuredActor {
 
 				// if block is already handled, skip it
 				if (handledBlocks.contains(mw.getBlockid())) {
-					// skipped, already processed
+					// skipped, already processed, we save time
 					return;
 				}
 
@@ -199,7 +201,6 @@ public class WayConstructorActor extends MeasuredActor {
 				}
 
 				// register the block, and prepare for parsing
-
 				List<WayToConstruct> waysToConstruct = mw.getWaysToConstruct();
 				for (WayToConstruct w : waysToConstruct) {
 					reg.register(w);
@@ -207,11 +208,15 @@ public class WayConstructorActor extends MeasuredActor {
 				}
 
 				if (!hasinformed) {
+					// in case we miss some ways registration,
+					// tell the cluster that we need more reads of the input
+					// file
 					tell(dispatcher, MessageClusterRegistration.NEED_MORE_READ,
 							getSelf());
 					hasinformed = true;
 				}
 
+				// the bloc has been handled
 				handledBlocks.add(mw.getBlockid());
 
 				log.info(reg.getWaysRegistered()

@@ -18,8 +18,8 @@ class FilterKeyExist extends Filter {
 }
 
 // construction de la chaine
-builder.build(osmstream) {
 
+builder.build(osmstream) {
 	
 	def featureClasses = [:]
 
@@ -64,7 +64,7 @@ builder.build(osmstream) {
 				_integer('id')
 				_text("type", size:2000)
 			}
-			featureclass(l + "_lines", ESRI_GEOMETRY_POINT,"WGS84") {
+			featureclass(l + "_lines", ESRI_GEOMETRY_POLYLINE,"WGS84") {
 				/* _text("k", size : 40)
 				_integer("mon champ entier")
 				_double("autre champ") */
@@ -129,8 +129,6 @@ builder.build(osmstream) {
 	}
 
 	
-	
-	
 
 	// flux de sortie
 	
@@ -140,4 +138,5 @@ builder.build(osmstream) {
 	}
 	
 }
+
 
