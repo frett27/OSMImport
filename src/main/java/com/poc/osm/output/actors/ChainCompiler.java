@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
@@ -38,7 +40,7 @@ public class ChainCompiler {
 	 * @return
 	 * @throws Exception
 	 */
-	public ProcessModel compile(File processFile, Stream mainStream)
+	public ProcessModel compile(File processFile, Stream mainStream, Map<String,String> builtinVariables)
 			throws Exception {
 
 		assert processFile != null;
@@ -47,7 +49,7 @@ public class ChainCompiler {
 
 		// custom imports for ease the use of the geometry types
 		ImportCustomizer icz = new ImportCustomizer();
-		icz.addStarImports("org.esrifrance.osm", "com.esri.core.geometry");
+		icz.addStarImports("com.poc.osm", "com.esri.core.geometry");
 		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
 				"ESRI_GEOMETRY_POINT");
 		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
@@ -69,6 +71,20 @@ public class ChainCompiler {
 		binding.setVariable("builder", new TBuilder());
 		binding.setVariable("osmstream", mainStream);
 		binding.setVariable("out", System.out);
+		
+		if (builtinVariables != null)
+		{
+			
+			for(Entry<String,String> v : builtinVariables.entrySet())
+			{
+				// adding builting variables
+				String k = "var_" + v.getKey();
+				binding.setVariable(k, v.getValue());
+			}
+			
+			
+		}
+		
 		
 
 		Object result = gse.run(processFile.getName(), binding);

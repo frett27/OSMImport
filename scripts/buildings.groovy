@@ -9,7 +9,7 @@ import com.poc.osm.model.OSMEntityGeometry
 builder.build(osmstream) {
 
 	// défini un flux de sortie, et description de la structure
-	sortie = gdb(path : "c:\\temp\\t.gdb") {
+	sortie = gdb(path : var_gdb) {
 		featureclass("buildings", ESRI_GEOMETRY_POLYGON,"WGS84") {
 			_integer('id')
 			_text("type")

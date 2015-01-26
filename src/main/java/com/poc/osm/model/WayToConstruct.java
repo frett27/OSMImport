@@ -10,6 +10,12 @@ import com.esri.core.geometry.Polyline;
 
 public class WayToConstruct implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6618949187593219613L;
+
+	
 	static class WayPointReference {
 
 		private WayToConstruct c;
@@ -99,13 +105,19 @@ public class WayToConstruct implements Serializable {
 		refids = null; //
 	}
 
+	/**
+	 * this function construct a OSM Entity if the feature has an area key, then
+	 * a polygon is created, else a polyline
+	 * 
+	 * @return
+	 */
 	public OSMEntity constructOSMEntity() {
 
 		String area = null;
 		if (fields != null) {
 			area = (String) fields.get("area");
 		}
-		
+
 		MultiPath multiPath;
 
 		if (area != null) {

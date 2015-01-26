@@ -112,7 +112,7 @@ public class TestClusterParsing extends TestCase {
 				.compile(
 						new File(
 								"src/test/resources/com/esrifrance/osm/output/actors/testchain.groovy"),
-						osmStream);
+						osmStream, null);
 
 		// dump it
 		System.out.println(pm);

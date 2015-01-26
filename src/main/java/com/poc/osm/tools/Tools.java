@@ -19,7 +19,7 @@ public class Tools {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Serializable Clone(Serializable s) throws Exception {
+	public static Serializable clone(Serializable s) throws Exception {
 		if (s == null)
 			return null;
 

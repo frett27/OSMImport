@@ -24,12 +24,12 @@ import akka.event.LoggingAdapter;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.poc.osm.actors.MeasuredActor;
-import com.poc.osm.model.OSMReader.VelGetter;
 import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageReadFile;
 import com.poc.osm.parsing.actors.newparse.BlobMessageWithNo;
 import com.poc.osm.parsing.actors.newparse.OSMParser;
+import com.poc.osm.parsing.actors.newparse.OSMParser.VelGetter;
 import com.poc.osm.regulation.MessageRegulatorStatus;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;

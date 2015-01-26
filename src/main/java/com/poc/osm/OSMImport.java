@@ -46,14 +46,14 @@ public class OSMImport {
 	private Map<String, OpenedGeodatabase> geodatabases;
 	private ProcessModel pm;
 
-	public void loadAndCompileScript(File script) throws Exception {
+	public void loadAndCompileScript(File script, Map<String, String> additionalVariables) throws Exception {
 		assert script != null;
 		assert script.exists();
 
 		ChainCompiler c = new ChainCompiler();
 		Stream mainStream = new Stream(); // fake for getting reference
 		mainStream.actorName = "result";
-		ProcessModel pm = c.compile(script, mainStream);
+		ProcessModel pm = c.compile(script, mainStream, additionalVariables);
 
 		ValidateResult v = c.validateProcessModel(pm);
 		if (v.warnings != null && v.warnings.length > 0) {

@@ -1,6 +1,8 @@
 package com.poc.osm;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -39,8 +41,15 @@ public class CLI {
 				.withDescription("script file describing the streams")
 				.create('s');
 
+		Option variables = OptionBuilder.withArgName("var").hasArg()
+				.withDescription("variable").withValueSeparator(',').create('v');
+
 		options.addOption(input);
 		options.addOption(script);
+		options.addOption(variables);
+		
+		Map<String,String> variableMap = new HashMap<>();
+		
 		File inputpbffile = null;
 		File sf = null;
 		try {
@@ -56,6 +65,30 @@ public class CLI {
 			if (!sf.exists())
 				throw new Exception("" + sf + " doesn't exist");
 
+			
+			String[] v = c.getOptionValues('v');
+			if (v != null && v.length > 0)
+			{
+				for (String s : v)
+				{
+					// split key=value
+					int i = s.indexOf('=');
+					if (i >= 0)
+					{
+						String sk = s.substring(0,i).trim();
+						String sv = s.substring(i+1).trim();
+						if (!sk.isEmpty())
+						{
+							System.out.println("Adding variable " + sk + "=" + sv);
+							variableMap.put(sk, sv);
+						}
+					}
+				}
+				
+				
+			}
+			
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			new HelpFormatter().printHelp("osmimport", options);
@@ -63,9 +96,11 @@ public class CLI {
 		}
 
 		OSMImport osmImport = new OSMImport();
+		
+		
 
 		// load and compile script to be sur there are no errors in it
-		osmImport.loadAndCompileScript(sf);
+		osmImport.loadAndCompileScript(sf, variableMap);
 
 		osmImport.run(inputpbffile);
 

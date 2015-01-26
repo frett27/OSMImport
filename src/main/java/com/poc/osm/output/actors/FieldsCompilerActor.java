@@ -21,6 +21,12 @@ import com.poc.osm.output.fields.GeometryFieldSetter;
 import com.poc.osm.output.fields.IntegerFieldSetter;
 import com.poc.osm.output.fields.StringFieldSetter;
 
+/**
+ * this actor compile the fields values for a new row
+ * 
+ * @author pfreydiere
+ * 
+ */
 public class FieldsCompilerActor extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
@@ -87,9 +93,9 @@ public class FieldsCompilerActor extends MeasuredActor {
 
 				String rs;
 				if (n[i] instanceof GeometryFieldSetter) {
-					Geometry geometry = osme
-							.getGeometry();
-					// log.info("geometry :" + GeometryEngine.geometryToJson(4326, geometry));
+					Geometry geometry = osme.getGeometry();
+					// log.info("geometry :" +
+					// GeometryEngine.geometryToJson(4326, geometry));
 					rs = ((GeometryFieldSetter) n[i]).setValue(geometry);
 					if (rs != null)
 						sb.append(rs).append("\n");
@@ -115,7 +121,7 @@ public class FieldsCompilerActor extends MeasuredActor {
 						+ sb.toString());
 			}
 
-			tell(compiledOutputActor,new CompiledFieldsMessage(n), getSelf());
+			tell(compiledOutputActor, new CompiledFieldsMessage(n), getSelf());
 
 		}
 
