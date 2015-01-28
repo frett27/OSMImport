@@ -11,10 +11,11 @@ NOTA : still an ongoing project, dev skills highly required
 
 # TODO
 
-- handling polygon
 - handling relationships
 - error logs, and feedbacks
 - clean logs
-- check distributed execution
 - handling all kind of fields (only integer, string, long)
 
+ChangeLog :
+
+28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
