@@ -21,31 +21,51 @@ public class ParsingSubSystemActor extends MeasuredActor {
 
 	private ActorRef dispatcher;
 
+	private ActorRef polygonDispatcher;
+
 	public ParsingSubSystemActor(ActorRef flowRegulator, ActorRef output) {
 
 		// setTerminal = true;
 
+		polygonDispatcher = getContext().actorOf(
+				Props.create(RelationPolygonDispatcher.class, output,
+						flowRegulator), "polygon_dispatcher");
+
 		dispatcher = getContext().actorOf(
-				Props.create(ParsingDispatcher.class, output, flowRegulator),
-				"dispatcher");
+				Props.create(WayParsingDispatcher.class,output, polygonDispatcher,
+						 flowRegulator), "dispatcher");
 
 		// reading actor
+
 		reading = getContext().actorOf(
-				Props.create(ReadingActor.class, dispatcher, flowRegulator),
-				"reading");
+				Props.create(ReadingSubSystemActor.class, dispatcher,
+						flowRegulator), "reading");
 
 		// init the worker
 
-		long maxwaysToConstruct = (long) ((Runtime.getRuntime().maxMemory() * 1.0 - 3000000000.0) / 2000000000.0 * 80000 * 5);
+		final long nbofworkers = 5;
 
-		long nbofworkers = 5;
+		final long maxwaysToConstruct = (long) ((Runtime.getRuntime()
+				.maxMemory() * 1.0 - 3_000_000_000.0) / 2_000_000_000.0 * 80_000 * nbofworkers);
+
 		for (int i = 0; i < nbofworkers; i++) {
 			ActorRef worker = getContext().actorOf(
-					Props.create(WayConstructorActor.class, dispatcher,
-							maxwaysToConstruct / nbofworkers), "worker" + i);
+					Props.create(WayConstructWorkerActor.class, dispatcher,polygonDispatcher,output,
+							maxwaysToConstruct / nbofworkers), "worker_" + i);
+
+			// initialize the worker
 			tell(worker, MessageParsingSystemStatus.INITIALIZE,
 					ActorRef.noSender());
 
+		}
+
+		for (int i = 0; i < nbofworkers; i++) {
+			ActorRef worker = getContext().actorOf(
+					Props.create(RelationPolygonWorkerActor.class,
+							polygonDispatcher, output), "polygon_worker_" + i);
+			// initialize the worker
+			tell(worker, MessageParsingSystemStatus.INITIALIZE,
+					ActorRef.noSender());
 		}
 
 	}

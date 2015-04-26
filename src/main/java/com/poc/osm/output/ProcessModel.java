@@ -145,8 +145,9 @@ public class ProcessModel {
 	 * @return
 	 */
 	public Set<ModelElement> getChildren(Stream s) {
-		if (childrens == null)
+		if (childrens == null) {
 			throw new IllegalStateException("childrens must be computed");
+		}
 		return childrens.get(s);
 	}
 
@@ -157,9 +158,10 @@ public class ProcessModel {
 	 * @return
 	 */
 	public Set<ModelElement> getOthersChildrens(Stream s) {
-		if (childrenOthers == null)
+		if (childrenOthers == null) {
 			throw new IllegalStateException(
-					"childrens must be compacted before");
+					"childrens must be compacted before"); 
+		}
 		return childrenOthers.get(s);
 	}
 

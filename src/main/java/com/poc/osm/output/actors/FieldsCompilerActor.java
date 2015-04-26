@@ -14,6 +14,7 @@ import akka.event.LoggingAdapter;
 
 import com.esri.core.geometry.Geometry;
 import com.poc.osm.actors.MeasuredActor;
+import com.poc.osm.model.OSMAttributedEntity;
 import com.poc.osm.model.OSMEntity;
 import com.poc.osm.output.actors.messages.CompiledFieldsMessage;
 import com.poc.osm.output.fields.AbstractFieldSetter;
@@ -80,9 +81,9 @@ public class FieldsCompilerActor extends MeasuredActor {
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
-		if (message instanceof OSMEntity) {
+		if (message instanceof OSMAttributedEntity) {
 
-			OSMEntity osme = (OSMEntity) message;
+			OSMAttributedEntity osme = (OSMAttributedEntity) message;
 
 			StringBuilder sb = new StringBuilder();
 
@@ -92,8 +93,11 @@ public class FieldsCompilerActor extends MeasuredActor {
 				n[i] = compiledFields[i].clone();
 
 				String rs;
-				if (n[i] instanceof GeometryFieldSetter) {
-					Geometry geometry = osme.getGeometry();
+				if (n[i] instanceof GeometryFieldSetter && osme instanceof OSMEntity) {
+					
+					OSMEntity entityWithGeometry = (OSMEntity)osme;
+					
+					Geometry geometry = entityWithGeometry.getGeometry();
 					// log.info("geometry :" +
 					// GeometryEngine.geometryToJson(4326, geometry));
 					rs = ((GeometryFieldSetter) n[i]).setValue(geometry);

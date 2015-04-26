@@ -11,8 +11,9 @@ import akka.event.LoggingAdapter;
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
-import com.poc.osm.parsing.actors.messages.MessageOutputRef;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
+import com.poc.osm.parsing.actors.messages.MessagePolygonToConstruct;
+import com.poc.osm.parsing.actors.messages.MessageRelations;
 import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
 
 /**
@@ -22,7 +23,7 @@ import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
  * @author pfreydiere
  * 
  */
-public class ParsingDispatcher extends MeasuredActor {
+public class WayParsingDispatcher extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
@@ -30,16 +31,27 @@ public class ParsingDispatcher extends MeasuredActor {
 
 	private ActorRef outputRef;
 
+	private ActorRef polygonDispatcher;
+
 	private boolean stillneedmoreread = false;
 
+	/**
+	 * number of file read
+	 */
 	private int startreadingFileCounter = 0;
 
-	public ParsingDispatcher(ActorRef outputRef, ActorRef flowRegulator) {
+	public WayParsingDispatcher(ActorRef outputRef, ActorRef polygonDispatcher,
+			ActorRef flowRegulator) {
 		assert outputRef != null;
 		this.outputRef = outputRef;
-
+		this.polygonDispatcher = polygonDispatcher;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.poc.osm.actors.MeasuredActor#onReceiveMeasured(java.lang.Object)
+	 */
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
@@ -53,16 +65,19 @@ public class ParsingDispatcher extends MeasuredActor {
 
 				wayDispatcher.add(getSender());
 
-				log.info("way dispatcher " + getSender() + " registered");
+				if (log.isInfoEnabled()) {
+					log.info("way dispatcher " + getSender() + " registered");
+				}
 
-				// inform for the output ActorRef
-				tell(getSender(), new MessageOutputRef(outputRef), getSelf());
+				
 
 			} else if (m == MessageClusterRegistration.NEED_MORE_READ) {
+
 				// some workers send NEED_More_READ
 				stillneedmoreread = true;
 
 			} else if (m == MessageClusterRegistration.ASK_IF_NEED_MORE_READ) {
+
 				// supervisor tell if all blocks have been completed
 				if (stillneedmoreread || startreadingFileCounter <= 3) {
 					// respond to the state
@@ -135,6 +150,20 @@ public class ParsingDispatcher extends MeasuredActor {
 					.hasNext();) {
 				ActorRef a = (ActorRef) iterator.next();
 				tell(a, message, getSelf());
+			}
+
+		} else if (message instanceof MessageRelations) {
+
+			// only send relations once to the output
+			if (startreadingFileCounter <= 1) {
+				tell(outputRef, message, getSelf());
+			}
+
+		} else if (message instanceof MessagePolygonToConstruct) {
+
+			// only send relations once to the output
+			if (startreadingFileCounter <= 1) {
+				tell(polygonDispatcher, message, getSelf());
 			}
 
 		} else {

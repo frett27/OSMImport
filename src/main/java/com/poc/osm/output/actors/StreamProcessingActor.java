@@ -9,10 +9,18 @@ import akka.event.LoggingAdapter;
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.messages.MessageWay;
-import com.poc.osm.model.OSMEntity;
+import com.poc.osm.model.OSMAttributedEntity;
+import com.poc.osm.model.OSMRelation;
 import com.poc.osm.output.Filter;
 import com.poc.osm.output.Transform;
+import com.poc.osm.parsing.actors.messages.MessageRelations;
 
+/**
+ * actor supporting filter and transform operation for an OSMEntity
+ * 
+ * @author pfreydiere
+ * 
+ */
 public class StreamProcessingActor extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
@@ -24,7 +32,7 @@ public class StreamProcessingActor extends MeasuredActor {
 	private List<ActorRef> nextRefs;
 
 	private List<ActorRef> others;
-	
+
 	private long handledOuput = 0;
 
 	public StreamProcessingActor(Filter filter, Transform transform,
@@ -42,19 +50,36 @@ public class StreamProcessingActor extends MeasuredActor {
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
-		if (message instanceof OSMEntity) {
+		if (message instanceof OSMAttributedEntity) {
+
 			handleMessage(message);
+
 		} else if (message instanceof MessageNodes) {
 
 			MessageNodes mn = (MessageNodes) message;
-			for (OSMEntity e : mn.getNodes()) {
+			for (OSMAttributedEntity e : mn.getNodes()) {
 				handleMessage(e);
 			}
-
 			return;
+
 		} else if (message instanceof MessageWay) {
+
 			MessageWay mw = (MessageWay) message;
+
 			handleMessage(mw.getEntity());
+
+		} else if (message instanceof MessageRelations) {
+
+			MessageRelations mr = (MessageRelations) message;
+			List<OSMRelation> rels = mr.getRelations();
+			if (rels != null) {
+				for (OSMRelation r : rels) {
+					if (r != null) {
+						handleMessage(r);
+					}
+				}
+			}
+
 		} else {
 			unhandled(message);
 		}
@@ -62,17 +87,18 @@ public class StreamProcessingActor extends MeasuredActor {
 	}
 
 	private void handleMessage(Object message) {
-	
-		if (!(message instanceof OSMEntity)) {
+
+		if (!(message instanceof OSMAttributedEntity)) {
 			return;
 		}
-		
-		OSMEntity e = (OSMEntity) message;
-		
-		handledOuput ++;
-		if (handledOuput % 1000000 == 0)
-			log.info("" + handledOuput + " entity handled");
 
+		OSMAttributedEntity e = (OSMAttributedEntity) message;
+
+		handledOuput++;
+		if (handledOuput % 1000000 == 0) {
+			log.info("" + handledOuput + " entity handled");
+		}
+		
 		try {
 			if (filter != null) {
 				if (!filter.filter(e)) {
@@ -100,10 +126,9 @@ public class StreamProcessingActor extends MeasuredActor {
 			}
 
 		} catch (Exception ex) {
-			log.error(ex,"error in processing the message :" + ex.getMessage() + " on object :" + e);
+			log.error(ex, "error in processing the message :" + ex.getMessage()
+					+ " on object :" + e);
 		}
 	}
 
 }
-
-

@@ -18,9 +18,9 @@ public class OSMEntityPoint extends OSMEntity {
 	private double x;
 	private double y;
 	
-	public OSMEntityPoint()
+	protected OSMEntityPoint()
 	{
-		
+		super();
 	}
 	
 	public OSMEntityPoint(long id, double x, double y, Map<String,Object> fields)

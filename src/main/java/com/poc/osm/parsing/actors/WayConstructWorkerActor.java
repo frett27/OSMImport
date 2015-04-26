@@ -8,19 +8,17 @@ import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-import com.esri.core.geometry.Geometry;
-import com.esri.core.geometry.Polygon;
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.messages.MessageWay;
 import com.poc.osm.model.OSMEntity;
-import com.poc.osm.model.WayConstructListener;
-import com.poc.osm.model.WayToConstruct;
-import com.poc.osm.model.WayToConstructRegistry;
 import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
-import com.poc.osm.parsing.actors.messages.MessageOutputRef;
 import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
 import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
+import com.poc.osm.parsing.model.BaseEntityToConstruct;
+import com.poc.osm.parsing.model.OSMEntityConstructListener;
+import com.poc.osm.parsing.model.OSMEntityConstructRegistry;
+import com.poc.osm.parsing.model.WayToConstruct;
 import com.poc.osm.regulation.FlowRegulator;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;
@@ -31,7 +29,7 @@ import com.yammer.metrics.core.Counter;
  * @author pfreydiere
  * 
  */
-public class WayConstructorActor extends MeasuredActor {
+public class WayConstructWorkerActor extends MeasuredActor {
 
 	/**
 	 * logger
@@ -41,7 +39,7 @@ public class WayConstructorActor extends MeasuredActor {
 	/**
 	 * the registry to know which points are necessary for a constructing way
 	 */
-	private WayToConstructRegistry reg = new WayToConstructRegistry();
+	private OSMEntityConstructRegistry reg = new OSMEntityConstructRegistry();
 
 	/**
 	 * handled blocks, list of handled blocks for ways
@@ -75,13 +73,18 @@ public class WayConstructorActor extends MeasuredActor {
 
 	private boolean hasinformed = false;
 
-	private ActorRef dispatcher;
+	private ActorRef wayDispatcher;
 
+	private ActorRef polygonDispatcher;
+	
 	private Counter waysMetrics;
 
-	public WayConstructorActor(ActorRef dispatcher, long maxWaysToConstruct) {
-		this.dispatcher = dispatcher;
+	public WayConstructWorkerActor(ActorRef dispatcher,
+			ActorRef polygonDispatcher,ActorRef outputRef, long maxWaysToConstruct) {
+		this.wayDispatcher = dispatcher;
+		this.polygonDispatcher = polygonDispatcher;
 		this.maxWayToConstruct = maxWaysToConstruct;
+		this.output = outputRef;
 
 		log.info("take " + maxWaysToConstruct + " for ways constructions");
 
@@ -94,14 +97,15 @@ public class WayConstructorActor extends MeasuredActor {
 	public void preStart() throws Exception {
 		super.preStart();
 
-		reg.setWayConstructListener(new WayConstructListener() {
+		reg.setEntityConstructListener(new OSMEntityConstructListener() {
 			@Override
-			public void signalWayOSMEntity(OSMEntity e) {
+			public void signalOSMEntity(OSMEntity e) {
 				if (log.isDebugEnabled())
 					log.debug("emit way " + e);
-				
+
 				// tell the output there is a new constructed way
 				tell(output, new MessageWay(e), getSelf());
+				tell(polygonDispatcher, new MessageWay(e), getSelf());
 				waysMetrics.dec();
 			}
 		});
@@ -109,7 +113,7 @@ public class WayConstructorActor extends MeasuredActor {
 
 	@Override
 	public void postStop() throws Exception {
-		reg.setWayConstructListener(null);
+		reg.setEntityConstructListener(null);
 		super.postStop();
 	}
 
@@ -124,18 +128,16 @@ public class WayConstructorActor extends MeasuredActor {
 				if (m == MessageParsingSystemStatus.INITIALIZE) {
 					// launch registration
 
-					tell(dispatcher,
+					tell(wayDispatcher,
 							MessageClusterRegistration.ASK_FOR_WAY_REGISTRATION,
 							getSelf());
+					
+					currentState = State.PROCESSING_PHASE;
 				}
+				
+				
 
-			} else if (message instanceof MessageOutputRef) {
-				MessageOutputRef o = (MessageOutputRef) message;
-				this.output = o.getOutput();
-				currentState = State.PROCESSING_PHASE;
-				log.debug("current state :" + currentState);
-
-			} else {
+			}  else {
 				unhandled(message);
 			}
 
@@ -152,13 +154,13 @@ public class WayConstructorActor extends MeasuredActor {
 
 				} else if (message == MessageParsingSystemStatus.END_READING_FILE) {
 
-					if (needMoreRead || (reg.getWaysRegistered() > 0)) {
-						tell(dispatcher,
+					if (needMoreRead || (reg.getEntitiesRegistered() > 0)) {
+						tell(wayDispatcher,
 								MessageClusterRegistration.NEED_MORE_READ,
 								getSelf());
 						log.info("I need more read");
 					} else {
-						tell(dispatcher,
+						tell(wayDispatcher,
 								MessageClusterRegistration.ALL_BLOCKS_READ,
 								getSelf());
 					}
@@ -174,9 +176,9 @@ public class WayConstructorActor extends MeasuredActor {
 			} else if (message instanceof MessageNodes) {
 
 				MessageNodes mn = (MessageNodes) message;
-				reg.givePoints(mn.getNodes());
+				reg.giveEntity(mn.getNodes());
 
-				needMoreRead = needMoreRead || reg.getWaysRegistered() > 0;
+				needMoreRead = needMoreRead || reg.getEntitiesRegistered() > 0;
 
 			} else if (message instanceof MessageWayToConstruct) {
 
@@ -188,11 +190,11 @@ public class WayConstructorActor extends MeasuredActor {
 					return;
 				}
 
-				needMoreRead = needMoreRead || reg.getWaysRegistered() > 0;
+				needMoreRead = needMoreRead || reg.getEntitiesRegistered() > 0;
 
 				// the block is not already handled,
 				// check if we have room to handle it
-				if (reg.getWaysRegistered() > maxWayToConstruct) {
+				if (reg.getEntitiesRegistered() > maxWayToConstruct) {
 					if (log.isDebugEnabled())
 						log.debug("too much ways left - handled blocks :"
 								+ handledBlocks.size());
@@ -202,7 +204,7 @@ public class WayConstructorActor extends MeasuredActor {
 
 				// register the block, and prepare for parsing
 				List<WayToConstruct> waysToConstruct = mw.getWaysToConstruct();
-				for (WayToConstruct w : waysToConstruct) {
+				for (BaseEntityToConstruct w : waysToConstruct) {
 					reg.register(w);
 					waysMetrics.inc();
 				}
@@ -211,7 +213,7 @@ public class WayConstructorActor extends MeasuredActor {
 					// in case we miss some ways registration,
 					// tell the cluster that we need more reads of the input
 					// file
-					tell(dispatcher, MessageClusterRegistration.NEED_MORE_READ,
+					tell(wayDispatcher, MessageClusterRegistration.NEED_MORE_READ,
 							getSelf());
 					hasinformed = true;
 				}
@@ -219,7 +221,7 @@ public class WayConstructorActor extends MeasuredActor {
 				// the bloc has been handled
 				handledBlocks.add(mw.getBlockid());
 
-				log.info(reg.getWaysRegistered()
+				log.info(reg.getEntitiesRegistered()
 						+ " ways registered for actor " + getSelf().path());
 
 			} else {
@@ -236,7 +238,7 @@ public class WayConstructorActor extends MeasuredActor {
 	 * @throws Exception
 	 */
 	protected void reset() throws Exception {
-		reg = new WayToConstructRegistry();
+		reg = new OSMEntityConstructRegistry();
 		preStart();
 		currentState = State.REGISTRATION_PHASE;
 		log.debug("current state :" + currentState);

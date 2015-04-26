@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 import akka.dispatch.ControlMessage;
 
+/**
+ * regulation message, used to regulate the reading depending of the load
+ * @author pfreydiere
+ *
+ */
 public class MessageRegulatorStatus implements Serializable, ControlMessage{
 	
 	/**

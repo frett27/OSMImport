@@ -10,8 +10,8 @@ import akka.actor.ActorRef;
 
 import com.google.protobuf.ByteString;
 import com.poc.osm.actors.MeasuredActor;
-import com.poc.osm.model.OSMBlock;
-import com.poc.osm.model.OSMContext;
+import com.poc.osm.parsing.model.OSMBlock;
+import com.poc.osm.parsing.model.OSMContext;
 
 import crosby.binary.Fileformat;
 import crosby.binary.Osmformat;
@@ -21,6 +21,12 @@ import crosby.binary.Osmformat.PrimitiveBlock;
 import crosby.binary.Osmformat.Relation;
 import crosby.binary.Osmformat.Way;
 
+/**
+ * this class read blocks and follow the block to a parsing actor
+ * 
+ * @author pfreydiere
+ * 
+ */
 public class OSMParser extends MeasuredActor {
 
 	protected int granularity;

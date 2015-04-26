@@ -1,6 +1,6 @@
 package com.poc.osm.output;
 
-import com.poc.osm.model.OSMEntity;
+import com.poc.osm.model.OSMAttributedEntity;
 
 import groovy.lang.Closure;
 
@@ -19,7 +19,7 @@ public class ClosureFilter extends Filter {
 	
 	
 	@Override
-	public boolean filter(OSMEntity e) {
+	public boolean filter(OSMAttributedEntity e) {
 		return (Boolean) filterClosure.call(e);
 	}
 

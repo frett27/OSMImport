@@ -14,7 +14,7 @@ import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Meter;
 
 /**
- * Actor that compute a pid regulation for the streams
+ * Actor that compute regulation for the streams
  * 
  * @author pfreydiere
  */
@@ -70,7 +70,6 @@ public class FlowRegulator extends MeasuredActor {
 			long s = System.nanoTime();
 			double dt = (s - previousTime) / 1000000.0; // per second
 
-		
 			long c = computeMessageNumber();
 
 			double error = 1.0 * consigne - c;
@@ -94,7 +93,8 @@ public class FlowRegulator extends MeasuredActor {
 			}
 
 			if (cpt++ % 10 == 0) {
-				log.info("new computed velocity :" + vel + "(" + c + " elements)");
+				log.info("new computed velocity :" + vel + "(" + c
+						+ " elements)");
 				// consolidateAllMessages().dump();
 			}
 

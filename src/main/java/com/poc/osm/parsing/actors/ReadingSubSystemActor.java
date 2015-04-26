@@ -44,7 +44,11 @@ import crosby.binary.Fileformat.Blob;
  * @author pfreydiere
  * 
  */
-public class ReadingActor extends MeasuredActor {
+public class ReadingSubSystemActor extends MeasuredActor {
+
+	private static final String OSM_DATA_HEADER = "OSMData";
+
+	private static final int READ_BUFFER_SIZE = 10000000;
 
 	private static final RegulationMessage TICK_FOR_PID_UPDATE = new RegulationMessage();
 
@@ -68,7 +72,7 @@ public class ReadingActor extends MeasuredActor {
 
 	private BlockingQueue<ActorRef> generators = new LinkedBlockingQueue<ActorRef>();
 
-	public ReadingActor(ActorRef dispatcher, ActorRef flowRegulator) {
+	public ReadingSubSystemActor(ActorRef dispatcher, ActorRef flowRegulator) {
 
 		// setTerminal = true;
 
@@ -78,21 +82,25 @@ public class ReadingActor extends MeasuredActor {
 
 		this.flowRegulator = flowRegulator;
 
-		for (int i = 0; i < 5; i++) {
+		int nbOfParsingElementsWorkers = 5;
+		
+		for (int i = 0; i < nbOfParsingElementsWorkers; i++) {
+			
 			ActorRef objectGenerator = getContext().actorOf(
 					Props.create(OSMObjectGenerator.class, dispatcher,
 							flowRegulator));
 
 			ActorRef parser = getContext().actorOf(
 					Props.create(OSMParser.class, objectGenerator));
+			
 			generators.add(parser);
 
 		}
 
 		nbofRead = Metrics
-				.newCounter(ReadingActor.class, "Number of file read");
+				.newCounter(ReadingSubSystemActor.class, "Number of file read");
 
-		timer = Metrics.newTimer(ReadingActor.class, "ReadFile time");
+		timer = Metrics.newTimer(ReadingSubSystemActor.class, "ReadFile time");
 
 	}
 
@@ -194,7 +202,7 @@ public class ReadingActor extends MeasuredActor {
 					try {
 						int cpt = 0;
 						BufferedInputStream bfis = new BufferedInputStream(fis,
-								10000000);
+								READ_BUFFER_SIZE);
 						try {
 
 							DataInputStream datinput = new DataInputStream(bfis);
@@ -306,7 +314,7 @@ public class ReadingActor extends MeasuredActor {
 
 		Blob blob = Fileformat.Blob.parseFrom(b);
 
-		if ("OSMData".equals(header.getType())) {
+		if (OSM_DATA_HEADER.equals(header.getType())) {
 
 			ActorRef next = generators.take();
 			try {

@@ -1,4 +1,4 @@
-package com.poc.osm.model;
+package com.poc.osm.parsing.model;
 
 import java.io.Serializable;
 import java.util.List;
