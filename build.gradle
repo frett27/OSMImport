@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'groovy'
 
 group = 'osmtools'
-version = '0.3'
+version = '0.4'
 
 description = """tools for handling import of osm datas into filegeodatabases"""
 
