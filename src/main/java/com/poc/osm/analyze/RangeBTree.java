@@ -180,7 +180,7 @@ public class RangeBTree<Key extends Comparable<Key>> implements Serializable {
 			}
 		}
 
-		System.out.println("done in " + (System.currentTimeMillis() - start));
+		System.out.println("done in " + (System.currentTimeMillis() - start) + " ms");
 		
 
 	}
