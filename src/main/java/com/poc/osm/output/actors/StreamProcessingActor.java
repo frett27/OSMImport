@@ -98,7 +98,7 @@ public class StreamProcessingActor extends MeasuredActor {
 		if (handledOuput % 1000000 == 0) {
 			log.info("" + handledOuput + " entity handled");
 		}
-		
+
 		try {
 			if (filter != null) {
 				if (!filter.filter(e)) {
@@ -116,13 +116,22 @@ public class StreamProcessingActor extends MeasuredActor {
 				}
 			}
 
+			List<OSMAttributedEntity> l = null;
+
 			if (transform != null) {
-				e = transform.transform(e);
+				l = transform.transform(e);
 			}
 
-			for (ActorRef r : nextRefs) {
-				tell(r, e, getSelf());
-				// log.info("send message to " + r);
+			if (l != null) {
+
+				for (OSMAttributedEntity entity : l) {
+					if (entity != null) {
+						for (ActorRef r : nextRefs) {
+							tell(r, entity, getSelf());
+							// log.info("send message to " + r);
+						}
+					}
+				}
 			}
 
 		} catch (Exception ex) {

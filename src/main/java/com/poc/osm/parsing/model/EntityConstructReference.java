@@ -21,7 +21,7 @@ class EntityConstructReference {
 	 *            the point
 	 * @return true if the way to construct is ready to be processed
 	 */
-	public boolean signalPoint(OSMEntity entity) {
+	public boolean signalEntity(OSMEntity entity) {
 		assert entity != null;
 		if (c.associatedEntity[objectIdx] == null) {
 			c.fill.decrementAndGet();

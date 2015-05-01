@@ -83,12 +83,15 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 	}
 
+	/**
+	 * parse the relations
+	 * 
+	 * @param b the block that may contains relations
+	 */
 	protected void parseRelations(OSMBlock b) {
 
 		List<Relation> relations = b.getRelations();
 		OSMContext ctx = b.getContext();
-
-		// List<RelationToConstruct> ret = null;
 
 		List<PolygonToConstruct> polygons = null;
 
@@ -98,6 +101,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 			label_relation: for (Relation r : relations) {
 
+				// handling fields
+				
 				long id = r.getId();
 
 				HashMap<String, Object> flds = null;
@@ -110,6 +115,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 					flds.put(k, v);
 				}
 
+				// ok we have fields
+				
 				if (flds != null) {
 
 					if (flds.containsKey("area")) {
@@ -122,7 +129,9 @@ public class OSMObjectGenerator extends MeasuredActor {
 						for (int i = 0; i < r.getMemidsCount(); i++) {
 							long rid = r.getMemids(i);
 							String role = ctx.getStringById(r.getRolesSid(i));
+							
 							MemberType mt = r.getTypes(i);
+							
 							if (mt != MemberType.WAY) {
 								log.warning("area relation "
 										+ id

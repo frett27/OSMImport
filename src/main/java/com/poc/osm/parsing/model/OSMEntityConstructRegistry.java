@@ -53,10 +53,11 @@ public class OSMEntityConstructRegistry {
 
 	
 	void signalEntity(OSMEntity entity) {
+		assert entity != null;
 		List<EntityConstructReference> l = ts.get(entity.getId());
 		if (l != null) {
 			for (EntityConstructReference wr : l) {
-				if (wr.signalPoint(entity)) {
+				if (wr.signalEntity(entity)) {
 					OSMEntity osmEntity = wr.getOSMEntity();
 					if (entityConstructListener != null)
 						entityConstructListener.signalOSMEntity(osmEntity);

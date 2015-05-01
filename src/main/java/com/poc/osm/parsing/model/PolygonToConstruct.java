@@ -38,7 +38,7 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 
 		Polygon polygon = new Polygon();
 
-		for (int i = 0; i < refids.length; i++) {
+		for (int i = 0; i < associatedEntity.length; i++) {
 			OSMEntity e = associatedEntity[i];
 			assert e != null;
 			polygon.add((MultiPath) e.getGeometry(), false);
@@ -48,3 +48,5 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 	}
 
 }
+
+
