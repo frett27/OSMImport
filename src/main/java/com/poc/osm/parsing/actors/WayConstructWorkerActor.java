@@ -114,6 +114,12 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	@Override
 	public void postStop() throws Exception {
 		reg.setEntityConstructListener(null);
+		
+		if (reg.getEntitiesRegistered() >0)
+		{
+			log.warning("" + reg.getEntitiesRegistered() + " entities are still registered and not finished");
+		}
+		
 		super.postStop();
 	}
 

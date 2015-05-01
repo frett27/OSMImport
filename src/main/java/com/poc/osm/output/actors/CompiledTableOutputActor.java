@@ -70,6 +70,7 @@ public class CompiledTableOutputActor extends MeasuredActor {
 	public void onReceiveMeasured(Object message) throws Exception {
 
 		if (!(message instanceof CompiledFieldsMessage)) {
+			log.warning("message received is not a " + CompiledFieldsMessage.class.getSimpleName());
 			return;
 		}
 		CompiledFieldsMessage e = (CompiledFieldsMessage) message;

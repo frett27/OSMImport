@@ -1,5 +1,6 @@
 package com.poc.osm.parsing.actors;
 
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -76,10 +77,17 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 		super.preStart();
 
 		reg.setEntityConstructListener(new OSMEntityConstructListener() {
+
+			int c = 0;
+
 			@Override
 			public void signalOSMEntity(OSMEntity e) {
-				if (log.isDebugEnabled())
+				if (log.isDebugEnabled()) {
 					log.debug("emit polygon " + e);
+				}
+				if (c++ % 100 == 0) {
+					log.info("" + c + " polygons constructed from relations");
+				}
 
 				// tell the output there is a new constructed polygon
 				tell(output, e, getSelf());
@@ -91,6 +99,12 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 	@Override
 	public void postStop() throws Exception {
 		reg.setEntityConstructListener(null);
+		if (reg.getEntitiesRegistered() > 0) {
+			log.warning("" + reg.getEntitiesRegistered()
+					+ " entities are still registered and not finished");
+			reg.dumpTS(new OutputStreamWriter(System.out));
+		}
+
 		super.postStop();
 	}
 

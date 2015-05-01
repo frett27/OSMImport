@@ -1,6 +1,7 @@
 package com.poc.osm.parsing.actors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,31 +63,35 @@ public class OSMObjectGenerator extends MeasuredActor {
 		if (log.isDebugEnabled())
 			log.debug(getSelf() + " " + System.currentTimeMillis()
 					+ " handle block " + b.getCounter());
+		
 
-		List<OSMEntity> allNodes = constructNodesTreeSet(b);
-		if (allNodes != null) {
-			tell(dispatcher, new MessageNodes(allNodes), getSelf());
-		}
-
-		// emit the nodes received ...
+		parseRelations(b);
 
 		ArrayList<WayToConstruct> ways = constructWays(b);
 		if (ways != null) {
-			if (allNodes != null) {
 				tell(dispatcher,
 						new MessageWayToConstruct(b.getCounter(), ways),
 						getSelf());
-			}
 		}
 
-		parseRelations(b);
+		
+		List<OSMEntity> allNodes = constructNodesTreeSet(b);
+		if (allNodes != null) {
+			// emit the nodes received ...
+			tell(dispatcher, new MessageNodes(allNodes), getSelf());
+		}
+
+		
+
+		
 
 	}
 
 	/**
 	 * parse the relations
 	 * 
-	 * @param b the block that may contains relations
+	 * @param b
+	 *            the block that may contains relations
 	 */
 	protected void parseRelations(OSMBlock b) {
 
@@ -99,10 +104,10 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 		if (relations != null && relations.size() > 0) {
 
-			label_relation: for (Relation r : relations) {
+			for (Relation r : relations) {
 
 				// handling fields
-				
+
 				long id = r.getId();
 
 				HashMap<String, Object> flds = null;
@@ -116,112 +121,96 @@ public class OSMObjectGenerator extends MeasuredActor {
 				}
 
 				// ok we have fields
-				
-				if (flds != null) {
 
-					if (flds.containsKey("area")) {
+				// extract outer and inner ways relations
 
-						long[] relids = new long[r.getMemidsCount()];
-						Role[] idsRoles = new Role[r.getMemidsCount()];
+				long[] polyRelids = new long[r.getMemidsCount()];
+				Role[] polyRoles = new Role[r.getMemidsCount()];
+				int polyCountRel = 0; // counter for elements in the array;
 
-						// polygon
+				List<OSMRelatedObject> relatedObjects = null;
 
-						for (int i = 0; i < r.getMemidsCount(); i++) {
-							long rid = r.getMemids(i);
-							String role = ctx.getStringById(r.getRolesSid(i));
-							
-							MemberType mt = r.getTypes(i);
-							
-							if (mt != MemberType.WAY) {
-								log.warning("area relation "
-										+ id
-										+ " contains relation of other type than WAY, the object is skipped");
-								continue label_relation;
-							}
+				for (int i = 0; i < r.getMemidsCount(); i++) {
+					long rid = r.getMemids(i);
+					String role = ctx.getStringById(r.getRolesSid(i));
+					MemberType mt = r.getTypes(i);
 
-							relids[i] = rid;
+					String stringType = null;
+					switch (mt) {
 
-							Role erole = null;
+					case NODE:
+						stringType = "node";
+						break;
+					case WAY:
+						stringType = "way";
+						break;
+					case RELATION:
+						stringType = "relation";
+						break;
+					default:
+						String msg = "unknown relation type for object " + id
+								+ " and relation " + rid
+								+ " the object is skipped";
+						log.warning(msg);
+						throw new RuntimeException(msg); // FIXME
+					}
 
-							if ("outer".equals(role)) {
-								erole = Role.OUTER;
-							} else if ("inner".equals(role)) {
-								erole = Role.INNER;
-							} else {
-								log.warning("area relation "
-										+ id
-										+ " contains relation of other role outer or inner, the object is skipped");
-								continue label_relation;
-							}
+					if (relatedObjects == null) {
+						relatedObjects = new ArrayList<>();
+					}
 
-							idsRoles[i] = erole;
+					// add relation
+					relatedObjects.add(new OSMRelatedObject(rid, role,
+							stringType));
 
-							if (polygons == null) {
-								polygons = new ArrayList<>();
-							}
+					// for polygons
+					if (("outer".equals(role) || "inner".equals(role))
+							&& mt == MemberType.WAY) {
+						// polygon construct relation
 
-							polygons.add(new PolygonToConstruct(id, relids,
-									flds, idsRoles));
-
-						}
-
-					} else {
-						// relation ..
-
-						List<OSMRelatedObject> relatedObjects = null;
-
-						for (int i = 0; i < r.getMemidsCount(); i++) {
-							long rid = r.getMemids(i);
-							String role = ctx.getStringById(r.getRolesSid(i));
-
-							MemberType types = r.getTypes(i);
-							String stringType = null;
-							switch (types) {
-
-							case NODE:
-								stringType = "node";
-								break;
-							case WAY:
-								stringType = "way";
-								break;
-							case RELATION:
-								stringType = "relation";
-								break;
-							default:
-								log.warning("unknown relation type for object "
-										+ id + " the object is skipped");
-								continue label_relation;
-
-							}
-
-							if (relatedObjects == null) {
-								relatedObjects = new ArrayList<>();
-							}
-							relatedObjects.add(new OSMRelatedObject(rid, role,
-									stringType));
-
-						}
-
-						if (outRels == null) {
-							outRels = new ArrayList<>();
-						}
-
-						outRels.add(new OSMRelation(id, flds, relatedObjects));
+						polyRelids[polyCountRel] = rid;
+						polyRoles[polyCountRel] = ("outer".equals(role) ? Role.OUTER
+								: Role.INNER);
+						polyCountRel++;
 
 					}
 
+				} // relations
+
+				log.debug("end of analyzing the relation");
+
+				// the relation contains, polygon features
+
+				if (polyCountRel > 0) {
+
+					if (polygons == null) {
+						polygons = new ArrayList<>();
+					}
+
+					polygons.add(new PolygonToConstruct(id, Arrays.copyOfRange(
+							polyRelids, 0, polyCountRel), flds, Arrays.copyOf(
+							polyRoles, polyCountRel)));
+
+				} 
+
+				if (outRels == null) {
+					outRels = new ArrayList<>();
 				}
+
+				outRels.add(new OSMRelation(id, flds, relatedObjects));
 
 			}
 
-		}
+		} // relations if the block
 
 		if (polygons != null) {
+			// there are polygons, emit
 			tell(dispatcher, new MessagePolygonToConstruct(b.getCounter(),
 					polygons), getSelf());
 		}
 
 		if (outRels != null) {
+			// there are relations, emit
 			tell(dispatcher, new MessageRelations(outRels), getSelf());
 		}
 

@@ -1,5 +1,6 @@
 package com.poc.osm.parsing.model;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,21 +24,23 @@ public abstract class BaseEntityToConstruct {
 	 * fields, might be null
 	 */
 	protected HashMap<String, Object> fields;
-	
+
 	protected long id;
 
-	public BaseEntityToConstruct(long id, long[] refids, HashMap<String, Object> fields) {
+	public BaseEntityToConstruct(long id, long[] refids,
+			HashMap<String, Object> fields) {
 		this.id = id;
 		assert refids != null;
 		this.refids = refids;
 		this.associatedEntity = new OSMEntity[refids.length];
 		assert refids.length > 0;
-		this.fill.set( refids.length); // FIXME might be zero
+		this.fill.set(refids.length); // FIXME might be zero
 		this.fields = fields;
 	}
 
 	/**
-	 * internal method to register the {@link EntityConstructReference} in registry
+	 * internal method to register the {@link EntityConstructReference} in
+	 * registry
 	 * 
 	 * @param r
 	 */
@@ -50,5 +53,11 @@ public abstract class BaseEntityToConstruct {
 	}
 
 	public abstract OSMEntity constructOSMEntity();
-	
+
+	@Override
+	public String toString() {
+		return "Entity construct " + id + " (" + fill.get()
+				+ ") entity missing left , details :" + Arrays.asList(associatedEntity);
+	}
+
 }

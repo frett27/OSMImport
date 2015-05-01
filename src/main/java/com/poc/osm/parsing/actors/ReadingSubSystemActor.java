@@ -58,8 +58,6 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-	// private Router generatorRouter;
-
 	private ActorRef dispatcher;
 
 	private ActorRef flowRegulator;

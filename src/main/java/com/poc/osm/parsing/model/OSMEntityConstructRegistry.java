@@ -1,11 +1,12 @@
 package com.poc.osm.parsing.model;
 
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.poc.osm.model.OSMAttributedEntity;
 import com.poc.osm.model.OSMEntity;
 
 /**
@@ -79,6 +80,28 @@ public class OSMEntityConstructRegistry {
 		for (OSMEntity e : entities) {
 			signalEntity(e);
 		}
+	}
+	
+	public void dumpTS(Writer out) throws Exception
+	{
+		
+		if (ts == null)
+		{
+			out.write("no entities left");
+			return;
+		}
+		out.write("dump Entities for " + this);
+		for (Map.Entry<Long,List<EntityConstructReference>> es : ts.entrySet()) {
+			out.write("    Entity " + es.getKey() + " ->  \n");
+			List<EntityConstructReference> l = es.getValue();
+			for(EntityConstructReference r : l)
+			{
+				out.write("       " + r + "\n");
+			}
+
+		}
+		
+		
 	}
 
 }

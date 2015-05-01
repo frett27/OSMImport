@@ -41,7 +41,7 @@ public class ParsingSubSystemActor extends MeasuredActor {
 				Props.create(ReadingSubSystemActor.class, dispatcher,
 						flowRegulator), "reading");
 
-		// init the worker
+		// init the worker for ways
 
 		final long nbofworkers = 5;
 
@@ -59,6 +59,8 @@ public class ParsingSubSystemActor extends MeasuredActor {
 
 		}
 
+		// init the works for polygons
+		
 		for (int i = 0; i < nbofworkers; i++) {
 			ActorRef worker = getContext().actorOf(
 					Props.create(RelationPolygonWorkerActor.class,
@@ -97,16 +99,13 @@ public class ParsingSubSystemActor extends MeasuredActor {
 										getContext().system().shutdown();
 									}
 								}, getContext().system().dispatcher());
-
 			}
 
 		} else if (message instanceof MessageReadFile) {
 
 			tell(reading, message, getSelf());
 
-		}
-
-		else {
+		} else {
 			unhandled(message);
 		}
 	}

@@ -1,5 +1,6 @@
 package com.poc.osm.output.actors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import akka.actor.ActorRef;
@@ -50,7 +51,7 @@ public class StreamProcessingActor extends MeasuredActor {
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
-		if (message instanceof OSMAttributedEntity) {
+		if (message instanceof OSMAttributedEntity || message instanceof List) {
 
 			handleMessage(message);
 
@@ -58,7 +59,7 @@ public class StreamProcessingActor extends MeasuredActor {
 
 			MessageNodes mn = (MessageNodes) message;
 			for (OSMAttributedEntity e : mn.getNodes()) {
-				handleMessage(e);
+				handleSingleMessage(e);
 			}
 			return;
 
@@ -66,7 +67,7 @@ public class StreamProcessingActor extends MeasuredActor {
 
 			MessageWay mw = (MessageWay) message;
 
-			handleMessage(mw.getEntity());
+			handleSingleMessage(mw.getEntity());
 
 		} else if (message instanceof MessageRelations) {
 
@@ -75,7 +76,7 @@ public class StreamProcessingActor extends MeasuredActor {
 			if (rels != null) {
 				for (OSMRelation r : rels) {
 					if (r != null) {
-						handleMessage(r);
+						handleSingleMessage(r);
 					}
 				}
 			}
@@ -86,8 +87,8 @@ public class StreamProcessingActor extends MeasuredActor {
 
 	}
 
-	private void handleMessage(Object message) {
-
+	private void handleSingleMessage(OSMAttributedEntity message) {
+		
 		if (!(message instanceof OSMAttributedEntity)) {
 			return;
 		}
@@ -95,8 +96,8 @@ public class StreamProcessingActor extends MeasuredActor {
 		OSMAttributedEntity e = (OSMAttributedEntity) message;
 
 		handledOuput++;
-		if (handledOuput % 1000000 == 0) {
-			log.info("" + handledOuput + " entity handled");
+		if (handledOuput % 100000 == 0) {
+			log.info("" + handledOuput + " entity handled by actor " + getSelf().path());
 		}
 
 		try {
@@ -116,14 +117,19 @@ public class StreamProcessingActor extends MeasuredActor {
 				}
 			}
 
-			List<OSMAttributedEntity> l = null;
+			List<OSMAttributedEntity> l = null ;
 
 			if (transform != null) {
 				l = transform.transform(e);
+			} else 
+			{
+				l = new ArrayList<OSMAttributedEntity>();
+				l.add(e);
 			}
 
 			if (l != null) {
 
+				assert l instanceof List;
 				for (OSMAttributedEntity entity : l) {
 					if (entity != null) {
 						for (ActorRef r : nextRefs) {
@@ -132,12 +138,32 @@ public class StreamProcessingActor extends MeasuredActor {
 						}
 					}
 				}
+			} else 
+			{
+				
+				log.warning("transform returned null for transform " + transform );
 			}
 
 		} catch (Exception ex) {
 			log.error(ex, "error in processing the message :" + ex.getMessage()
 					+ " on object :" + e);
 		}
+	}
+
+	private void handleMessage(Object message) {
+
+		if (message instanceof List) {
+			List<OSMAttributedEntity> l = (List<OSMAttributedEntity>) message;
+			for (OSMAttributedEntity e : l) {
+				handleSingleMessage(e);
+			}
+
+		} else if (message instanceof OSMAttributedEntity) {
+			handleSingleMessage((OSMAttributedEntity) message);
+		} else {
+			unhandled(message);
+		}
+
 	}
 
 }

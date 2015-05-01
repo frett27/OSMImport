@@ -248,6 +248,7 @@ public class ProcessModel {
 		ActorRef a = sys.actorOf(Props.create(LBActor.class, actors), "D_"
 				+ Tools.toActorName(ss.getKey()));
 
+		// register the dispatcher
 		flowRegulator
 				.tell(new MessageRegulatorRegister(a), ActorRef.noSender());
 

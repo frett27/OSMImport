@@ -40,4 +40,12 @@ class EntityConstructReference {
 		return c.constructOSMEntity();
 	}
 
+	@Override
+	public String toString() {
+		
+		return " index " + objectIdx + ":" + c.toString();
+	}
+	
 }
+
+
