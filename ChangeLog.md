@@ -9,3 +9,5 @@ Version 0.4:
 - Relations can now be integrated in Tables, using a transform that lineage the OSMRelation with the related entities.
 
 - When a polygon relation contains related ways with outer and inner roles, this will try to create an associated polygon.
+
+- add _long type for fields, this is equivalent to _integer("fieldname", size : 8)

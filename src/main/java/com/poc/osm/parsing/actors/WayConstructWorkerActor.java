@@ -1,5 +1,6 @@
 package com.poc.osm.parsing.actors;
 
+import java.io.OutputStreamWriter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -118,6 +119,7 @@ public class WayConstructWorkerActor extends MeasuredActor {
 		if (reg.getEntitiesRegistered() >0)
 		{
 			log.warning("" + reg.getEntitiesRegistered() + " entities are still registered and not finished");
+			reg.dumpTS(new OutputStreamWriter(System.out));
 		}
 		
 		super.postStop();

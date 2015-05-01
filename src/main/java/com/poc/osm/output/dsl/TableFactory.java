@@ -22,14 +22,10 @@ public class TableFactory extends AbstractFactory {
 		
 		System.out.println("TableFactory");
 
-		assert value instanceof List;
-		List l = (List) value;
-		if (l.size() < 1)
-			throw new InstantiationException(
-					"taable must have a TABLE NAME");
+		assert value instanceof String;
 
 		TBuilder tb = (TBuilder) builder;
-		tb.currentTableHelper = TableHelper.newTable((String) l.get(0));
+		tb.currentTableHelper = TableHelper.newTable((String)value);
 
 		return tb.currentTableHelper;
 	}

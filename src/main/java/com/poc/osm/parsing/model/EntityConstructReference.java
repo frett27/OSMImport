@@ -1,18 +1,17 @@
 package com.poc.osm.parsing.model;
 
-import com.poc.osm.model.OSMAttributedEntity;
 import com.poc.osm.model.OSMEntity;
 
 class EntityConstructReference {
 
 	private BaseEntityToConstruct c;
+	
+	private int objectIdx;
 
 	public EntityConstructReference(BaseEntityToConstruct c, int idx) {
 		this.objectIdx = idx;
 		this.c = c;
 	}
-
-	private int objectIdx;
 
 	/**
 	 * when a point is available,
@@ -42,8 +41,7 @@ class EntityConstructReference {
 
 	@Override
 	public String toString() {
-		
-		return " index " + objectIdx + ":" + c.toString();
+		return " (Entity " + c.id + ") index "+ objectIdx;
 	}
 	
 }

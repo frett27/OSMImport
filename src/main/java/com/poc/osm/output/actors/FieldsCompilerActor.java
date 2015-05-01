@@ -125,19 +125,18 @@ public class FieldsCompilerActor extends MeasuredActor {
 				// log.info("geometry :" +
 				// GeometryEngine.geometryToJson(4326, geometry));
 				rs = ((GeometryFieldSetter) n[i]).setValue(geometry);
-				if (rs != null)
+				if (rs != null){
 					sb.append(rs).append("\n");
-
+				}
 			} else {
 
 				Map<String, Object> flds = osme.getFields();
 
 				if (flds != null) {
-
 					rs = n[i].setValue(flds.get(n[i].getFieldName()));
-					if (rs != null)
+					if (rs != null) {
 						sb.append(rs).append("\n");
-
+					}
 				}
 
 			}
@@ -145,7 +144,7 @@ public class FieldsCompilerActor extends MeasuredActor {
 		}
 
 		if (sb.length() > 0) {
-			log.debug("error on entity :" + osme.getId() + " :" + sb.toString());
+			log.error("error on entity :" + osme.getId() + " :" + sb.toString());
 		}
 
 		tell(compiledOutputActor, new CompiledFieldsMessage(n), getSelf());

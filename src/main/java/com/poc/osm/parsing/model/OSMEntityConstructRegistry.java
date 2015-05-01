@@ -20,7 +20,8 @@ public class OSMEntityConstructRegistry {
 	/**
 	 * hash containing the Point reference for a way
 	 */
-	private HashMap<Long, List<EntityConstructReference>> ts = new HashMap<Long, List<EntityConstructReference>>();
+	private HashMap<Long, List<EntityConstructReference>> ts = 
+			new HashMap<Long, List<EntityConstructReference>>();
 
 	private long entitiesRegistered = 0;
 
@@ -43,7 +44,7 @@ public class OSMEntityConstructRegistry {
 		return entitiesRegistered;
 	}
 
-	void registerWayPoint(Long id, EntityConstructReference r) {
+	void registerEntityConstructReference(Long id, EntityConstructReference r) {
 		List<EntityConstructReference> list = ts.get(id);
 		if (list == null) {
 			list = new ArrayList<EntityConstructReference>(1);
@@ -60,8 +61,9 @@ public class OSMEntityConstructRegistry {
 			for (EntityConstructReference wr : l) {
 				if (wr.signalEntity(entity)) {
 					OSMEntity osmEntity = wr.getOSMEntity();
-					if (entityConstructListener != null)
+					if (entityConstructListener != null) {
 						entityConstructListener.signalOSMEntity(osmEntity);
+					}
 					entitiesRegistered --;
 					// System.out.println(" " + waysRegistered + " left");
 				}
@@ -84,24 +86,20 @@ public class OSMEntityConstructRegistry {
 	
 	public void dumpTS(Writer out) throws Exception
 	{
-		
 		if (ts == null)
 		{
 			out.write("no entities left");
 			return;
 		}
-		out.write("dump Entities for " + this);
+		out.write("dump needed Entities (" + this + ")");
 		for (Map.Entry<Long,List<EntityConstructReference>> es : ts.entrySet()) {
-			out.write("    Entity " + es.getKey() + " ->  \n");
+			out.write("    Entity " + es.getKey() + " needed for ->  \n");
 			List<EntityConstructReference> l = es.getValue();
 			for(EntityConstructReference r : l)
 			{
 				out.write("       " + r + "\n");
 			}
-
 		}
-		
-		
 	}
 
 }

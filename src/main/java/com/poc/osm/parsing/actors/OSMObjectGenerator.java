@@ -130,8 +130,9 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 				List<OSMRelatedObject> relatedObjects = null;
 
+				long rid = 0;
 				for (int i = 0; i < r.getMemidsCount(); i++) {
-					long rid = r.getMemids(i);
+					rid += r.getMemids(i);
 					String role = ctx.getStringById(r.getRolesSid(i));
 					MemberType mt = r.getTypes(i);
 
@@ -187,8 +188,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 						polygons = new ArrayList<>();
 					}
 
-					polygons.add(new PolygonToConstruct(id, Arrays.copyOfRange(
-							polyRelids, 0, polyCountRel), flds, Arrays.copyOf(
+					polygons.add(new PolygonToConstruct(id, Arrays.copyOf(
+							polyRelids, polyCountRel), flds, Arrays.copyOf(
 							polyRoles, polyCountRel)));
 
 				} 

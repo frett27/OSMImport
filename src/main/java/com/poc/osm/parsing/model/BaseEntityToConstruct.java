@@ -47,7 +47,7 @@ public abstract class BaseEntityToConstruct {
 	protected void register(OSMEntityConstructRegistry r) {
 		for (int i = 0; i < refids.length; i++) {
 			long current = refids[i];
-			r.registerWayPoint(current, new EntityConstructReference(this, i));
+			r.registerEntityConstructReference(current, new EntityConstructReference(this, i));
 		}
 		refids = null; // free mem
 	}

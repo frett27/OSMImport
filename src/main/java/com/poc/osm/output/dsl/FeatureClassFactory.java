@@ -38,11 +38,15 @@ public class FeatureClassFactory extends AbstractFactory {
 					"only WGS84 SRS is supported for the moment");
 
 		TBuilder tb = (TBuilder) builder;
-		tb.currentTableHelper = TableHelper.newFeatureClass((String) l.get(0),
-				(EsriGeometryType) l.get(1),
-				TableHelper.constructW84SpatialReference());
+		try {
+			tb.currentTableHelper = TableHelper.newFeatureClass(
+					(String) l.get(0), (EsriGeometryType) l.get(1),
+					TableHelper.constructW84SpatialReference());
+			return tb.currentTableHelper;
+		} catch (Exception ex) {
+			throw new RuntimeException(ex.getMessage(), ex);
+		}
 
-		return tb.currentTableHelper;
 	}
 
 	@Override
