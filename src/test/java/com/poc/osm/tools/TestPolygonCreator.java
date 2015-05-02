@@ -62,6 +62,20 @@ public class TestPolygonCreator extends TestCase {
 
 		dump(r);
 	}
+	
+	public void testSimpleCloseMultiPath2() throws Exception {
+
+		MultiPath p1 = createMultiPath(new double[][] { { 0, 0 }, { 0, 1 } });
+		MultiPath p2 = createMultiPath(new double[][] { { 0, 1 }, { 1, 1 }});
+		MultiPath p3 = createMultiPath(new double[][] { { 1, 1 }, { 1, 0 }});
+		MultiPath p4 = createMultiPath(new double[][] { { 1, 0 }, { 0, 0 }});
+
+		
+		Polygon r = PolygonCreator.createPolygon(new MultiPath[] { p1, p2, p3, p4 },
+				new Role[] { Role.OUTER, Role.OUTER , Role.OUTER, Role.OUTER});
+
+		dump(r);
+	}
 
 	public void testSimpleCloseReversedMultiPath() throws Exception {
 
@@ -90,7 +104,7 @@ public class TestPolygonCreator extends TestCase {
 		MultiPath p1 = createMultiPath(new double[][] { { 0, 0 }, { 0, 1 },
 				{ 1, 1 }, { 0, 0 } });
 		MultiPath p2 = createMultiPath(new double[][] { { 0, 0.5 },
-				{ 0.5, 0.5 }, { 0, 0 } });
+				{ 0.5, 0.5 }, { 0, 0.5 } });
 
 		Polygon r = PolygonCreator.createPolygon(new MultiPath[] { p1, p2 },
 				new Role[] { Role.OUTER, Role.INNER });

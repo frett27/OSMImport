@@ -42,18 +42,7 @@ public class PolygonCreator {
 
 		@Override
 		public String toString() {
-			StringBuffer sb = new StringBuffer();
-			sb.append("(")
-					.append(role)
-					.append(")")
-					.append(" ")
-					.append(multiPath.getPathCount())
-					.append(" pts -> ")
-					.append(GeometryEngine.geometryToJson(4623,
-							multiPath.getPoint(multiPath.getPathStart(0))));
-			sb.append(" - ").append(
-					GeometryEngine.geometryToJson(4623,
-							multiPath.getPoint(multiPath.getPathEnd(0) - 1)));
+			StringBuffer sb = firstAndLastPoints(role.toString(), multiPath);
 
 			return sb.toString();
 		}
@@ -193,7 +182,8 @@ public class PolygonCreator {
 			while (!finished) {
 
 				if (logger.isDebugEnabled())
-					logger.debug("current :" + current);
+					logger.debug("current :"
+							+ firstAndLastPoints(null, p).toString());
 
 				int pathEnd = p.getPathEnd(0) - 1;
 				Point joinPoint = p.getPoint(pathEnd); // the join point
@@ -223,9 +213,9 @@ public class PolygonCreator {
 					logger.debug("OK, insert the element in the current constructed polygon");
 
 					// add the path to the current multipath
-					p.insertPoints(0, pathEnd + 1,
-							followingPathWithCorrectOrder, 0, 0,
-							followingPathWithCorrectOrder.getPathCount(), true);
+
+					p.insertPoints(0, -1, followingPathWithCorrectOrder, 0, 1,
+							followingPathWithCorrectOrder.getPointCount() - 1, true); // skip the first point
 
 				} else {
 					// don't find a following path, and not closed !!!
@@ -244,8 +234,9 @@ public class PolygonCreator {
 							sb.append(",");
 
 						sb.append("{ \"geometry\" :");
-						sb.append(GeometryEngine.geometryToJson(4623, p))
-								.append(",");
+						sb.append(
+								GeometryEngine.geometryToJson(4623,
+										multiPath[i])).append(",");
 						sb.append(" \"role\": ").append('"').append(roles[i])
 								.append('"').append("}");
 						first = false;
@@ -296,10 +287,10 @@ public class PolygonCreator {
 					finalPolygon.add(p, false);
 					finished = true;
 				} else {
-					logger.debug("no, the path is not closed");
+					logger.debug("no, the path is not closed, continue");
 				}
 
-			}
+			} // !finished
 
 			logger.debug("next ring");
 
@@ -398,7 +389,7 @@ public class PolygonCreator {
 				newGeometry.reverseAllPaths();
 
 				left.remove(i);
-				return p;
+				return newGeometry;
 			}
 
 			// metrics
@@ -436,7 +427,7 @@ public class PolygonCreator {
 		assert p1 != null;
 		assert p2 != null;
 		return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2)
-				+ Math.pow(p2.getY() - p2.getY(), 2));
+				+ Math.pow(p1.getY() - p2.getY(), 2));
 	}
 
 	/**
@@ -468,6 +459,26 @@ public class PolygonCreator {
 		assert p != null;
 		String jsong = GeometryEngine.geometryToJson(4623, p);
 		System.out.println(jsong);
+	}
+
+	private static StringBuffer firstAndLastPoints(String role,
+			MultiPath multiPath) {
+		StringBuffer sb = new StringBuffer();
+		if (role != null) {
+			sb.append("(")
+
+			.append(role).append(")");
+		}
+
+		sb.append(" ")
+				.append(multiPath.getPointCount())
+				.append(" pts -> ")
+				.append(GeometryEngine.geometryToJson(4623,
+						multiPath.getPoint(multiPath.getPathStart(0))));
+		sb.append(" - ").append(
+				GeometryEngine.geometryToJson(4623,
+						multiPath.getPoint(multiPath.getPathEnd(0) - 1)));
+		return sb;
 	}
 
 }
