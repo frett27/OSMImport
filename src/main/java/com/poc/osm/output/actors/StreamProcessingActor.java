@@ -1,6 +1,8 @@
 package com.poc.osm.output.actors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import akka.actor.ActorRef;
@@ -88,7 +90,7 @@ public class StreamProcessingActor extends MeasuredActor {
 	}
 
 	private void handleSingleMessage(OSMAttributedEntity message) {
-		
+
 		if (!(message instanceof OSMAttributedEntity)) {
 			return;
 		}
@@ -97,7 +99,8 @@ public class StreamProcessingActor extends MeasuredActor {
 
 		handledOuput++;
 		if (handledOuput % 100000 == 0) {
-			log.info("" + handledOuput + " entity handled by actor " + getSelf().path());
+			log.info("" + handledOuput + " entity handled by actor "
+					+ getSelf().path());
 		}
 
 		try {
@@ -117,14 +120,17 @@ public class StreamProcessingActor extends MeasuredActor {
 				}
 			}
 
-			List<OSMAttributedEntity> l = null ;
+			List<OSMAttributedEntity> l = null;
 
 			if (transform != null) {
 				l = transform.transform(e);
-			} else 
-			{
+			} else {
 				l = new ArrayList<OSMAttributedEntity>();
 				l.add(e);
+			}
+
+			if (l != null) {
+				l = Arrays.asList(l.toArray(new OSMAttributedEntity[l.size()]));
 			}
 
 			if (l != null) {
@@ -138,10 +144,10 @@ public class StreamProcessingActor extends MeasuredActor {
 						}
 					}
 				}
-			} else 
-			{
-				
-				log.warning("transform returned null for transform " + transform );
+			} else {
+
+				log.warning("transform returned null for transform "
+						+ transform);
 			}
 
 		} catch (Exception ex) {

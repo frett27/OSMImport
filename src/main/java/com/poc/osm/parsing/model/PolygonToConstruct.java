@@ -3,12 +3,12 @@ package com.poc.osm.parsing.model;
 import java.io.Serializable;
 import java.util.HashMap;
 
+import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.MultiPath;
-import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
-import com.esri.core.geometry.Polyline;
 import com.poc.osm.model.OSMEntity;
 import com.poc.osm.model.OSMEntityGeometry;
+import com.poc.osm.tools.PolygonCreator;
 
 /**
  * relation to construct
@@ -36,6 +36,40 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 	@Override
 	public OSMEntity constructOSMEntity() {
 
+		try {
+
+			MultiPath[] g = new MultiPath[associatedEntity.length];
+			for (int i = 0; i < g.length; i++) {
+				g[i] = (MultiPath) associatedEntity[i].getGeometry();
+			}
+			try {
+
+				return new OSMEntityGeometry(this.id,
+						PolygonCreator.createPolygon(g, idsRole), this.fields);
+
+			} catch (Exception ex) {
+				System.out.println("fail to create polygon, ... :");
+				ex.printStackTrace();
+
+				System.out.println(" Dumping faulty Polygon / Polyline :");
+				for (int j = 0; j < g.length; j++) {
+					MultiPath p = g[j];
+					System.out.println("   " + idsRole[j] + " -> " + p.getClass().getSimpleName() + " "
+							+ GeometryEngine.geometryToJson(4623, p));
+				}
+
+				return fallBackConstructPolygon();
+			}
+
+		} catch (Exception ex) {
+			System.err.println("Fail to create polygon " + this);
+			ex.printStackTrace(System.err);
+			throw new RuntimeException(ex.getMessage(), ex);
+		}
+
+	}
+
+	private OSMEntity fallBackConstructPolygon() {
 		Polygon polygon = new Polygon();
 
 		for (int i = 0; i < associatedEntity.length; i++) {
@@ -48,5 +82,3 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 	}
 
 }
-
-
