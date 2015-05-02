@@ -9,13 +9,17 @@ public class OSMAttributedEntity {
 	protected long id;
 	protected Map<String, Object> fields;
 
-	protected OSMAttributedEntity()
-	{
-		
+	protected OSMAttributedEntity() {
+
 	}
-	
+
 	public OSMAttributedEntity(long id, Map<String, Object> fields) {
 		this.id = id;
+
+		if (fields != null) {
+			fields = new HashMap<String, Object>(fields);
+		}
+
 		this.fields = fields;
 	}
 
@@ -57,6 +61,11 @@ public class OSMAttributedEntity {
 			this.fields = new HashMap<String, Object>();
 		if (name != null)
 			this.fields.put(name, value);
+	}
+
+	@Override
+	public String toString() {
+		return "" + id + "(" + fields + ")";
 	}
 
 }

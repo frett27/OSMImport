@@ -1,8 +1,8 @@
 
-import com.poc.osm.model.OSMAttributedEntity;
-import com.poc.osm.model.OSMEntity;
-import com.poc.osm.model.OSMRelatedObject;
-import com.poc.osm.model.OSMRelation;
+import com.poc.osm.model.OSMAttributedEntity
+import com.poc.osm.model.OSMEntity
+import com.poc.osm.model.OSMRelatedObject
+import com.poc.osm.model.OSMRelation
 
 
 // construction de la chaine
@@ -41,22 +41,27 @@ builder.build(osmstream) {
 	   }
 		
 		transform { OSMRelation e ->
+			
 			e.getFields()?.clear();
+			
 			e.setValue("id",e.getId());
-				
-			e?.relations.collect { 
-				
+			
+			r = [] as List;
+			
+			for (int i = 0 ; i < e.relations.size() ; i ++ )
+			{
+				OSMRelatedObject related = e.relations.get(i)
 				OSMAttributedEntity ro = new OSMAttributedEntity(e.id, e.fields);
 				ro.setValue("id", e.id);
-				ro.setValue("rid", it.relatedId);
-				ro.setValue('role', it.relation);
-				ro.setValue('type', it.type);
+				ro.setValue("rid", related.relatedId);
+				ro.setValue('role', related.relation);
+				ro.setValue('type', related.type);
 				
-				ro;
-				
+				r.add(ro)
 			}
-				
 			
+			
+			return r;
 		}
 	}
 	

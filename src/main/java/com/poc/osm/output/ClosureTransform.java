@@ -18,9 +18,9 @@ public class ClosureTransform extends Transform {
 	@Override
 	public List<OSMAttributedEntity> transform(OSMAttributedEntity e) {
 		assert current != null;
-		
+
 		Object ret = current.call(e);
-		
+
 		if (ret == null) {
 			return null;
 		}

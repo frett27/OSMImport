@@ -95,7 +95,7 @@ public class CompiledTableOutputActor extends MeasuredActor {
 
 			
 		} catch (Exception ex) {
-			log.error("error processing entity :" + e + ":" + ex.getMessage(),
+			log.error("error storing entity :" + e + ":" + ex.getMessage(),
 					ex);
 		}
 		if (start != -1) {
