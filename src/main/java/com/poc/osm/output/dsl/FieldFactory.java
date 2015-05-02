@@ -20,7 +20,7 @@ public class FieldFactory extends AbstractFactory {
 			Object value, Map attributes) throws InstantiationException,
 			IllegalAccessException {
 
-		assert builder instanceof TBuilder;
+		assert builder instanceof TBuilder; 
 		TBuilder b = (TBuilder) builder;
 
 		assert b.currentTableHelper != null;

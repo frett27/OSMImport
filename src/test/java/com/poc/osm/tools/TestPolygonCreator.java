@@ -1,10 +1,21 @@
 package com.poc.osm.tools;
 
 import java.io.IOException;
-
-import org.codehaus.jackson.JsonParseException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
+
+import org.codehaus.jackson.JsonParseException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.BasicConfigurator;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.MultiPath;
@@ -131,18 +142,51 @@ public class TestPolygonCreator extends TestCase {
 
 		Polygon r = PolygonCreator.createPolygon(new MultiPath[] { p1, p2, p3,
 				p4 }, new Role[] { Role.OUTER, Role.OUTER, Role.OUTER,
-				Role.OUTER});
+				Role.OUTER });
 
 		dump(r);
 
-		
-		
 	}
 
 	private MultiPath parse(String a) throws JsonParseException, IOException {
 		MultiPath p1 = (MultiPath) GeometryEngine.jsonToGeometry(a)
 				.getGeometry();
 		return p1;
+	}
+
+	public void testFileCase2() throws Exception {
+
+		
+	
+		//BasicConfigurator.configureDefaultContext();
+	
+		
+		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		root.setLevel(Level.ALL);
+		
+		
+		InputStream is = getClass().getResourceAsStream("case2.json");
+		assertNotNull(is);
+		JSONTokener t = new JSONTokener(new InputStreamReader(is));
+		JSONObject o = new JSONObject(t);
+
+		Object a = o.get("origin");
+
+		JSONArray arr = (JSONArray) a;
+
+		MultiPath[] paths = new MultiPath[arr.length()];
+		Role[] roles = new Role[arr.length()];
+
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject element = (JSONObject) arr.get(i);
+			paths[i] = (MultiPath) GeometryEngine.jsonToGeometry(
+					element.get("geometry").toString()).getGeometry();
+
+			roles[i] = Role.valueOf( element.getString("role").toString());
+		}
+
+		PolygonCreator.createPolygon(paths, roles);
+
 	}
 
 }

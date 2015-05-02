@@ -3,7 +3,8 @@ package com.poc.osm.tools;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.qos.logback.classic.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.MultiPath;
@@ -18,7 +19,8 @@ import com.poc.osm.parsing.model.PolygonToConstruct.Role;
  * 
  */
 public class PolygonCreator {
-	
+
+	public static Logger logger = LoggerFactory.getLogger(PolygonCreator.class);
 
 	public static class MultiPathAndRole {
 
@@ -38,7 +40,63 @@ public class PolygonCreator {
 			return multiPath;
 		}
 
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append("(")
+					.append(role)
+					.append(")")
+					.append(" ")
+					.append(multiPath.getPathCount())
+					.append(" pts -> ")
+					.append(GeometryEngine.geometryToJson(4623,
+							multiPath.getPoint(multiPath.getPathStart(0))));
+			sb.append(" - ").append(
+					GeometryEngine.geometryToJson(4623,
+							multiPath.getPoint(multiPath.getPathEnd(0) - 1)));
+
+			return sb.toString();
+		}
 	}
+
+	private static String dump(List<MultiPathAndRole> l) {
+		if (l == null)
+			return null;
+
+		StringBuffer sb = new StringBuffer('\n');
+		for (MultiPathAndRole r : l) {
+			sb.append(r).append('\n');
+		}
+		return sb.toString();
+	}
+
+	private List<MultiPathAndRole> create(MultiPath[] multiPath, Role[] roles) {
+		List<MultiPathAndRole> pathLeft = new ArrayList<>();
+		for (int i = 0; i < multiPath.length; i++) {
+			pathLeft.add(new MultiPathAndRole(multiPath[i], roles[i]));
+		}
+		return pathLeft;
+	}
+
+	// /**
+	// *
+	// * @param current
+	// * @param r
+	// * @return
+	// * @throws Exception
+	// */
+	// public static boolean createRing(MultiPath current,
+	// List<MultiPathAndRole> r)
+	// throws Exception {
+	//
+	// Polygon p = new Polygon();
+	//
+	// if (isClosed(current) ){
+	//
+	// }
+	//
+	//
+	// }
 
 	/**
 	 * create a polygon from multi path elements, passed arrays must have the
@@ -52,27 +110,63 @@ public class PolygonCreator {
 	public static Polygon createPolygon(MultiPath[] multiPath, Role[] roles)
 			throws Exception {
 
+		logger.debug("start create Polygon");
+
 		assert multiPath != null;
 		assert roles != null;
 		assert multiPath.length == roles.length;
 
 		Polygon finalPolygon = new Polygon();
 
-		List<MultiPath> currentPath = new ArrayList<MultiPath>();
 		List<MultiPathAndRole> pathLeft = new ArrayList<>();
 		for (int i = 0; i < multiPath.length; i++) {
 			pathLeft.add(new MultiPathAndRole(multiPath[i], roles[i]));
 		}
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("-- initial current stack :");
+			logger.debug(dump(pathLeft));
+			logger.debug("--end");
+
+		}
+
 		MultiPathAndRole current = null;
+
 		current = pop(pathLeft);
+
+		if (logger.isDebugEnabled())
+			logger.debug("get the first element " + current);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("--current stack :");
+			logger.debug(dump(pathLeft));
+			logger.debug("--end");
+
+		}
 
 		while (current != null) {
 
+			if (logger.isDebugEnabled())
+				logger.debug("current :" + current);
+
 			while (current != null && isClosed(current.getMultiPath())) {
 				// add to polygon
+				logger.debug("current is closed, add to finalPolygon");
 				finalPolygon.add(current.getMultiPath(), false);
+
+				if (logger.isDebugEnabled()) {
+					logger.debug(" -- stack");
+					logger.debug(dump(pathLeft));
+				}
+
 				current = pop(pathLeft);
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("--current stack :");
+					logger.debug(dump(pathLeft));
+					logger.debug("--end");
+
+				}
 			}
 
 			// if (pathLeft.size() == 0)
@@ -84,6 +178,7 @@ public class PolygonCreator {
 			// current might be null
 
 			if (current == null) {
+				logger.debug("current is null, end of the construction");
 				return finalPolygon;
 			}
 
@@ -93,17 +188,40 @@ public class PolygonCreator {
 
 			boolean finished = false;
 
+			logger.debug("having an initial element");
+
 			while (!finished) {
+
+				if (logger.isDebugEnabled())
+					logger.debug("current :" + current);
 
 				int pathEnd = p.getPathEnd(0) - 1;
 				Point joinPoint = p.getPoint(pathEnd); // the join point
+
+				if (logger.isDebugEnabled())
+					logger.debug("search for lines in stack having "
+							+ joinPoint);
 
 				MultiPath followingPathWithCorrectOrder = findExtremisAndIfEndPointReverseTheMultiPath(
 						pathLeft, joinPoint, current.getRole()); // search for
 																	// the
 																	// next
+				if (logger.isDebugEnabled()) {
+					logger.debug("found multipath :"
+							+ followingPathWithCorrectOrder);
+				}
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("--current stack :");
+					logger.debug(dump(pathLeft));
+					logger.debug("--end");
+
+				}
 
 				if (followingPathWithCorrectOrder != null) {
+
+					logger.debug("OK, insert the element in the current constructed polygon");
+
 					// add the path to the current multipath
 					p.insertPoints(0, pathEnd + 1,
 							followingPathWithCorrectOrder, 0, 0,
@@ -112,20 +230,64 @@ public class PolygonCreator {
 				} else {
 					// don't find a following path, and not closed !!!
 
-					System.out.println("elements left :" + pathLeft);
+					// Construct a JSON with all elements
+
+					StringBuffer sb = new StringBuffer();
+
+					sb.append("{");
+					sb.append("   \"origin\": ");
+					sb.append("[");
+					boolean first = true;
+					for (int i = 0; i < multiPath.length; i++) {
+
+						if (!first)
+							sb.append(",");
+
+						sb.append("{ \"geometry\" :");
+						sb.append(GeometryEngine.geometryToJson(4623, p))
+								.append(",");
+						sb.append(" \"role\": ").append('"').append(roles[i])
+								.append('"').append("}");
+						first = false;
+
+					}
+					sb.append("]");
+					sb.append(",");
+					sb.append("   \"constructed\":");
+					sb.append(GeometryEngine.geometryToJson(4623, p));
+					sb.append(",");
+					sb.append("   \"left\":");
+					sb.append("[");
+					first = true;
 					for (int i = 0; i < pathLeft.size(); i++) {
 						MultiPathAndRole e = pathLeft.get(i);
-						dump(e.getMultiPath());
+
+						if (!first)
+							sb.append(",");
+						sb.append("{ \"geometry\" :");
+						sb.append(
+								GeometryEngine.geometryToJson(4623,
+										e.getMultiPath())).append(",");
+						sb.append(" \"role\": ").append(e.getRole())
+								.append("}");
+						first = false;
 					}
+					sb.append("]");
+					sb.append("}");
+
+					System.out.println("fail to construct poly :"
+							+ sb.toString());
 
 					throw new Exception("path cannot be closed");
 				}
 
 				// closed ???
 
+				logger.debug("is closed ?");
 				if (areCoincident(p.getPoint(p.getPathStart(0)),
 						p.getPoint(p.getPathEnd(0) - 1))) {
 
+					logger.debug("yes, fire the new path");
 					// yes this is closed, add the part
 
 					// FIXME reverse path ??? -> inner / outer, the proper
@@ -133,13 +295,26 @@ public class PolygonCreator {
 
 					finalPolygon.add(p, false);
 					finished = true;
+				} else {
+					logger.debug("no, the path is not closed");
 				}
+
+			}
+
+			logger.debug("next ring");
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("--elements left to handle - current stack :");
+				logger.debug(dump(pathLeft));
+				logger.debug("--end");
 
 			}
 
 			current = pop(pathLeft);
 
 		}
+
+		logger.debug("end of construct");
 
 		return finalPolygon;
 
@@ -152,6 +327,36 @@ public class PolygonCreator {
 
 		return areCoincident(p.getPoint(start), p.getPoint(end));
 
+	}
+
+	public static List<Integer> findAll(List<MultiPathAndRole> left,
+			Point joinPoint, Role searchRole) {
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+
+		for (int i = 0; i < left.size(); i++) {
+
+			MultiPathAndRole e = left.get(i);
+
+			if (e.getRole() != searchRole)
+				continue;
+
+			MultiPath p = e.getMultiPath();
+			assert p != null;
+			assert p.getPathCount() == 1;
+
+			int indexStart = p.getPathStart(0);
+			int indexStop = p.getPathEnd(0) - 1;
+
+			Point startPoint = p.getPoint(indexStart);
+			Point entPoint = p.getPoint(indexStop);
+			if (areCoincident(startPoint, joinPoint)
+					|| areCoincident(entPoint, joinPoint)) {
+				indices.add(i);
+			}
+
+		}
+
+		return indices;
 	}
 
 	public static MultiPath findExtremisAndIfEndPointReverseTheMultiPath(
@@ -196,22 +401,24 @@ public class PolygonCreator {
 				return p;
 			}
 
+			// metrics
 			double d = Math.min(euclidianDistance(startPoint, joinPoint),
 					euclidianDistance(entPoint, joinPoint));
 			if (d < distance) {
 				distance = d;
 				bestindex = i;
 			}
+			//
 
 		}
 
-		System.out.println("best probable match for point "
-				+ joinPoint
-				+ " index "
-				+ bestindex
-				+ "("
-				+ GeometryEngine.geometryToJson(4623, left.get(bestindex)
-						.getMultiPath()) + ") distance :" + distance);
+		// System.out.println("best probable match for point "
+		// + joinPoint
+		// + " index "
+		// + bestindex
+		// + "("
+		// + GeometryEngine.geometryToJson(4623, left.get(bestindex)
+		// .getMultiPath()) + ") distance :" + distance);
 
 		return null;
 	}

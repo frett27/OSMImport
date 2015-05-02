@@ -48,15 +48,16 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 						PolygonCreator.createPolygon(g, idsRole), this.fields);
 
 			} catch (Exception ex) {
-				System.out.println("fail to create polygon, ... :");
+				
+				System.out.println("fail to create polygon for entity " + this.id);
 				ex.printStackTrace();
 
-				System.out.println(" Dumping faulty Polygon / Polyline :");
-				for (int j = 0; j < g.length; j++) {
-					MultiPath p = g[j];
-					System.out.println("   " + idsRole[j] + " -> " + p.getClass().getSimpleName() + " "
-							+ GeometryEngine.geometryToJson(4623, p));
-				}
+//				System.out.println(" Dumping faulty Polygon / Polyline :");
+//				for (int j = 0; j < g.length; j++) {
+//					MultiPath p = g[j];
+//					System.out.println("   " + idsRole[j] + " -> " + p.getClass().getSimpleName() + " "
+//							+ GeometryEngine.geometryToJson(4623, p));
+//				}
 
 				return fallBackConstructPolygon();
 			}
