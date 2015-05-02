@@ -59,33 +59,16 @@ public class PolygonCreator {
 		return sb.toString();
 	}
 
+	
 	private List<MultiPathAndRole> create(MultiPath[] multiPath, Role[] roles) {
+	
 		List<MultiPathAndRole> pathLeft = new ArrayList<>();
 		for (int i = 0; i < multiPath.length; i++) {
 			pathLeft.add(new MultiPathAndRole(multiPath[i], roles[i]));
 		}
 		return pathLeft;
 	}
-
-	// /**
-	// *
-	// * @param current
-	// * @param r
-	// * @return
-	// * @throws Exception
-	// */
-	// public static boolean createRing(MultiPath current,
-	// List<MultiPathAndRole> r)
-	// throws Exception {
-	//
-	// Polygon p = new Polygon();
-	//
-	// if (isClosed(current) ){
-	//
-	// }
-	//
-	//
-	// }
+	
 
 	/**
 	 * create a polygon from multi path elements, passed arrays must have the
@@ -157,12 +140,6 @@ public class PolygonCreator {
 
 				}
 			}
-
-			// if (pathLeft.size() == 0)
-			// {
-			// // no more elements,
-			// return finalPolygon;
-			// }
 
 			// current might be null
 
@@ -283,6 +260,7 @@ public class PolygonCreator {
 
 					// FIXME reverse path ??? -> inner / outer, the proper
 					// orientation
+					
 
 					finalPolygon.add(p, false);
 					finished = true;

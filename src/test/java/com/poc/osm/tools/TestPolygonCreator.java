@@ -62,17 +62,17 @@ public class TestPolygonCreator extends TestCase {
 
 		dump(r);
 	}
-	
+
 	public void testSimpleCloseMultiPath2() throws Exception {
 
 		MultiPath p1 = createMultiPath(new double[][] { { 0, 0 }, { 0, 1 } });
-		MultiPath p2 = createMultiPath(new double[][] { { 0, 1 }, { 1, 1 }});
-		MultiPath p3 = createMultiPath(new double[][] { { 1, 1 }, { 1, 0 }});
-		MultiPath p4 = createMultiPath(new double[][] { { 1, 0 }, { 0, 0 }});
+		MultiPath p2 = createMultiPath(new double[][] { { 0, 1 }, { 1, 1 } });
+		MultiPath p3 = createMultiPath(new double[][] { { 1, 1 }, { 1, 0 } });
+		MultiPath p4 = createMultiPath(new double[][] { { 1, 0 }, { 0, 0 } });
 
-		
-		Polygon r = PolygonCreator.createPolygon(new MultiPath[] { p1, p2, p3, p4 },
-				new Role[] { Role.OUTER, Role.OUTER , Role.OUTER, Role.OUTER});
+		Polygon r = PolygonCreator.createPolygon(new MultiPath[] { p1, p2, p3,
+				p4 }, new Role[] { Role.OUTER, Role.OUTER, Role.OUTER,
+				Role.OUTER });
 
 		dump(r);
 	}
@@ -170,15 +170,12 @@ public class TestPolygonCreator extends TestCase {
 
 	public void testFileCase2() throws Exception {
 
-		
-	
-		//BasicConfigurator.configureDefaultContext();
-	
-		
-		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		// BasicConfigurator.configureDefaultContext();
+
+		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory
+				.getLogger(Logger.ROOT_LOGGER_NAME);
 		root.setLevel(Level.ALL);
-		
-		
+
 		InputStream is = getClass().getResourceAsStream("case2.json");
 		assertNotNull(is);
 		JSONTokener t = new JSONTokener(new InputStreamReader(is));
@@ -196,7 +193,7 @@ public class TestPolygonCreator extends TestCase {
 			paths[i] = (MultiPath) GeometryEngine.jsonToGeometry(
 					element.get("geometry").toString()).getGeometry();
 
-			roles[i] = Role.valueOf( element.getString("role").toString());
+			roles[i] = Role.valueOf(element.getString("role").toString());
 		}
 
 		PolygonCreator.createPolygon(paths, roles);
