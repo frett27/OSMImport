@@ -9,7 +9,7 @@ import com.poc.osm.model.OSMRelation
 builder.build(osmstream) {
 
 	// défini un flux de sortie, et description de la structure
-	sortie = gdb(path : "c:\\temp\\t2.gdb") {
+	sortie = gdb(path : var_outputgdb) {
 		featureclass("pts", ESRI_GEOMETRY_POINT,"WGS84") {
 			_long('id')
 		}
@@ -24,15 +24,11 @@ builder.build(osmstream) {
 			_long('rid')
 			_text('role')
 			_text('type')
-		}
-		
-		
+		}	
 	}
 
-	// dummy filter
-	// f = filter { e -> return true }
-
-	// a stream
+	
+	// relations stream
 	
 	rels = stream(osmstream, label:"relations") {
 		filter {
@@ -68,7 +64,7 @@ builder.build(osmstream) {
 	}
 	
 	
-	t = stream(osmstream, label:"Points with informations") {
+	t = stream(osmstream, label:"Points") {
 
 		filter {
 			 e ->
@@ -83,7 +79,7 @@ builder.build(osmstream) {
 
 	}
 	// a stream
-	l = stream(osmstream, label:"polylines") {
+	l = stream(osmstream, label:"Polylines") {
 
 		filter {
 			 e ->
@@ -101,7 +97,7 @@ builder.build(osmstream) {
 		
 				filter {
 					 e ->
-					(e instanceof OSMEntity) &&   e.geometryType == Geometry.Type.Polygon && e.getFields() != null
+					(e instanceof OSMEntity) && e.geometryType == Geometry.Type.Polygon && e.getFields() != null
 				}
 				
 				transform { OSMEntity e ->
