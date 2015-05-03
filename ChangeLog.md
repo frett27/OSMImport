@@ -1,4 +1,10 @@
 
+ChangeLog :
+
+28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
+
+
+
 Version 0.4:
 -------
 
