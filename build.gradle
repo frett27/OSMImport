@@ -54,13 +54,17 @@ dependencies {
 	// tools for metrics reporting
     compile group: 'com.yammer.metrics', name: 'metrics-core', version:'2.2.0'
 	// file geodatabase dependency
-    compile group: 'fgdbapi', name: 'jfgdb', version:'0.1'
+    compile group: 'fgdbapi', name: 'jfgdb', version:'0.1.1'
 	// groovy for import DSL
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version:'2.3.7'
-	
+
 	// used for command line interpretation
     compile group: 'commons-cli', name: 'commons-cli', version:'1.2'
 	
+
+    compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.13'
+
+
 	// test dependencies
     testCompile group: 'junit', name: 'junit', version:'4.11'
 	testCompile group: 'ch.qos.logback', name:'logback-classic',version:'1.0.13'
