@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'groovy'
 
 group = 'osmtools'
-version = '0.3'
+version = '0.4'
 
 description = """tools for handling import of osm datas into filegeodatabases"""
 
@@ -22,21 +22,21 @@ sourceSets {
         groovy {
             srcDirs = ['src/main/java','src/main/groovy']
         }
-	java {
-            srcDirs = []
-	}
-	resources {
-	    srcDirs = ['src/main/resources']
-	}
+		java {
+	            srcDirs = []
+		}
+		resources {
+		    srcDirs = ['src/main/resources']
+		}
     }
 
     test {
         groovy {
             srcDirs = ['src/test/java','src/test/groovy']
         }
-	java {
-            srcDirs = []
-	}
+		java {
+	            srcDirs = []
+		}
     }
 }
 
@@ -47,12 +47,25 @@ repositories {
 }
 
 dependencies {
+	// PBF binary structures
     compile group: 'crosby.binary', name: 'osmpbf', version:'1.3.3'
+	// Aka dependencies
     compile group: 'com.typesafe.akka', name: 'akka-actor_2.10', version:'2.4-SNAPSHOT'
+	// tools for metrics reporting
     compile group: 'com.yammer.metrics', name: 'metrics-core', version:'2.2.0'
-    compile group: 'fgdbapi', name: 'jfgdb', version:'0.1'
+	// file geodatabase dependency
+    compile group: 'fgdbapi', name: 'jfgdb', version:'0.1.1'
+	// groovy for import DSL
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version:'2.3.7'
+
+	// used for command line interpretation
     compile group: 'commons-cli', name: 'commons-cli', version:'1.2'
+	
+
+    compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.13'
+
+
+	// test dependencies
     testCompile group: 'junit', name: 'junit', version:'4.11'
 	testCompile group: 'ch.qos.logback', name:'logback-classic',version:'1.0.13'
 	

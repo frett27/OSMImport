@@ -1,6 +1,7 @@
 package com.poc.osm.output.actors;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.fgdbapi.thindriver.swig.FieldDef;
@@ -14,6 +15,7 @@ import akka.event.LoggingAdapter;
 
 import com.esri.core.geometry.Geometry;
 import com.poc.osm.actors.MeasuredActor;
+import com.poc.osm.model.OSMAttributedEntity;
 import com.poc.osm.model.OSMEntity;
 import com.poc.osm.output.actors.messages.CompiledFieldsMessage;
 import com.poc.osm.output.fields.AbstractFieldSetter;
@@ -80,51 +82,72 @@ public class FieldsCompilerActor extends MeasuredActor {
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
-		if (message instanceof OSMEntity) {
+		if (message instanceof OSMAttributedEntity) {
 
-			OSMEntity osme = (OSMEntity) message;
+			handleSingleMessage((OSMAttributedEntity) message);
 
-			StringBuilder sb = new StringBuilder();
+		} else if (message instanceof List) {
 
-			AbstractFieldSetter[] n = new AbstractFieldSetter[compiledFields.length];
-			for (int i = 0; i < n.length; i++) {
+			List<OSMAttributedEntity> l = (List<OSMAttributedEntity>) message;
+			for (OSMAttributedEntity e : l) {
+				try {
+					handleSingleMessage(e);
+				} catch (Exception ex) {
+					log.error("error in handling message " + ex.getMessage(),
+							ex);
+				}
+			}
 
-				n[i] = compiledFields[i].clone();
+		}
 
-				String rs;
-				if (n[i] instanceof GeometryFieldSetter) {
-					Geometry geometry = osme.getGeometry();
-					// log.info("geometry :" +
-					// GeometryEngine.geometryToJson(4326, geometry));
-					rs = ((GeometryFieldSetter) n[i]).setValue(geometry);
-					if (rs != null)
+		else {
+			unhandled(message);
+		}
+
+	}
+
+	private void handleSingleMessage(OSMAttributedEntity osme) {
+
+		StringBuilder sb = new StringBuilder();
+
+		AbstractFieldSetter[] n = new AbstractFieldSetter[compiledFields.length];
+		for (int i = 0; i < n.length; i++) {
+
+			n[i] = compiledFields[i].clone();
+
+			String rs;
+			if (n[i] instanceof GeometryFieldSetter
+					&& osme instanceof OSMEntity) {
+
+				OSMEntity entityWithGeometry = (OSMEntity) osme;
+
+				Geometry geometry = entityWithGeometry.getGeometry();
+				// log.info("geometry :" +
+				// GeometryEngine.geometryToJson(4326, geometry));
+				rs = ((GeometryFieldSetter) n[i]).setValue(geometry);
+				if (rs != null){
+					sb.append(rs).append("\n");
+				}
+			} else {
+
+				Map<String, Object> flds = osme.getFields();
+
+				if (flds != null) {
+					rs = n[i].setValue(flds.get(n[i].getFieldName()));
+					if (rs != null) {
 						sb.append(rs).append("\n");
-
-				} else {
-
-					Map<String, Object> flds = osme.getFields();
-
-					if (flds != null) {
-
-						rs = n[i].setValue(flds.get(n[i].getFieldName()));
-						if (rs != null)
-							sb.append(rs).append("\n");
-
 					}
-
 				}
 
 			}
 
-			if (sb.length() > 0) {
-				log.debug("error on entity :" + osme.getId() + " :"
-						+ sb.toString());
-			}
-
-			tell(compiledOutputActor, new CompiledFieldsMessage(n), getSelf());
-
 		}
 
+		if (sb.length() > 0) {
+			log.error("error on entity :" + osme.getId() + " :" + sb.toString());
+		}
+
+		tell(compiledOutputActor, new CompiledFieldsMessage(n), getSelf());
 	}
 
 }

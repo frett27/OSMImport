@@ -16,13 +16,19 @@ import com.esri.core.geometry.Geometry.Type;
 public class OSMEntityGeometry extends OSMEntity {
 	
 	
+	/**
+	 * the geometry
+	 */
 	private Geometry geom;
 
+	/*
+	 * type of geometry
+	 */
 	private Geometry.Type type;
 
-	public OSMEntityGeometry()
+	protected OSMEntityGeometry()
 	{
-		
+		super();
 	}
 	
 	public OSMEntityGeometry(long id, Geometry g, Map<String, Object> fields) {

@@ -1,11 +1,11 @@
 package com.poc.osm.output;
 
-import com.poc.osm.model.OSMEntity;
+import java.util.List;
+
+import com.poc.osm.model.OSMAttributedEntity;
 
 public abstract class Transform {
 
-	
-	public abstract OSMEntity transform(OSMEntity e);
-	
-	
+	public abstract List<OSMAttributedEntity> transform(OSMAttributedEntity e);
+
 }

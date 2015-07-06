@@ -45,9 +45,10 @@ public class LBActor extends MeasuredActor {
 		current = (current + 1) % actors.size();
 
 		count++;
-		if (count % 1000000 == 0)
+		if (count % 1000000 == 0) {
 			log.info("" + count + " elements handled");
-
+		}
+		
 		ActorRef a = actors.get(current);
 		tell(a, message, getSelf());
 	}

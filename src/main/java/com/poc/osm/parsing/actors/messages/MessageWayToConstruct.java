@@ -3,7 +3,7 @@ package com.poc.osm.parsing.actors.messages;
 import java.io.Serializable;
 import java.util.List;
 
-import com.poc.osm.model.WayToConstruct;
+import com.poc.osm.parsing.model.WayToConstruct;
 
 /**
  * 

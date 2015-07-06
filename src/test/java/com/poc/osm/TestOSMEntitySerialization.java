@@ -65,7 +65,7 @@ public class TestOSMEntitySerialization extends TestCase {
 			System.out.println("size of serialization :" + b.length);
 			ObjectInputStream ois = new ObjectInputStream(bais);
 
-			OSMEntity r = new OSMEntityGeometry();
+			OSMEntity r = new OSMEntityGeometry(0,null,null);
 			try {
 
 				long start = System.nanoTime();

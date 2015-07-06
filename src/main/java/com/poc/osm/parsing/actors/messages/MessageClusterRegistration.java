@@ -8,7 +8,7 @@ package com.poc.osm.parsing.actors.messages;
  */
 public enum MessageClusterRegistration {
 
-	ASK_FOR_WAY_REGISTRATION, NEED_MORE_READ, ASK_IF_NEED_MORE_READ, 
+	ASK_FOR_WAY_REGISTRATION, ASK_FOR_POLYGONCONSTRUCT_REGISTATION, NEED_MORE_READ, ASK_IF_NEED_MORE_READ, 
 	ALL_BLOCKS_READ
 
 }

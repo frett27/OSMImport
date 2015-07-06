@@ -15,6 +15,7 @@ import akka.actor.Props;
 
 import com.poc.osm.output.actors.LBActor;
 import com.poc.osm.output.actors.StreamProcessingActor;
+import com.poc.osm.output.dsl.UnaryClosureFactory;
 import com.poc.osm.regulation.FlowRegulator;
 import com.poc.osm.regulation.MessageRegulatorRegister;
 import com.poc.osm.tools.Tools;
@@ -145,8 +146,9 @@ public class ProcessModel {
 	 * @return
 	 */
 	public Set<ModelElement> getChildren(Stream s) {
-		if (childrens == null)
+		if (childrens == null) {
 			throw new IllegalStateException("childrens must be computed");
+		}
 		return childrens.get(s);
 	}
 
@@ -157,9 +159,10 @@ public class ProcessModel {
 	 * @return
 	 */
 	public Set<ModelElement> getOthersChildrens(Stream s) {
-		if (childrenOthers == null)
+		if (childrenOthers == null) {
 			throw new IllegalStateException(
 					"childrens must be compacted before");
+		}
 		return childrenOthers.get(s);
 	}
 
@@ -234,8 +237,12 @@ public class ProcessModel {
 
 		for (int i = 0; i < 4; i++) {
 			// create the stream processing actor
+
+			Filter f = ss.filter;
+			Transform t = ss.transform;
+
 			ActorRef r = sys.actorOf(Props.create(StreamProcessingActor.class,
-					ss.filter, ss.transform, childrenActorRefList,
+					f, t, childrenActorRefList,
 					othersActorRefList), Tools.toActorName(ss.getKey()) + "_"
 					+ i);
 			flowRegulator.tell(new MessageRegulatorRegister(r),
@@ -246,6 +253,7 @@ public class ProcessModel {
 		ActorRef a = sys.actorOf(Props.create(LBActor.class, actors), "D_"
 				+ Tools.toActorName(ss.getKey()));
 
+		// register the dispatcher
 		flowRegulator
 				.tell(new MessageRegulatorRegister(a), ActorRef.noSender());
 

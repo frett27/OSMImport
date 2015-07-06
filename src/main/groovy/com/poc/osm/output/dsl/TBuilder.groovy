@@ -13,7 +13,7 @@ import com.poc.osm.output.Stream
  *
  */
 class TBuilder extends FactoryBuilderSupport {
-	
+	 
 
 	protected ProcessModel processModel= new ProcessModel();
 
@@ -57,6 +57,7 @@ class TBuilder extends FactoryBuilderSupport {
 		registerFactory("_text", new FieldFactory());
 		registerFactory("_integer", new FieldFactory());
 		registerFactory("_double", new FieldFactory());
+		registerFactory("_long", new FieldFactory());
 	}
 
 	/**

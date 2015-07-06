@@ -1,6 +1,6 @@
 package com.poc.osm.output;
 
-import com.poc.osm.model.OSMEntity;
+import com.poc.osm.model.OSMAttributedEntity;
 
 /**
  * definition of a filter
@@ -10,6 +10,6 @@ import com.poc.osm.model.OSMEntity;
  */
 public abstract class Filter {
 
-	public abstract boolean filter(OSMEntity e);
+	public abstract boolean filter(OSMAttributedEntity e);
 
 }

@@ -2,14 +2,14 @@ package com.poc.osm.output.dsl
 
 import org.fgdbapi.thindriver.xml.EsriGeometryType;
 
-import com.poc.osm.model.OSMEntity;
+import com.poc.osm.model.OSMAttributedEntity;
 import com.poc.osm.output.Filter;
 import com.poc.osm.output.Stream
 import com.poc.osm.output.Transform;
 
 class T extends Filter {
 	@Override
-	public boolean filter(OSMEntity e) {
+	public boolean filter(OSMAttributedEntity e) {
 		return false;
 	}
 }

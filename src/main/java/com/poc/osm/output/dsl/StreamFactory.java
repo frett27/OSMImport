@@ -45,12 +45,6 @@ public class StreamFactory extends AbstractFactory {
 
 	}
 	
-	@Override
-	public void onNodeCompleted(FactoryBuilderSupport builder, Object parent,
-			Object node) {
-		// TODO Auto-generated method stub
-		super.onNodeCompleted(builder, parent, node);
-	}
 	
 
 }

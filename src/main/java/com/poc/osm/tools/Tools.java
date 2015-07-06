@@ -34,7 +34,11 @@ public class Tools {
 
 	}
 
-	
+	/**
+	 * construct a safe actor name, replacing unsupported special characters to _
+	 * @param s the string
+	 * @return
+	 */
 	public static String toActorName(String s) {
 		assert s != null;
 		return s.replaceAll("[\\ \\\\:.]", "_");

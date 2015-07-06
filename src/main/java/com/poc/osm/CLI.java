@@ -10,6 +10,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 
 /**
  * command line for launching the process
@@ -19,13 +23,25 @@ import org.apache.commons.cli.Options;
  */
 public class CLI {
 
+	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CLI.class);
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
 
+		// initialize the logs
+		
+		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory
+				.getLogger(Logger.ROOT_LOGGER_NAME);
+		root.setLevel(Level.WARN);
+		
+		logger.debug("Start the command line");
+		
 		System.out.println("Launching OSM Import Tools");
 
+		
+		
 		if (Runtime.getRuntime().maxMemory() < 5000000000L)
 			throw new Exception(
 					"Command line must be launched with a least 5go of memory, using -Xmx5g");

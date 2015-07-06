@@ -1,6 +1,7 @@
 package com.poc.osm.parsing.actors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,16 +13,24 @@ import akka.event.LoggingAdapter;
 import com.esri.core.geometry.Point;
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
-import com.poc.osm.model.OSMBlock;
-import com.poc.osm.model.OSMContext;
 import com.poc.osm.model.OSMEntity;
 import com.poc.osm.model.OSMEntityGeometry;
 import com.poc.osm.model.OSMEntityPoint;
-import com.poc.osm.model.WayToConstruct;
+import com.poc.osm.model.OSMRelatedObject;
+import com.poc.osm.model.OSMRelation;
+import com.poc.osm.parsing.actors.messages.MessagePolygonToConstruct;
+import com.poc.osm.parsing.actors.messages.MessageRelations;
 import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
+import com.poc.osm.parsing.model.OSMBlock;
+import com.poc.osm.parsing.model.OSMContext;
+import com.poc.osm.parsing.model.PolygonToConstruct;
+import com.poc.osm.parsing.model.PolygonToConstruct.Role;
+import com.poc.osm.parsing.model.WayToConstruct;
 
 import crosby.binary.Osmformat.DenseNodes;
 import crosby.binary.Osmformat.Node;
+import crosby.binary.Osmformat.Relation;
+import crosby.binary.Osmformat.Relation.MemberType;
 import crosby.binary.Osmformat.Way;
 
 /**
@@ -35,7 +44,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
 	private ActorRef dispatcher;
-	
+
 	private ActorRef flowRegulator;
 
 	public OSMObjectGenerator(ActorRef dispatcher, ActorRef flowRegulator) {
@@ -54,26 +63,157 @@ public class OSMObjectGenerator extends MeasuredActor {
 		if (log.isDebugEnabled())
 			log.debug(getSelf() + " " + System.currentTimeMillis()
 					+ " handle block " + b.getCounter());
+		
 
-		List<OSMEntity> allNodes = constructNodesTreeSet(b);
-		if (allNodes != null) {
-			tell(dispatcher,new MessageNodes(allNodes), getSelf());
-		}
-
-		// emit the nodes received ...
+		parseRelations(b);
 
 		ArrayList<WayToConstruct> ways = constructWays(b);
 		if (ways != null) {
-			if (allNodes != null) {
-				tell(dispatcher, 
+				tell(dispatcher,
 						new MessageWayToConstruct(b.getCounter(), ways),
 						getSelf());
-			}
 		}
+
 		
-		// TODO relations
+		List<OSMEntity> allNodes = constructNodesTreeSet(b);
+		if (allNodes != null) {
+			// emit the nodes received ...
+			tell(dispatcher, new MessageNodes(allNodes), getSelf());
+		}
+
 		
+
 		
+
+	}
+
+	/**
+	 * parse the relations
+	 * 
+	 * @param b
+	 *            the block that may contains relations
+	 */
+	protected void parseRelations(OSMBlock b) {
+
+		List<Relation> relations = b.getRelations();
+		OSMContext ctx = b.getContext();
+
+		List<PolygonToConstruct> polygons = null;
+
+		List<OSMRelation> outRels = null;
+
+		if (relations != null && relations.size() > 0) {
+
+			for (Relation r : relations) {
+
+				// handling fields
+
+				long id = r.getId();
+
+				HashMap<String, Object> flds = null;
+				for (int i = 0; i < r.getKeysCount(); i++) {
+					String k = ctx.getStringById(r.getKeys(i));
+					String v = ctx.getStringById(r.getVals(i));
+					if (flds == null) {
+						flds = new HashMap<String, Object>();
+					}
+					flds.put(k, v);
+				}
+
+				// ok we have fields
+
+				// extract outer and inner ways relations
+
+				long[] polyRelids = new long[r.getMemidsCount()];
+				Role[] polyRoles = new Role[r.getMemidsCount()];
+				int polyCountRel = 0; // counter for elements in the array;
+
+				List<OSMRelatedObject> relatedObjects = null;
+
+				long rid = 0;
+				for (int i = 0; i < r.getMemidsCount(); i++) {
+					rid += r.getMemids(i);
+					String role = ctx.getStringById(r.getRolesSid(i));
+					MemberType mt = r.getTypes(i);
+
+					String stringType = null;
+					switch (mt) {
+
+					case NODE:
+						stringType = "node";
+						break;
+					case WAY:
+						stringType = "way";
+						break;
+					case RELATION:
+						stringType = "relation";
+						break;
+					default:
+						String msg = "unknown relation type for object " + id
+								+ " and relation " + rid
+								+ " the object is skipped";
+						log.warning(msg);
+						throw new RuntimeException(msg); // FIXME
+					}
+
+					if (relatedObjects == null) {
+						relatedObjects = new ArrayList<>();
+					}
+
+					// add relation
+					relatedObjects.add(new OSMRelatedObject(rid, role,
+							stringType));
+
+					// for polygons
+					if (("outer".equals(role) || "inner".equals(role))
+							&& mt == MemberType.WAY) {
+						// polygon construct relation
+
+						polyRelids[polyCountRel] = rid;
+						polyRoles[polyCountRel] = ("outer".equals(role) ? Role.OUTER
+								: Role.INNER);
+						polyCountRel++;
+
+					}
+
+				} // relations
+
+				log.debug("end of analyzing the relation");
+
+				// the relation contains, polygon features
+
+				if (polyCountRel > 0) {
+
+					if (polygons == null) {
+						polygons = new ArrayList<>();
+					}
+
+					polygons.add(new PolygonToConstruct(id, Arrays.copyOf(
+							polyRelids, polyCountRel), flds, Arrays.copyOf(
+							polyRoles, polyCountRel)));
+
+				} 
+
+				if (outRels == null) {
+					outRels = new ArrayList<>();
+				}
+
+				outRels.add(new OSMRelation(id, flds, relatedObjects));
+
+			}
+
+		} // relations if the block
+
+		if (polygons != null) {
+			// there are polygons, emit
+			tell(dispatcher, new MessagePolygonToConstruct(b.getCounter(),
+					polygons), getSelf());
+		}
+
+		if (outRels != null) {
+			// there are relations, emit
+			tell(dispatcher, new MessageRelations(outRels), getSelf());
+		}
 
 	}
 
@@ -130,7 +270,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 	 */
 	protected List<OSMEntity> constructNodesTreeSet(OSMBlock b) {
 
-		List< OSMEntity> parsedNodes = null;
+		List<OSMEntity> parsedNodes = null;
 
 		OSMContext ctx = b.getContext();
 
@@ -154,8 +294,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 				// construction
 
-				//  Optim
-				
+				// Optim
+
 				// Point p = new Point();
 				// p.setX(lastLon);
 				// p.setY(lastLat);
@@ -190,9 +330,10 @@ public class OSMObjectGenerator extends MeasuredActor {
 						j++; // Skip over the '0' delimiter.
 					}
 				} catch (Exception ex) {
-					System.out.println("error : "+ex.getMessage());
+					System.out.println("error : " + ex.getMessage());
 				}
-				OSMEntity o = new OSMEntityPoint(lastId, ctx.parseLon(lastLon), ctx.parseLat(lastLat), flds);
+				OSMEntity o = new OSMEntityPoint(lastId, ctx.parseLon(lastLon),
+						ctx.parseLat(lastLat), flds);
 				parsedNodes.add(o);
 
 			}
@@ -249,7 +390,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 		if (message instanceof OSMBlock) {
 			OSMBlock nds = (OSMBlock) message;
-			log.debug(nds + " Block receive in actor " + getSelf());
+			if (log.isDebugEnabled())
+				log.debug(nds + " Block receive in actor " + getSelf());
 			parseObjects(nds);
 			log.debug("block done !");
 		} else {

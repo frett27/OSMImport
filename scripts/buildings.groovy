@@ -20,11 +20,11 @@ builder.build(osmstream) {
 	b = stream(osmstream, label:"buildings") {
 
 		filter {
-			OSMEntity e ->
-			   e.geometryType == Geometry.Type.Polygon && e.getFields() && e.getFields().containsKey("building")
+			 e -> e instanceof OSMEntity &&
+			   e.geometryType == Geometry.Type.Polygon  && e.getFields() && e.getFields().containsKey("building")
 		}
 		
-		transform { OSMEntity e ->
+		transform {  e ->
 			String t = e.getFields().get("building")
 			e.getFields()?.clear()
 			e.setValue("id",e.id)
@@ -37,12 +37,12 @@ builder.build(osmstream) {
 	l = stream(osmstream, label:"building lines") {
 		
 		filter {
-			OSMEntity e ->
+			 e -> e instanceof OSMEntity &&
 			   e.geometryType == Geometry.Type.Polyline && e.getFields() && e.getFields().containsKey("building")
 		}
 		
 		transform {
-			OSMEntity e ->
+			 e ->
 			
 			Geometry g = e.getGeometry()
 			if (g == null || g.isEmpty())
