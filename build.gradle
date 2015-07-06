@@ -81,6 +81,7 @@ task fatJar(type: Jar) {
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it).matching {
         exclude 'META-INF/**.RSA'
+        exclude 'META-INF/MANIFEST.MF'
     } } }
     with jar
 }
