@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors.messages;
+package com.poc.osm.parsing.pbf.actors.messages;
 
 /**
  * message on the parsing cluster behaviour

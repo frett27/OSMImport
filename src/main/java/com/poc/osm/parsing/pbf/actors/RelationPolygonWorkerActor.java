@@ -1,6 +1,7 @@
-package com.poc.osm.parsing.actors;
+package com.poc.osm.parsing.pbf.actors;
 
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,27 +11,20 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
 import com.poc.osm.actors.MeasuredActor;
-import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.messages.MessageWay;
 import com.poc.osm.model.OSMEntity;
-import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
-import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
-import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
 import com.poc.osm.parsing.model.BaseEntityToConstruct;
 import com.poc.osm.parsing.model.OSMEntityConstructListener;
 import com.poc.osm.parsing.model.OSMEntityConstructRegistry;
-import com.poc.osm.parsing.model.WayToConstruct;
+import com.poc.osm.parsing.model.PolygonToConstruct;
+import com.poc.osm.parsing.pbf.actors.messages.MessageClusterRegistration;
+import com.poc.osm.parsing.pbf.actors.messages.MessageParsingSystemStatus;
+import com.poc.osm.parsing.pbf.actors.messages.MessagePolygonToConstruct;
 import com.poc.osm.regulation.FlowRegulator;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;
 
-/**
- * Actor constructing Ways
- * 
- * @author pfreydiere
- * 
- */
-public class WayConstructWorkerActor extends MeasuredActor {
+public class RelationPolygonWorkerActor extends MeasuredActor {
 
 	/**
 	 * logger
@@ -47,11 +41,6 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	 */
 	private Set<Long> handledBlocks = new HashSet<Long>();
 
-	/**
-	 * max way to handle by reading
-	 */
-	private long maxWayToConstruct = 80000;
-
 	private enum State {
 		REGISTRATION_PHASE, PROCESSING_PHASE
 	}
@@ -66,31 +55,20 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	 */
 	private ActorRef output;
 
-	/**
-	 * flag for telling we still have ways to resolve and an other file read is
-	 * necessary
-	 */
-	private boolean needMoreRead = true;
-
-	private boolean hasinformed = false;
-
-	private ActorRef wayDispatcher;
-
 	private ActorRef polygonDispatcher;
-	
-	private Counter waysMetrics;
 
-	public WayConstructWorkerActor(ActorRef dispatcher,
-			ActorRef polygonDispatcher,ActorRef outputRef, long maxWaysToConstruct) {
-		this.wayDispatcher = dispatcher;
+	private boolean hasInformed = false;
+
+	private Counter polygonsMetrics;
+
+	public RelationPolygonWorkerActor(ActorRef polygonDispatcher,
+			ActorRef output) {
+
 		this.polygonDispatcher = polygonDispatcher;
-		this.maxWayToConstruct = maxWaysToConstruct;
-		this.output = outputRef;
+		this.output = output;
 
-		log.info("take " + maxWaysToConstruct + " for ways constructions");
-
-		waysMetrics = Metrics.newCounter(FlowRegulator.class, getSelf().path()
-				.name() + " ways number");
+		polygonsMetrics = Metrics.newCounter(FlowRegulator.class, getSelf()
+				.path().name() + " polygons number");
 
 	}
 
@@ -99,15 +77,21 @@ public class WayConstructWorkerActor extends MeasuredActor {
 		super.preStart();
 
 		reg.setEntityConstructListener(new OSMEntityConstructListener() {
+
+			int c = 0;
+
 			@Override
 			public void signalOSMEntity(OSMEntity e) {
-				if (log.isDebugEnabled())
-					log.debug("emit way " + e);
+				if (log.isDebugEnabled()) {
+					log.debug("emit polygon " + e);
+				}
+				if (c++ % 100 == 0) {
+					log.info("" + c + " polygons constructed from relations");
+				}
 
-				// tell the output there is a new constructed way
-				tell(output, new MessageWay(e), getSelf());
-				tell(polygonDispatcher, new MessageWay(e), getSelf());
-				waysMetrics.dec();
+				// tell the output there is a new constructed polygon
+				tell(output, e, getSelf());
+				polygonsMetrics.dec();
 			}
 		});
 	}
@@ -115,13 +99,12 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	@Override
 	public void postStop() throws Exception {
 		reg.setEntityConstructListener(null);
-		
-		if (reg.getEntitiesRegistered() >0)
-		{
-			log.warning("" + reg.getEntitiesRegistered() + " entities are still registered and not finished");
+		if (reg.getEntitiesRegistered() > 0) {
+			log.warning("" + reg.getEntitiesRegistered()
+					+ " entities are still registered and not finished");
 			reg.dumpTS(new OutputStreamWriter(System.out));
 		}
-		
+
 		super.postStop();
 	}
 
@@ -136,16 +119,15 @@ public class WayConstructWorkerActor extends MeasuredActor {
 				if (m == MessageParsingSystemStatus.INITIALIZE) {
 					// launch registration
 
-					tell(wayDispatcher,
-							MessageClusterRegistration.ASK_FOR_WAY_REGISTRATION,
+					tell(polygonDispatcher,
+							MessageClusterRegistration.ASK_FOR_POLYGONCONSTRUCT_REGISTATION,
 							getSelf());
-					
-					currentState = State.PROCESSING_PHASE;
-				}
-				
-				
 
-			}  else {
+					currentState = State.PROCESSING_PHASE;
+
+				}
+
+			} else {
 				unhandled(message);
 			}
 
@@ -153,25 +135,20 @@ public class WayConstructWorkerActor extends MeasuredActor {
 
 			if (message instanceof MessageParsingSystemStatus) {
 
-				if (message == MessageParsingSystemStatus.START_READING_FILE) {
+				if (message == MessageParsingSystemStatus.END_READING_FILE) {
 
-					this.needMoreRead = false;
-					// a read started
-
-					hasinformed = false;
-
-				} else if (message == MessageParsingSystemStatus.END_READING_FILE) {
-
-					if (needMoreRead || (reg.getEntitiesRegistered() > 0)) {
-						tell(wayDispatcher,
+					if (reg.getEntitiesRegistered() > 0) {
+						tell(polygonDispatcher,
 								MessageClusterRegistration.NEED_MORE_READ,
 								getSelf());
-						log.info("I need more read");
+						log.info("I need more read, ");
 					} else {
-						tell(wayDispatcher,
+						tell(polygonDispatcher,
 								MessageClusterRegistration.ALL_BLOCKS_READ,
 								getSelf());
 					}
+
+					hasInformed = false;
 
 				} else if (message == MessageParsingSystemStatus.TERMINATE) {
 
@@ -181,16 +158,14 @@ public class WayConstructWorkerActor extends MeasuredActor {
 					unhandled(message);
 				}
 
-			} else if (message instanceof MessageNodes) {
+			} else if (message instanceof MessageWay) {
 
-				MessageNodes mn = (MessageNodes) message;
-				reg.giveEntity(mn.getNodes());
+				MessageWay mn = (MessageWay) message;
+				reg.giveEntity(Arrays.asList(new OSMEntity[] { mn.getEntity() }));
 
-				needMoreRead = needMoreRead || reg.getEntitiesRegistered() > 0;
+			} else if (message instanceof MessagePolygonToConstruct) {
 
-			} else if (message instanceof MessageWayToConstruct) {
-
-				MessageWayToConstruct mw = (MessageWayToConstruct) message;
+				MessagePolygonToConstruct mw = (MessagePolygonToConstruct) message;
 
 				// if block is already handled, skip it
 				if (handledBlocks.contains(mw.getBlockid())) {
@@ -198,39 +173,30 @@ public class WayConstructWorkerActor extends MeasuredActor {
 					return;
 				}
 
-				needMoreRead = needMoreRead || reg.getEntitiesRegistered() > 0;
-
-				// the block is not already handled,
-				// check if we have room to handle it
-				if (reg.getEntitiesRegistered() > maxWayToConstruct) {
-					if (log.isDebugEnabled())
-						log.debug("too much ways left - handled blocks :"
-								+ handledBlocks.size());
-
-					return;
-				}
-
 				// register the block, and prepare for parsing
-				List<WayToConstruct> waysToConstruct = mw.getWaysToConstruct();
+				List<PolygonToConstruct> waysToConstruct = mw
+						.getWaysToConstruct();
 				for (BaseEntityToConstruct w : waysToConstruct) {
 					reg.register(w);
-					waysMetrics.inc();
+					polygonsMetrics.inc();
 				}
 
-				if (!hasinformed) {
+				if (!hasInformed) {
 					// in case we miss some ways registration,
 					// tell the cluster that we need more reads of the input
 					// file
-					tell(wayDispatcher, MessageClusterRegistration.NEED_MORE_READ,
+					tell(polygonDispatcher,
+							MessageClusterRegistration.NEED_MORE_READ,
 							getSelf());
-					hasinformed = true;
+					hasInformed = true;
 				}
 
 				// the bloc has been handled
 				handledBlocks.add(mw.getBlockid());
 
 				log.info(reg.getEntitiesRegistered()
-						+ " ways registered for actor " + getSelf().path());
+						+ " Polygons relation registered for actor "
+						+ getSelf().path());
 
 			} else {
 				unhandled(message);

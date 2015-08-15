@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors.messages;
+package com.poc.osm.messages;
 
 import java.io.Serializable;
 import java.util.List;

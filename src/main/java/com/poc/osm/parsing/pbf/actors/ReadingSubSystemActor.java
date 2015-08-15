@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors;
+package com.poc.osm.parsing.pbf.actors;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -24,12 +24,11 @@ import akka.event.LoggingAdapter;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.poc.osm.actors.MeasuredActor;
-import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
-import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
-import com.poc.osm.parsing.actors.messages.MessageReadFile;
-import com.poc.osm.parsing.actors.newparse.BlobMessageWithNo;
-import com.poc.osm.parsing.actors.newparse.OSMParser;
-import com.poc.osm.parsing.actors.newparse.OSMParser.VelGetter;
+import com.poc.osm.parsing.pbf.actors.OSMParser.VelGetter;
+import com.poc.osm.parsing.pbf.actors.messages.BlobMessageWithNo;
+import com.poc.osm.parsing.pbf.actors.messages.MessageClusterRegistration;
+import com.poc.osm.parsing.pbf.actors.messages.MessageParsingSystemStatus;
+import com.poc.osm.parsing.pbf.actors.messages.MessageReadFile;
 import com.poc.osm.regulation.MessageRegulatorStatus;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;
@@ -39,7 +38,7 @@ import crosby.binary.Fileformat;
 import crosby.binary.Fileformat.Blob;
 
 /**
- * Actor handling the file handling
+ * Actor handling the file reading
  * 
  * @author pfreydiere
  * 

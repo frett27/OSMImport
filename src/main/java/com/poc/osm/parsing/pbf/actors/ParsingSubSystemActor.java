@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors;
+package com.poc.osm.parsing.pbf.actors;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,8 +10,8 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
 import com.poc.osm.actors.MeasuredActor;
-import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
-import com.poc.osm.parsing.actors.messages.MessageReadFile;
+import com.poc.osm.parsing.pbf.actors.messages.MessageParsingSystemStatus;
+import com.poc.osm.parsing.pbf.actors.messages.MessageReadFile;
 
 public class ParsingSubSystemActor extends MeasuredActor {
 

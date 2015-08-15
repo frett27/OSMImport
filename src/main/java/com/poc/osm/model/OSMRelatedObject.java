@@ -1,5 +1,10 @@
 package com.poc.osm.model;
 
+/**
+ * OSM relation
+ * @author pfreydiere
+ *
+ */
 public class OSMRelatedObject {
 
 	private long relatedId;

@@ -1,12 +1,10 @@
-package com.poc.osm.output.actors;
+package com.poc.osm.actors;
 
 import java.util.List;
 
 import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
-
-import com.poc.osm.actors.MeasuredActor;
 
 /**
  * Load balancing actor,

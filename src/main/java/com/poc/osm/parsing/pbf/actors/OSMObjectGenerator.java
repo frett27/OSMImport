@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors;
+package com.poc.osm.parsing.pbf.actors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,19 +13,19 @@ import akka.event.LoggingAdapter;
 import com.esri.core.geometry.Point;
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
+import com.poc.osm.messages.MessageRelations;
 import com.poc.osm.model.OSMEntity;
 import com.poc.osm.model.OSMEntityGeometry;
 import com.poc.osm.model.OSMEntityPoint;
 import com.poc.osm.model.OSMRelatedObject;
 import com.poc.osm.model.OSMRelation;
-import com.poc.osm.parsing.actors.messages.MessagePolygonToConstruct;
-import com.poc.osm.parsing.actors.messages.MessageRelations;
-import com.poc.osm.parsing.actors.messages.MessageWayToConstruct;
 import com.poc.osm.parsing.model.OSMBlock;
 import com.poc.osm.parsing.model.OSMContext;
 import com.poc.osm.parsing.model.PolygonToConstruct;
 import com.poc.osm.parsing.model.PolygonToConstruct.Role;
 import com.poc.osm.parsing.model.WayToConstruct;
+import com.poc.osm.parsing.pbf.actors.messages.MessagePolygonToConstruct;
+import com.poc.osm.parsing.pbf.actors.messages.MessageWayToConstruct;
 
 import crosby.binary.Osmformat.DenseNodes;
 import crosby.binary.Osmformat.Node;

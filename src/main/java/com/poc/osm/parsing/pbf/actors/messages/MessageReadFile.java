@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors.messages;
+package com.poc.osm.parsing.pbf.actors.messages;
 
 import java.io.File;
 import java.io.Serializable;

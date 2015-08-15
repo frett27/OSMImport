@@ -17,12 +17,12 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+import com.poc.osm.actors.StreamProcessingActor;
 import com.poc.osm.output.GDBReference;
 import com.poc.osm.output.OutCell;
 import com.poc.osm.output.ProcessModel;
 import com.poc.osm.output.Stream;
 import com.poc.osm.output.actors.ChainCompiler;
-import com.poc.osm.output.actors.StreamProcessingActor;
 
 public class TestClusterParsing extends TestCase {
 

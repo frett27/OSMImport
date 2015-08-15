@@ -1,4 +1,4 @@
-package com.poc.osm.output.actors;
+package com.poc.osm.actors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,17 +9,17 @@ import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
+import com.poc.osm.messages.MessageRelations;
 import com.poc.osm.messages.MessageWay;
 import com.poc.osm.model.OSMAttributedEntity;
 import com.poc.osm.model.OSMRelation;
 import com.poc.osm.output.Filter;
 import com.poc.osm.output.Transform;
-import com.poc.osm.parsing.actors.messages.MessageRelations;
 
 /**
- * actor supporting filter and transform operation for an OSMEntity
+ * actor processing a stream of datas
+ * it support filter and transform operation
  * 
  * @author pfreydiere
  * 

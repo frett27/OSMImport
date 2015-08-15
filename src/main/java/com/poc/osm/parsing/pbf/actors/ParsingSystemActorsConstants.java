@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors;
+package com.poc.osm.parsing.pbf.actors;
 
 /**
  * constants for the ParsingSystemActors

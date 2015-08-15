@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors;
+package com.poc.osm.parsing.pbf.actors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -8,7 +8,7 @@ import akka.event.LoggingAdapter;
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageNodes;
 import com.poc.osm.messages.MessageWay;
-import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
+import com.poc.osm.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 
 /**
  * Consolidate the parsing results, and send the result to a node

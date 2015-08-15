@@ -2,6 +2,12 @@ package com.poc.osm.actors;
 
 import akka.dispatch.ControlMessage;
 
+/**
+ * control message for message measure, and regulation
+ * 
+ * @author pfreydiere
+ * 
+ */
 public class AskMetrics implements ControlMessage {
 
 	/**
@@ -13,6 +19,7 @@ public class AskMetrics implements ControlMessage {
 
 	/**
 	 * ask for metrics, with a correlation id
+	 * 
 	 * @param correlationId
 	 */
 	public AskMetrics(long correlationId) {

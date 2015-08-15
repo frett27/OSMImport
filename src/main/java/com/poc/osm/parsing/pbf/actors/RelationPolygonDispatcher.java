@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors;
+package com.poc.osm.parsing.pbf.actors;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,9 +10,9 @@ import akka.event.LoggingAdapter;
 
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.messages.MessageWay;
-import com.poc.osm.parsing.actors.messages.MessageClusterRegistration;
-import com.poc.osm.parsing.actors.messages.MessageParsingSystemStatus;
-import com.poc.osm.parsing.actors.messages.MessagePolygonToConstruct;
+import com.poc.osm.parsing.pbf.actors.messages.MessageClusterRegistration;
+import com.poc.osm.parsing.pbf.actors.messages.MessageParsingSystemStatus;
+import com.poc.osm.parsing.pbf.actors.messages.MessagePolygonToConstruct;
 
 /**
  * construct the polygons

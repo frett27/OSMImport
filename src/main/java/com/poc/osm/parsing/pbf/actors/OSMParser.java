@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors.newparse;
+package com.poc.osm.parsing.pbf.actors;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,6 +12,7 @@ import com.google.protobuf.ByteString;
 import com.poc.osm.actors.MeasuredActor;
 import com.poc.osm.parsing.model.OSMBlock;
 import com.poc.osm.parsing.model.OSMContext;
+import com.poc.osm.parsing.pbf.actors.messages.BlobMessageWithNo;
 
 import crosby.binary.Fileformat;
 import crosby.binary.Osmformat;
@@ -22,7 +23,9 @@ import crosby.binary.Osmformat.Relation;
 import crosby.binary.Osmformat.Way;
 
 /**
- * this class read blocks and follow the block to a parsing actor
+ * this class read blocks of osm entities, 
+ * based on the work of crosby binary parsing, 
+ * simplified.
  * 
  * @author pfreydiere
  * 
@@ -118,6 +121,10 @@ public class OSMParser extends MeasuredActor {
 
 	public OSMContext currentContext;
 
+	/**
+	 * constructor, the digger is the following actor 
+	 * @param digger
+	 */
 	public OSMParser(ActorRef digger) {
 		this.digger = digger;
 

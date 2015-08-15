@@ -6,18 +6,18 @@ import java.util.List;
 import com.poc.osm.model.OSMEntity;
 
 /**
- * Message handling 
+ * Message contaning a list of entity nodes
+ * 
  * @author pfreydiere
- *
+ * 
  */
-public class MessageNodes implements Serializable{
+public class MessageNodes implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 521510126270071270L;
-	
-	
+
 	private List<OSMEntity> nodes;
 
 	public MessageNodes(List<OSMEntity> nodes) {

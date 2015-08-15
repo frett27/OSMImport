@@ -7,6 +7,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+/**
+ * message given the list of pending messages for an actor
+ * @author pfreydiere
+ *
+ */
 public class MessageMetrics implements Serializable {
 
 	private Map<String, Long> allrefs = new HashMap<String, Long>();

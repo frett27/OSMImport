@@ -13,8 +13,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
-import com.poc.osm.output.actors.LBActor;
-import com.poc.osm.output.actors.StreamProcessingActor;
+import com.poc.osm.actors.LBActor;
+import com.poc.osm.actors.StreamProcessingActor;
 import com.poc.osm.output.dsl.UnaryClosureFactory;
 import com.poc.osm.regulation.FlowRegulator;
 import com.poc.osm.regulation.MessageRegulatorRegister;

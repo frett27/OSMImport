@@ -1,4 +1,4 @@
-package com.poc.osm.parsing.actors.newparse;
+package com.poc.osm.parsing.pbf.actors.messages;
 
 import crosby.binary.Fileformat;
 
