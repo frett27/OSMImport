@@ -1,7 +1,7 @@
 package com.osmimport.parsing.model;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.osmimport.model.OSMEntity;
@@ -23,12 +23,12 @@ public abstract class BaseEntityToConstruct {
 	/**
 	 * fields, might be null
 	 */
-	protected HashMap<String, Object> fields;
+	protected Map<String, Object> fields;
 
 	protected long id;
 
 	public BaseEntityToConstruct(long id, long[] refids,
-			HashMap<String, Object> fields) {
+			Map<String, Object> fields) {
 		this.id = id;
 		assert refids != null;
 		this.refids = refids;

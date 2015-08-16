@@ -1,6 +1,8 @@
 package com.osmimport.parsing.pbf.actors;
 
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -184,7 +186,9 @@ public class WayConstructWorkerActor extends MeasuredActor {
 			} else if (message instanceof MessageNodes) {
 
 				MessageNodes mn = (MessageNodes) message;
-				reg.giveEntity(mn.getNodes());
+				ArrayList<OSMEntity> l = new ArrayList<OSMEntity>();
+				l.addAll(mn.getNodes());
+				reg.giveEntity(l);
 
 				needMoreRead = needMoreRead || reg.getEntitiesRegistered() > 0;
 

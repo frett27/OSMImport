@@ -1,31 +1,26 @@
-package com.osmimport.parsing.pbf.actors;
+package com.osmimport.parsing.xml;
 
 import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import scala.concurrent.duration.Duration;
 import akka.actor.ActorRef;
-import akka.actor.Props;
 import akka.dispatch.ControlMessage;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.osmimport.actors.MeasuredActor;
+import com.osmimport.messages.ParsingObjects;
 import com.osmimport.parsing.pbf.actors.OSMParser.VelGetter;
-import com.osmimport.parsing.pbf.actors.messages.BlobMessageWithNo;
+import com.osmimport.parsing.pbf.actors.ReadingSubSystemActor;
 import com.osmimport.parsing.pbf.actors.messages.MessageClusterRegistration;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
@@ -34,28 +29,15 @@ import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.Timer;
 
-import crosby.binary.Fileformat;
-import crosby.binary.Fileformat.Blob;
+public class XMLReadingActor extends MeasuredActor {
 
-/**
- * Actor handling the file reading
- * 
- * @author pfreydiere
- * 
- */
-public class ReadingSubSystemActor extends MeasuredActor {
-
-	private static final String OSM_DATA_HEADER = "OSMData";
-
-	private static final int READ_BUFFER_SIZE = 10000000;
+	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
 	private static final RegulationMessage TICK_FOR_PID_UPDATE = new RegulationMessage();
 
 	private static class RegulationMessage implements ControlMessage {
 
 	}
-
-	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
 	private ActorRef dispatcher;
 
@@ -67,54 +49,26 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 	private Timer timer;
 
-	private BlockingQueue<ActorRef> generators = new LinkedBlockingQueue<ActorRef>();
+	private File currentFile = null;
 
-	/**
-	 * constructor, take the dispatcher and flow regulator
-	 * @param dispatcher
-	 * @param flowRegulator
-	 */
-	public ReadingSubSystemActor(ActorRef dispatcher, ActorRef flowRegulator) {
+	private double currentVel = 100;
 
-		log.debug("starting actor " + getClass().getName());
+	private OSMXmlParsing parser = new OSMXmlParsing();
+
+	private int READ_BUFFER_SIZE = 1000000;
+
+	public XMLReadingActor(ActorRef dispatcher, ActorRef flowRegulator) {
+		assert dispatcher != null;
+		assert flowRegulator != null;
 
 		this.dispatcher = dispatcher;
-
 		this.flowRegulator = flowRegulator;
-
-		int nbOfParsingElementsWorkers = (int) (Runtime.getRuntime()
-				.availableProcessors() * 1.5); // depends on the system core
-												// number
-
-		for (int i = 0; i < nbOfParsingElementsWorkers; i++) {
-
-			ActorRef objectGenerator = getContext().actorOf(
-					Props.create(OSMObjectGenerator.class, dispatcher,
-							flowRegulator));
-
-			ActorRef parser = getContext().actorOf(
-					Props.create(OSMParser.class, objectGenerator));
-
-			generators.add(parser);
-
-		}
 
 		nbofRead = Metrics.newCounter(ReadingSubSystemActor.class,
 				"Number of file read");
 
 		timer = Metrics.newTimer(ReadingSubSystemActor.class, "ReadFile time");
-
 	}
-
-	private enum State {
-		AVAILABLE, RUNNING
-	}
-
-	private State currentState = State.AVAILABLE;
-
-	private File currentFile = null;
-
-	private double currentVel = 100;
 
 	@Override
 	public void preStart() throws Exception {
@@ -126,19 +80,6 @@ public class ReadingSubSystemActor extends MeasuredActor {
 				.scheduleOnce(Duration.create(10, TimeUnit.SECONDS), getSelf(),
 						TICK_FOR_PID_UPDATE, getContext().dispatcher(), null);
 	}
-
-	// ioc for velocity getting in the reader
-	private VelGetter currentVelGetter = new VelGetter() {
-		@Override
-		public double get() {
-			return currentVel;
-		}
-	};
-
-	public void postStop() throws Exception {
-		log.debug("stopping async reading");
-		asyncReading.shutdown();
-	};
 
 	@Override
 	public void onReceive(Object message) throws Exception {
@@ -177,8 +118,6 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 			log.info("start reading file " + mrf.getFileToRead());
 
-			currentState = State.RUNNING;
-
 			readFile(mrf.getFileToRead());
 
 		} else if (message == MessageClusterRegistration.NEED_MORE_READ) {
@@ -207,10 +146,20 @@ public class ReadingSubSystemActor extends MeasuredActor {
 								READ_BUFFER_SIZE);
 						try {
 
-							DataInputStream datinput = new DataInputStream(bfis);
-							while (true) {
-								readChunk(datinput, cpt++);
-							}
+							parser.parseFile(bfis,
+									new ParsingObjectsListener() {
+
+										@Override
+										public void emit(ParsingObjects objects) {
+											regulate();
+											tell(dispatcher, objects,
+													ActorRef.noSender());
+										}
+									}
+
+							);
+							
+							
 
 						} catch (EOFException eof) {
 							// end of the read
@@ -257,54 +206,31 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 	}
 
-	/**
-	 * read data chunk
-	 * 
-	 * @param datinput
-	 * @throws IOException
-	 * @throws InvalidProtocolBufferException
-	 */
-	private void readChunk(DataInputStream datinput, int cpt) throws Exception {
+	private ExecutorService asyncReading = Executors.newSingleThreadExecutor();
 
-		regulate();
+	void readFile(File f) throws Exception {
 
-		int headersize = datinput.readInt();
+		log.info("Read file :" + f);
+		this.currentFile = f;
 
-		byte buf[] = new byte[headersize];
-		datinput.readFully(buf);
+		tell(dispatcher, MessageParsingSystemStatus.START_JOB, getSelf());
 
-		// System.out.format("Read buffer for header of %d bytes\n",buf.length);
-		Fileformat.BlobHeader header = Fileformat.BlobHeader.parseFrom(buf);
-
-		int datasize = header.getDatasize();
-
-		// System.out.println("block type :" + header.getType());
-		// System.out.println("datasize :" + datasize);
-
-		byte b[] = new byte[datasize];
-		datinput.readFully(b);
-
-		Blob blob = Fileformat.Blob.parseFrom(b);
-
-		if (OSM_DATA_HEADER.equals(header.getType())) {
-
-			ActorRef next = generators.take();
-			try {
-				tell(next, new BlobMessageWithNo(blob, cpt),
-						ActorRef.noSender());
-			} finally {
-				generators.add(next);
-			}
-		}
-
+		onReceive(MessageClusterRegistration.NEED_MORE_READ);
 	}
+
+	private VelGetter currentVelGetter = new VelGetter() {
+		@Override
+		public double get() {
+			return currentVel;
+		}
+	};
 
 	/**
 	 * regulate input
 	 */
 	private void regulate() {
 		try {
-		
+
 			double v = currentVelGetter.get();
 			// System.out.println("vel :" + v);
 
@@ -333,18 +259,6 @@ public class ReadingSubSystemActor extends MeasuredActor {
 		} catch (Exception ex) {
 
 		}
-	}
-
-	private ExecutorService asyncReading = Executors.newSingleThreadExecutor();
-
-	void readFile(File f) throws Exception {
-
-		log.info("Read file :" + f);
-		this.currentFile = f;
-
-		tell(dispatcher, MessageParsingSystemStatus.START_JOB, getSelf());
-
-		onReceive(MessageClusterRegistration.NEED_MORE_READ);
 	}
 
 }

@@ -1,14 +1,19 @@
 
-ChangeLog :
+#ChangeLog :
 
-28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
+- 28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
+- 16/08/2015 : version 0.5, bugs fixes
 
+Version 0.5:
+------------
+
+- add XML support for input file
 
 
 Version 0.4:
--------
+------------
 
-- Table support for integrate the result.
+- Table support, relations support.
 
 - Transform can now accept List of entities in result, permitting to fire more than One entity. This permit to create new entities from relations or integrate Entities in more that One FeatureClass.
 
@@ -16,4 +21,8 @@ Version 0.4:
 
 - When a polygon relation contains related ways with outer and inner roles, this will try to create an associated polygon.
 
-- add _long type for fields, this is equivalent to _integer("fieldname", size : 8)
+- Add _long type for fields, this is equivalent to 
+
+	usage : `_long("fieldname")`
+
+	`_integer("fieldname", size : 8)`

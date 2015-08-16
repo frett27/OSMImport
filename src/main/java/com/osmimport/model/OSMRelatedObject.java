@@ -1,7 +1,7 @@
 package com.osmimport.model;
 
 /**
- * OSM relation
+ * OSM role
  * @author pfreydiere
  *
  */
@@ -9,13 +9,13 @@ public class OSMRelatedObject {
 
 	private long relatedId;
 
-	private String relation;
+	private String role;
 
 	private String type;
 
-	public OSMRelatedObject(long relatedId, String relation, String type) {
+	public OSMRelatedObject(long relatedId, String role, String type) {
 		this.relatedId = relatedId;
-		this.relation = relation;
+		this.role = role;
 		this.type = type;
 	}
 
@@ -23,8 +23,8 @@ public class OSMRelatedObject {
 		return type;
 	}
 
-	public String getRelation() {
-		return relation;
+	public String getRole() {
+		return role;
 	}
 
 	public long getRelatedId() {

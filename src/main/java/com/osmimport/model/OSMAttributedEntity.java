@@ -13,9 +13,18 @@ public class OSMAttributedEntity {
 
 	}
 
+	/**
+	 * constructor of the OSMAttributedEntity, by default, make a copy of the
+	 * fields
+	 * 
+	 * @param id
+	 * @param fields
+	 */
 	public OSMAttributedEntity(long id, Map<String, Object> fields) {
 		this.id = id;
 
+		// for safety reasons, we duplicated the fields hash,
+		// safety first, then performance.
 		if (fields != null) {
 			fields = new HashMap<String, Object>(fields);
 		}

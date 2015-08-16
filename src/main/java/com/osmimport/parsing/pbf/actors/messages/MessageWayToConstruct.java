@@ -3,6 +3,7 @@ package com.osmimport.parsing.pbf.actors.messages;
 import java.io.Serializable;
 import java.util.List;
 
+import com.osmimport.messages.ParsingObjects;
 import com.osmimport.parsing.model.WayToConstruct;
 
 /**
@@ -12,7 +13,7 @@ import com.osmimport.parsing.model.WayToConstruct;
  * @author pfreydiere
  *
  */
-public class MessageWayToConstruct implements Serializable {
+public class MessageWayToConstruct implements Serializable, ParsingObjects {
 
 	/**
 	 * 

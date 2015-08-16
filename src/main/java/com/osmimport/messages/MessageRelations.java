@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.osmimport.model.OSMRelation;
 
-public class MessageRelations implements Serializable {
+public class MessageRelations implements Serializable, ParsingObjects {
 
 	private List<OSMRelation> relations;
 

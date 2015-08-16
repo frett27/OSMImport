@@ -2,8 +2,8 @@ package com.osmimport.parsing.model;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
-import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.MultiPath;
 import com.esri.core.geometry.Polygon;
 import com.osmimport.model.OSMEntity;
@@ -18,6 +18,11 @@ import com.osmimport.tools.PolygonCreator;
  */
 public class PolygonToConstruct extends BaseEntityToConstruct implements
 		Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 744578977292873100L;
 
 	public enum Role {
 		OUTER, INNER
@@ -26,8 +31,8 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 	private Role[] idsRole;
 
 	public PolygonToConstruct(long id, long[] refids,
-			HashMap<String, Object> fields, Role[] idsRoles) {
-		super(id, refids, fields);
+			Map<String, Object> currentConstructedFields, Role[] idsRoles) {
+		super(id, refids, currentConstructedFields);
 		this.idsRole = idsRoles;
 
 		assert idsRoles.length == refids.length;
@@ -48,28 +53,35 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 						PolygonCreator.createPolygon(g, idsRole), this.fields);
 
 			} catch (Exception ex) {
-				
-				System.out.println("fail to create polygon for entity " + this.id);
-				ex.printStackTrace();
 
-//				System.out.println(" Dumping faulty Polygon / Polyline :");
-//				for (int j = 0; j < g.length; j++) {
-//					MultiPath p = g[j];
-//					System.out.println("   " + idsRole[j] + " -> " + p.getClass().getSimpleName() + " "
-//							+ GeometryEngine.geometryToJson(4623, p));
-//				}
+				System.err.println("bad polygon "
+						+ this.id);
+				ex.printStackTrace(System.err);
+
+				// System.out.println(" Dumping faulty Polygon / Polyline :");
+				// for (int j = 0; j < g.length; j++) {
+				// MultiPath p = g[j];
+				// System.out.println("   " + idsRole[j] + " -> " +
+				// p.getClass().getSimpleName() + " "
+				// + GeometryEngine.geometryToJson(4623, p));
+				// }
 
 				return fallBackConstructPolygon();
 			}
 
 		} catch (Exception ex) {
-			System.err.println("Fail to create polygon " + this);
+			System.err.println("Exception in creating polygon " + this);
 			ex.printStackTrace(System.err);
 			throw new RuntimeException(ex.getMessage(), ex);
 		}
 
 	}
 
+	/**
+	 * add all the lines in the polygon geometry, as is
+	 * 
+	 * @return
+	 */
 	private OSMEntity fallBackConstructPolygon() {
 		Polygon polygon = new Polygon();
 

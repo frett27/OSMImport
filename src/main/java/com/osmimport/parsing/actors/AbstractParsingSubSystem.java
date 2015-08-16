@@ -1,4 +1,4 @@
-package com.osmimport.parsing.pbf.actors;
+package com.osmimport.parsing.actors;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,22 +10,34 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
 import com.osmimport.actors.MeasuredActor;
+import com.osmimport.parsing.pbf.actors.RelationPolygonDispatcher;
+import com.osmimport.parsing.pbf.actors.RelationPolygonWorkerActor;
+import com.osmimport.parsing.pbf.actors.WayConstructWorkerActor;
+import com.osmimport.parsing.pbf.actors.WayParsingDispatcher;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
 
-public class ParsingSubSystemActor extends MeasuredActor {
+/**
+ * abstract class for defining a parsing sub system, strategy might differ
+ * depending of the file
+ * 
+ * @author pfreydiere
+ * 
+ */
+public abstract class AbstractParsingSubSystem extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+	
+	protected ActorRef reading; // reading actor
 
-	private ActorRef reading;
+	protected ActorRef dispatcher;
 
-	private ActorRef dispatcher;
-
-	private ActorRef polygonDispatcher;
-
-	public ParsingSubSystemActor(ActorRef flowRegulator, ActorRef output) {
-
-		// setTerminal = true;
+	protected ActorRef polygonDispatcher;
+	
+	protected ActorRef flowRegulator;
+	
+	public AbstractParsingSubSystem(ActorRef flowRegulator, ActorRef output) {
+		this.flowRegulator = flowRegulator;
 
 		polygonDispatcher = getContext().actorOf(
 				Props.create(RelationPolygonDispatcher.class, output,
@@ -36,10 +48,8 @@ public class ParsingSubSystemActor extends MeasuredActor {
 						 flowRegulator), "dispatcher");
 
 		// reading actor
-
-		reading = getContext().actorOf(
-				Props.create(ReadingSubSystemActor.class, dispatcher,
-						flowRegulator), "reading");
+		reading = createReadingActor();
+		
 
 		// init the worker for ways
 
@@ -69,9 +79,12 @@ public class ParsingSubSystemActor extends MeasuredActor {
 			tell(worker, MessageParsingSystemStatus.INITIALIZE,
 					ActorRef.noSender());
 		}
-
+		
 	}
-
+	
+	protected abstract ActorRef createReadingActor();
+	
+	
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
@@ -109,4 +122,5 @@ public class ParsingSubSystemActor extends MeasuredActor {
 			unhandled(message);
 		}
 	}
+
 }

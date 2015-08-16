@@ -1,8 +1,8 @@
 
-import com.poc.osm.model.OSMAttributedEntity
-import com.poc.osm.model.OSMEntity
-import com.poc.osm.model.OSMRelatedObject
-import com.poc.osm.model.OSMRelation
+import com.osmimport.model.OSMAttributedEntity
+import com.osmimport.model.OSMEntity
+import com.osmimport.model.OSMRelatedObject
+import com.osmimport.model.OSMRelation
 
 
 // construction de la chaine

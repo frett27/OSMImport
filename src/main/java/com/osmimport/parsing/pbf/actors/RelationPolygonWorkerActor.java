@@ -59,6 +59,9 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 
 	private boolean hasInformed = false;
 
+	/**
+	 * polygon left to construct
+	 */
 	private Counter polygonsMetrics;
 
 	public RelationPolygonWorkerActor(ActorRef polygonDispatcher,
@@ -68,7 +71,7 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 		this.output = output;
 
 		polygonsMetrics = Metrics.newCounter(FlowRegulator.class, getSelf()
-				.path().name() + " polygons number");
+				.path().name() + " polygons number left to construct");
 
 	}
 
@@ -76,6 +79,7 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 	public void preStart() throws Exception {
 		super.preStart();
 
+		// in case some polygon are correctly constructed, this listener is called
 		reg.setEntityConstructListener(new OSMEntityConstructListener() {
 
 			int c = 0;
@@ -175,7 +179,7 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 
 				// register the block, and prepare for parsing
 				List<PolygonToConstruct> waysToConstruct = mw
-						.getWaysToConstruct();
+						.getPolygonsToConstruct();
 				for (BaseEntityToConstruct w : waysToConstruct) {
 					reg.register(w);
 					polygonsMetrics.inc();

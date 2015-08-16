@@ -1,7 +1,7 @@
 package com.osmimport.parsing.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.esri.core.geometry.MultiPath;
 import com.esri.core.geometry.Point;
@@ -25,7 +25,7 @@ public class WayToConstruct extends BaseEntityToConstruct implements Serializabl
 	 *            the list of referenced ids
 	 * @param fields
 	 */
-	public WayToConstruct(long id, long[] refids, HashMap<String, Object> fields) {
+	public WayToConstruct(long id, long[] refids, Map<String, Object> fields) {
 		super(id, refids, fields);
 	}
 

@@ -22,9 +22,10 @@ import com.osmimport.output.actors.ChainCompiler;
 import com.osmimport.output.actors.CompiledTableOutputActor;
 import com.osmimport.output.actors.FieldsCompilerActor;
 import com.osmimport.output.actors.ChainCompiler.ValidateResult;
-import com.osmimport.parsing.pbf.actors.ParsingSubSystemActor;
+import com.osmimport.parsing.pbf.actors.PbfParsingSubSystemActor;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
+import com.osmimport.parsing.xml.XMLParsingSubSystemActor;
 import com.osmimport.regulation.FlowRegulator;
 import com.osmimport.regulation.MessageRegulatorRegister;
 import com.osmimport.tools.Tools;
@@ -44,10 +45,11 @@ public class OSMImport {
 	}
 
 	private Map<String, OpenedGeodatabase> geodatabases;
-	
+
 	private ProcessModel pm;
 
-	public void loadAndCompileScript(File script, Map<String, String> additionalVariables) throws Exception {
+	public void loadAndCompileScript(File script,
+			Map<String, String> additionalVariables) throws Exception {
 		assert script != null;
 		assert script.exists();
 
@@ -63,7 +65,7 @@ public class OSMImport {
 		}
 
 		this.pm = pm;
-		
+
 	}
 
 	private static class OpenedGeodatabase {
@@ -91,7 +93,6 @@ public class OSMImport {
 			GDBReference r = oc.gdb;
 			String path = r.getPath();
 
-			
 			Geodatabase geodatabase;
 
 			if (!g.containsKey(path)) {
@@ -100,7 +101,7 @@ public class OSMImport {
 				OpenedGeodatabase og = new OpenedGeodatabase();
 
 				System.out.println("create geodatabase " + path);
-				
+
 				// create the GDB
 				geodatabase = FGDBJNIWrapper.createGeodatabase(path);
 				og.geodatabase = geodatabase;
@@ -113,11 +114,12 @@ public class OSMImport {
 					Table newTable = geodatabase.createTable(tableDef, "");
 
 					System.out.println("table " + h.getName() + " created");
-					
-					// closing table to be sur the definition is correctly stored
-					
+
+					// closing table to be sur the definition is correctly
+					// stored
+
 					geodatabase.closeTable(newTable);
-					
+
 					System.out.println("open the table " + h.getName());
 
 					newTable = geodatabase.openTable(h.getName());
@@ -125,7 +127,7 @@ public class OSMImport {
 					og.tables.put(h.getName(), newTable);
 
 					System.out.println("successfully created");
-				
+
 				}
 
 				g.put(path, og);
@@ -137,8 +139,6 @@ public class OSMImport {
 		this.geodatabases = g;
 	}
 
-	
-	
 	public void run(File osmInputFile) throws Exception {
 
 		assert pm != null;
@@ -147,14 +147,12 @@ public class OSMImport {
 		Config config = ConfigFactory.load();
 
 		Config osmclusterconfig = config.getConfig("osmcluster");
-		
-		ActorSystem sys = ActorSystem.create("osmcluster",
-				osmclusterconfig);
-		
-		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
-				"output", osmclusterconfig.getLong("eventbuffer"))); 
 
-		
+		ActorSystem sys = ActorSystem.create("osmcluster", osmclusterconfig);
+
+		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
+				"output", osmclusterconfig.getLong("eventbuffer")));
+
 		createGeodatabasesAndTables();
 
 		// for each out, create the output actor
@@ -164,7 +162,6 @@ public class OSMImport {
 			GDBReference r = oc.gdb;
 			String path = r.getPath();
 
-
 			if (!geodatabases.containsKey(path)) {
 				throw new Exception("geodatabase " + path + " not found");
 			}
@@ -172,10 +169,9 @@ public class OSMImport {
 			OpenedGeodatabase openedGeodatabase = geodatabases.get(path);
 
 			Table table = openedGeodatabase.tables.get(oc.tablename);
-			
+
 			if (table == null)
 				throw new Exception("table " + oc.tablename + " not found");
-			
 
 			String keyname = path + "_" + oc.tablename;
 
@@ -186,13 +182,15 @@ public class OSMImport {
 					Props.create(CompiledTableOutputActor.class, table,
 							flowRegulator).withDispatcher("pdisp"),
 					Tools.toActorName("T__" + keyname));
-			flowRegulator.tell(new MessageRegulatorRegister(tableCompiledOutputActor), ActorRef.noSender());
+			flowRegulator.tell(new MessageRegulatorRegister(
+					tableCompiledOutputActor), ActorRef.noSender());
 
-			
 			ActorRef fieldsCompiler = sys.actorOf(
-					Props.create(FieldsCompilerActor.class, table, tableCompiledOutputActor),
-					Tools.toActorName("FC__" + keyname));
-			flowRegulator.tell(new MessageRegulatorRegister(fieldsCompiler), ActorRef.noSender());
+					Props.create(FieldsCompilerActor.class, table,
+							tableCompiledOutputActor), Tools.toActorName("FC__"
+							+ keyname));
+			flowRegulator.tell(new MessageRegulatorRegister(fieldsCompiler),
+					ActorRef.noSender());
 
 			oc._actorRef = fieldsCompiler;
 
@@ -201,17 +199,29 @@ public class OSMImport {
 		pm.computeChildrens();
 		pm.compactAndExtractOthers();
 
-		ActorRef resultActor = pm.getOrCreateActorRef(sys, pm.mainStream, flowRegulator);
-		
-		ActorRef parsingSubSystem = sys.actorOf(Props.create(
-				ParsingSubSystemActor.class, flowRegulator, resultActor));
-		flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem), ActorRef.noSender());
+		ActorRef resultActor = pm.getOrCreateActorRef(sys, pm.mainStream,
+				flowRegulator);
 
+		Class parsingSubSystemClass = XMLParsingSubSystemActor.class;
+
+		String lowerCaseFileName = osmInputFile.getName().toLowerCase();
+		if (lowerCaseFileName.endsWith(".pbf")) {
+			System.out.println("Using pbf parser subsystem");
+			parsingSubSystemClass = PbfParsingSubSystemActor.class;
+		} else {
+			System.out.println("Use xml parsing subsystem");
+		}
+
+		ActorRef parsingSubSystem = sys.actorOf(Props.create(
+				parsingSubSystemClass, flowRegulator, resultActor));
+		flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem),
+				ActorRef.noSender());
 
 		// init the reading
 		parsingSubSystem.tell(MessageParsingSystemStatus.INITIALIZE,
 				ActorRef.noSender());
 
+		// wait a bit
 		Thread.sleep(2000);
 
 		System.out.println("launch the reading");

@@ -3,10 +3,11 @@ package com.osmimport.parsing.pbf.actors.messages;
 import java.io.Serializable;
 import java.util.List;
 
+import com.osmimport.messages.ParsingObjects;
 import com.osmimport.parsing.model.PolygonToConstruct;
 import com.osmimport.parsing.model.WayToConstruct;
 
-public class MessagePolygonToConstruct implements Serializable {
+public class MessagePolygonToConstruct implements Serializable, ParsingObjects {
 
 	/**
 	 * 
@@ -23,7 +24,7 @@ public class MessagePolygonToConstruct implements Serializable {
 		this.polygonToConstruct = polygonToConstruct;
 	}
 
-	public List<PolygonToConstruct> getWaysToConstruct() {
+	public List<PolygonToConstruct> getPolygonsToConstruct() {
 		return polygonToConstruct;
 	}
 

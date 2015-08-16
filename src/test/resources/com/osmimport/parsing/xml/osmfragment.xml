@@ -1,0 +1,86 @@
+ <bounds minlat="45.7614400" minlon="4.8754300" maxlat="45.7658400" maxlon="4.8863300"/>
+ <node id="25932603" visible="true" version="12" changeset="11809463" timestamp="2012-06-05T19:43:54Z" user="LQui" uid="515998" lat="45.7702064" lon="4.8755925">
+  <tag k="highway" v="traffic_signals"/>
+ </node>
+ <node id="54704547" visible="true" version="4" changeset="11019471" timestamp="2012-03-18T14:29:01Z" user="lapinos03" uid="33634" lat="45.7652633" lon="4.8740061">
+  <tag k="highway" v="traffic_signals"/>
+ </node>
+ <node id="55457297" visible="true" version="3" changeset="9516844" timestamp="2011-10-09T20:29:18Z" user="LQui" uid="515998" lat="45.7619763" lon="4.8807647">
+ </node>
+<relation id="3743216" visible="true" version="1" changeset="22336163" timestamp="2014-05-14T15:48:15Z" user="zerpou" uid="1238664">
+  <member type="node" ref="2858196367" role="house"/>
+  <member type="node" ref="2858196395" role="house"/>
+  <member type="node" ref="2858196977" role="house"/>
+  <member type="node" ref="2858197415" role="house"/>
+  <member type="node" ref="2858197420" role="house"/>
+  <member type="node" ref="2858197418" role="house"/>
+  <member type="node" ref="2858196984" role="house"/>
+  <member type="node" ref="2858197409" role="house"/>
+  <member type="node" ref="2858197414" role="house"/>
+  <member type="node" ref="2858196970" role="house"/>
+  <member type="node" ref="2858196917" role="house"/>
+  <member type="node" ref="2858196952" role="house"/>
+  <member type="node" ref="2858196908" role="house"/>
+  <member type="node" ref="2858196384" role="house"/>
+  <member type="node" ref="2858196372" role="house"/>
+  <member type="node" ref="2858196345" role="house"/>
+  <member type="node" ref="2858196332" role="house"/>
+  <member type="node" ref="2858196320" role="house"/>
+  <member type="node" ref="2858196302" role="house"/>
+  <member type="node" ref="2858189838" role="house"/>
+  <member type="node" ref="2858189694" role="house"/>
+  <member type="node" ref="2858189666" role="house"/>
+  <member type="node" ref="2858189384" role="house"/>
+  <member type="node" ref="2858189612" role="house"/>
+  <member type="node" ref="2858189330" role="house"/>
+  <member type="node" ref="2858189083" role="house"/>
+  <member type="node" ref="2858189020" role="house"/>
+  <member type="node" ref="2858188956" role="house"/>
+  <member type="node" ref="2858184093" role="house"/>
+  <member type="node" ref="2858197465" role="house"/>
+  <member type="node" ref="2858196327" role="house"/>
+  <member type="node" ref="2858189614" role="house"/>
+  <member type="node" ref="2858196922" role="house"/>
+  <member type="node" ref="2858196389" role="house"/>
+  <member type="node" ref="2858189396" role="house"/>
+  <member type="node" ref="2858189349" role="house"/>
+  <member type="node" ref="2858189312" role="house"/>
+  <member type="node" ref="2858197490" role="house"/>
+  <member type="node" ref="2858197437" role="house"/>
+  <member type="node" ref="2858189849" role="house"/>
+  <member type="node" ref="2858189806" role="house"/>
+  <member type="node" ref="2858196310" role="house"/>
+  <member type="node" ref="2858196945" role="house"/>
+  <member type="node" ref="2858189680" role="house"/>
+  <member type="node" ref="2858188986" role="house"/>
+  <member type="node" ref="2858188923" role="house"/>
+  <member type="node" ref="2858189641" role="house"/>
+  <member type="node" ref="2858189851" role="house"/>
+  <member type="node" ref="2858196961" role="house"/>
+  <member type="node" ref="2858189628" role="house"/>
+  <member type="node" ref="2858197405" role="house"/>
+  <member type="way" ref="7917431" role="street"/>
+  <member type="way" ref="128930534" role="street"/>
+  <member type="way" ref="128930533" role="street"/>
+  <tag k="name" v="Rue Docteur Rollet"/>
+  <tag k="ref:FR:FANTOIR" v="692661330P"/>
+  <tag k="source" v="Grand Lyon - 10/2011"/>
+  <tag k="type" v="associatedStreet"/>
+ </relation>
+ 
+  <way id="7655231" visible="true" version="5" changeset="13166782" timestamp="2012-09-19T08:28:21Z" user="Neil Dewhurst" uid="162016">
+  <nd ref="208769069"/>
+  <nd ref="208769057"/>
+  <nd ref="208769027"/>
+  <nd ref="208769047"/>
+  <nd ref="208769039"/>
+  <nd ref="1679901306"/>
+  <nd ref="55474973"/>
+  <nd ref="1679901318"/>
+  <nd ref="1679901320"/>
+  <nd ref="1679901328"/>
+  <nd ref="55457276"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="Rue Pascal"/>
+ </way>
+ 

@@ -10,20 +10,17 @@ import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-import com.esri.core.geometry.Point;
 import com.osmimport.actors.MeasuredActor;
 import com.osmimport.messages.MessageNodes;
 import com.osmimport.messages.MessageRelations;
-import com.osmimport.model.OSMEntity;
-import com.osmimport.model.OSMEntityGeometry;
 import com.osmimport.model.OSMEntityPoint;
 import com.osmimport.model.OSMRelatedObject;
 import com.osmimport.model.OSMRelation;
 import com.osmimport.parsing.model.OSMBlock;
 import com.osmimport.parsing.model.OSMContext;
 import com.osmimport.parsing.model.PolygonToConstruct;
-import com.osmimport.parsing.model.WayToConstruct;
 import com.osmimport.parsing.model.PolygonToConstruct.Role;
+import com.osmimport.parsing.model.WayToConstruct;
 import com.osmimport.parsing.pbf.actors.messages.MessagePolygonToConstruct;
 import com.osmimport.parsing.pbf.actors.messages.MessageWayToConstruct;
 
@@ -75,7 +72,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 		}
 
 		
-		List<OSMEntity> allNodes = constructNodesTreeSet(b);
+		List<OSMEntityPoint> allNodes = constructNodesTreeSet(b);
 		if (allNodes != null) {
 			// emit the nodes received ...
 			tell(dispatcher, new MessageNodes(allNodes), getSelf());
@@ -150,10 +147,9 @@ public class OSMObjectGenerator extends MeasuredActor {
 						break;
 					default:
 						String msg = "unknown relation type for object " + id
-								+ " and relation " + rid
-								+ " the object is skipped";
+								+ " and relation " + rid;
 						log.warning(msg);
-						throw new RuntimeException(msg); // FIXME
+						throw new RuntimeException(msg); 
 					}
 
 					if (relatedObjects == null) {
@@ -188,8 +184,16 @@ public class OSMObjectGenerator extends MeasuredActor {
 						polygons = new ArrayList<>();
 					}
 
+					HashMap<String, Object> polyfields = flds;
+					if (polyfields != null)
+					{
+						// clone the attributes
+						polyfields = new HashMap<>();
+						polyfields.putAll(flds);
+					}
+					
 					polygons.add(new PolygonToConstruct(id, Arrays.copyOf(
-							polyRelids, polyCountRel), flds, Arrays.copyOf(
+							polyRelids, polyCountRel), polyfields, Arrays.copyOf(
 							polyRoles, polyCountRel)));
 
 				} 
@@ -243,7 +247,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 				OSMContext ctx = b.getContext();
 
-				HashMap<String, Object> flds = null;
+				Map<String, Object> flds = null;
 
 				for (int i = 0; i < w.getKeysCount(); i++) {
 					String k = ctx.getStringById(w.getKeys(i));
@@ -268,9 +272,9 @@ public class OSMObjectGenerator extends MeasuredActor {
 	/**
 	 * @param b
 	 */
-	protected List<OSMEntity> constructNodesTreeSet(OSMBlock b) {
+	protected List<OSMEntityPoint> constructNodesTreeSet(OSMBlock b) {
 
-		List<OSMEntity> parsedNodes = null;
+		List<OSMEntityPoint> parsedNodes = null;
 
 		OSMContext ctx = b.getContext();
 
@@ -319,9 +323,10 @@ public class OSMObjectGenerator extends MeasuredActor {
 							else
 								System.out.println("error in encoding");
 
-							if (flds == null)
+							if (flds == null) {
 								flds = new HashMap<String, Object>();
-
+							}
+							
 							flds.put(k, v);
 
 							// System.out.println(k + "->" + v);
@@ -332,7 +337,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 				} catch (Exception ex) {
 					System.out.println("error : " + ex.getMessage());
 				}
-				OSMEntity o = new OSMEntityPoint(lastId, ctx.parseLon(lastLon),
+				OSMEntityPoint o = new OSMEntityPoint(lastId, ctx.parseLon(lastLon),
 						ctx.parseLat(lastLat), flds);
 				parsedNodes.add(o);
 
@@ -348,10 +353,6 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 			for (Node thenode : n) {
 
-				Point p = new Point();
-				p.setXY(ctx.parseLon(thenode.getLon()),
-						ctx.parseLat(thenode.getLat()));
-
 				Map<String, Object> fields = null;
 
 				for (int i = 0; i < thenode.getKeysCount(); i++) {
@@ -364,7 +365,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 					fields.put(k, v);
 				}
 
-				OSMEntity o = new OSMEntityGeometry(thenode.getId(), p, fields);
+				OSMEntityPoint o = new OSMEntityPoint(thenode.getId(),ctx.parseLon(thenode.getLon()),
+						ctx.parseLat(thenode.getLat()) ,fields);
 				parsedNodes.add(o);
 
 			}
@@ -381,8 +383,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 	/**
 	 * @return
 	 */
-	protected List<OSMEntity> constructEmptyTreeMap() {
-		return new ArrayList<OSMEntity>();
+	protected List<OSMEntityPoint> constructEmptyTreeMap() {
+		return new ArrayList<OSMEntityPoint>();
 	}
 
 	@Override
