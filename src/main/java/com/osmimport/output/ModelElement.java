@@ -8,7 +8,7 @@ import akka.actor.ActorRef;
  * @author pfreydiere
  * 
  */
-public class ModelElement {
+public abstract class ModelElement {
 
 	public ActorRef _actorRef;
 

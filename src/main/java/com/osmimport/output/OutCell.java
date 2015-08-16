@@ -12,10 +12,19 @@ import akka.actor.ActorRef;
  */
 public class OutCell extends ModelElement {
 
+	/**
+	 * associated upstreams
+	 */
 	public Stream[] streams;
 
+	/**
+	 * reference to the GDB
+	 */
 	public GDBReference gdb;
 
+	/**
+	 * output table name or featureclass
+	 */
 	public String tablename;
 	
 	

@@ -38,6 +38,9 @@ public class Stream extends ModelElement {
 	 */
 	public Transform transform;
 
+	/**
+	 * internal actor reference (when the script is compiled)
+	 */
 	public ActorRef _actor;
 
 	/**

@@ -7,14 +7,31 @@ import java.util.List;
 
 import com.osmimport.model.OSMAttributedEntity;
 
+/**
+ * transform for a groovy closure
+ * 
+ * @author pfreydiere
+ * 
+ */
 public class ClosureTransform extends Transform {
 
+	/**
+	 * current closure
+	 */
 	private Closure current;
 
+	/**
+	 * define the associated closure
+	 * @param c
+	 */
 	public void setClosure(Closure c) {
 		this.current = c;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.osmimport.output.Transform#transform(com.osmimport.model.OSMAttributedEntity)
+	 */
 	@Override
 	public List<OSMAttributedEntity> transform(OSMAttributedEntity e) {
 		assert current != null;
