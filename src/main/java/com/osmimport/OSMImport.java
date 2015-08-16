@@ -115,7 +115,7 @@ public class OSMImport {
 
 					System.out.println("table " + h.getName() + " created");
 
-					// closing table to be sur the definition is correctly
+					// closing table to be sure the definition is correctly
 					// stored
 
 					geodatabase.closeTable(newTable);

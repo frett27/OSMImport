@@ -5,7 +5,7 @@ Yet An Other OSM Import / Formatting OSM data tool
 
 This project aim to provide a command line for filtering / structuring OSM PBF or XML files directly in tables or featureclasses inside a FileGeodatabases (read to use). 
 
-Since October 2014, lots of feedbacks have been implemented in the lastest version. This project **doesn't need a PostGIS database**. This tools works on Windows directly. Except Java, **No additional software needed**. 
+Since October 2014, lots of feedbacks have been implemented in the lastest version. This project **doesn't need a PostGIS database**, **you don't need extensive software stack**. This tools works on Windows directly. Except Java, **No additional software needed**. 
 
 This project use internal actors system and big data principles (streams, no sequencial read) to do the job, proposing a disruptive performance experience. This tool benefit directly from a Muticore machine, 
 
@@ -28,7 +28,9 @@ This project use internal actors system and big data principles (streams, no seq
 - At minimum of 5go of RAM is necessary for a first load
 	- Nota : RAM is used for processing complete ways and polygons, if RAM is not available, subsequent input file read are going to be done and will lead to decrease performances.
 
-a typical 32 Gb or RAM permit to handle France territory in a nice timeframe. (let us know your benchmarks)
+A typical 32 Gb or RAM permit to handle France territory in a nice timeframe. (let us know your benchmarks)
+
+- The tool only support WGS84 coordinate system for the moment as the osm datas use this coordinate system and it is quite easy to reproject thoses in an other coordinate system afterward.
 
 
 #Benchmarks
