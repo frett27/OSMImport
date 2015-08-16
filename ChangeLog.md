@@ -9,6 +9,10 @@ Version 0.5:
 
 - add XML support for input file
 
+breaking change : 
+
+- the com.poc.osm has been renamed to com.osmimport
+
 
 Version 0.4:
 ------------

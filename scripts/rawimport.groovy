@@ -52,7 +52,7 @@ builder.build(osmstream) {
 				OSMAttributedEntity ro = new OSMAttributedEntity(e.id, e.fields);
 				ro.setValue("id", e.id);
 				ro.setValue("rid", related.relatedId);
-				ro.setValue('role', related.relation);
+				ro.setValue('role', related.role);
 				ro.setValue('type', related.type);
 				
 				r.add(ro)

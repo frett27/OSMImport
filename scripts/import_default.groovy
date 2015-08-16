@@ -1,7 +1,7 @@
 import com.esri.core.geometry.Geometry;
-import com.poc.osm.model.OSMEntity;
-import com.poc.osm.output.Filter;
-import com.poc.osm.output.Transform;
+import com.osmimport.model.OSMEntity;
+import com.osmimport.output.Filter;
+import com.osmimport.output.Transform;
 
 import groovy.util.XmlSlurper;
 
