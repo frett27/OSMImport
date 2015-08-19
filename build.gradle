@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+apply plugin: 'distribution'
 
 group = 'osmtools'
 version = '0.5-SNAPSHOT'
@@ -88,10 +89,7 @@ task fatJar(type: Jar) {
     with jar
 }
 
-task copyToLib(type: Copy) {
-    into "$buildDir/output/lib"
-    from configurations.runtime
-}
+
 
 configurations.all {
 
@@ -101,4 +99,39 @@ configurations.all {
 		
 	}
 }	
-	
+
+
+
+distributions {
+    main {
+        baseName = "osmimport"
+        contents {
+            with copySpec {
+                from ( "$buildDir/libs" )
+                {
+                    include "*.jar"
+                }
+            } 
+            
+            with copySpec {
+                if (System.getProperty("file.separator") == "/") {
+                    from { "src/main/distscript/nix" }
+                } else {
+                    from { "src/main/distscript/windows" }
+                }
+            }
+             
+            with copySpec{
+                // include the jre in the build
+                def jrePath = new File(System.getProperty("java.home"))
+                from { jrePath }
+                into { 'jre' }
+            } 
+        }
+
+    }
+
+}
+
+distZip.dependsOn fatJar
+
