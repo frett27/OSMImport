@@ -1,8 +1,8 @@
 import com.esri.core.geometry.Geometry
 import com.esri.core.geometry.MultiPath
 import com.esri.core.geometry.Polygon
-import com.poc.osm.model.OSMEntity
-import com.poc.osm.model.OSMEntityGeometry
+import com.osmimport.model.OSMEntity
+import com.osmimport.model.OSMEntityGeometry
 
 
 // construction de la chaine
