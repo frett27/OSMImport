@@ -48,17 +48,17 @@ public class CLI {
 
 		GnuParser p = new GnuParser();
 		Options options = new Options();
-		Option input = OptionBuilder.withArgName("inputpbf").hasArg()
-				.withLongOpt("inputpbf").isRequired()
-				.withDescription("input PBF OSM file").create('i');
+		Option input = OptionBuilder.withArgName("input").hasArg()
+				.withLongOpt("input").isRequired()
+				.withDescription("input PBF or OSM file").create('i');
 
 		Option script = OptionBuilder.withArgName("streams").hasArg()
 				.withLongOpt("streams").isRequired()
-				.withDescription("script file describing the streams filtering and transformation")
+				.withDescription("script file describing the filtering and transformations")
 				.create('s');
 
 		Option variables = OptionBuilder.withArgName("var").hasArg()
-				.withDescription("variable").withValueSeparator(',').create('v');
+				.withDescription("additional variables definition that are mapped into var[name] in the script").withValueSeparator(',').create('v');
 
 		options.addOption(input);
 		options.addOption(script);
@@ -66,15 +66,15 @@ public class CLI {
 		
 		Map<String,String> variableMap = new HashMap<>();
 		
-		File inputpbffile = null;
+		File inputpbfosmfile = null;
 		File sf = null;
 		try {
 			CommandLine c = p.parse(options, args);
 
 			String inputfile = c.getOptionValue('i');
-			inputpbffile = new File(inputfile);
-			if (!inputpbffile.exists())
-				throw new Exception("" + inputpbffile + " doesn't exist");
+			inputpbfosmfile = new File(inputfile);
+			if (!inputpbfosmfile.exists())
+				throw new Exception("" + inputpbfosmfile + " doesn't exist");
 
 			String streamfile = c.getOptionValue('s');
 			sf = new File(streamfile);
@@ -100,8 +100,6 @@ public class CLI {
 						}
 					}
 				}
-				
-				
 			}
 			
 			
@@ -116,7 +114,7 @@ public class CLI {
 		// load and compile script to be sure there are no errors in it
 		osmImport.loadAndCompileScript(sf, variableMap);
 
-		osmImport.run(inputpbffile);
+		osmImport.run(inputpbfosmfile);
 
 	}
 }

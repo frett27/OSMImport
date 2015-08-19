@@ -2,16 +2,16 @@
 #ChangeLog :
 
 - 28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
-- 16/08/2015 : version 0.5, bugs fixes
+- 16/08/2015 : version 0.5,add XML/OSM file support, bugs fixes
 
 Version 0.5:
 ------------
 
-- add XML support for input file
+- add XML support for input file (not as performant as PBF, for the moment, simple implementation for testing scripts with small datasets)
 
 breaking change : 
 
-- the com.poc.osm has been renamed to com.osmimport
+- the com.poc.osm package has been renamed to com.osmimport
 
 
 Version 0.4:

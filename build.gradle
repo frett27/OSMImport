@@ -79,7 +79,7 @@ task fatJar(type: Jar) {
 	manifest {
         attributes 'Implementation-Title': 'OSM Import',  
         	'Implementation-Version': version,
-        	'Main-Class': 'com.poc.osm.CLI'
+        	'Main-Class': 'com.osmimport.CLI'
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it).matching {
