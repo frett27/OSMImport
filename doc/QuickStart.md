@@ -8,6 +8,13 @@ This documentation explain how to use the OSMImport project to create tables / f
 
 download the install bundle and put it in a directory of your choice.
 
+Version _0.5-SNAPSHOT_  
+
+**Windows 64 bits** - 
+[osmimport-0.5-SNAPSHOT.zip](https://s3-eu-west-1.amazonaws.com/osmimport-cli/osmimport-0.5-SNAPSHOT.zip)
+
+**Linux 64 bits** - TBD
+
 
 ##Download PBF or OSM located datas
 
