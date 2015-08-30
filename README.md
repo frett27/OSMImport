@@ -42,13 +42,16 @@ A typical 32 Gb or RAM permit to handle France territory in a very nice timefram
 
 #Download and install - Next actions
 
-Take a tour at [5 mins setup guide](doc/QuickStart.md)
+Take a tour at [5 mins setup guide](doc/QuickStart.md) to launch your first command line.
 
-[How to write Scripts](doc/WritingAScript.md)
+[How to write Scripts](doc/WritingAScript.md) explain how to customize or configure your scripts for your usage.
 
 
-[Existing Scripts folder](scripts)
+[Existing Scripts folder](scripts) contains a bunch of existing scripts for already configured OSM transformation and filtering
 
+other documentations can be found in the [doc](doc) folder
+
+don't hesitate to send pull requests or return of experience.
 
 
 #Contributions
