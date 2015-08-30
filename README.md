@@ -1,6 +1,10 @@
 OSMImport
 =========
 
+_Patrice Freydiere - 2015_
+
+---
+
 Yet An Other OSM Import / Formatting OSM data tool
 
 This project aim to provide a simple **optimized command line for filtering / GIS structuring OSM PBF or OSM XML files**. The result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). 
