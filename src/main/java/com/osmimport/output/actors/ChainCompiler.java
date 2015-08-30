@@ -44,12 +44,13 @@ public class ChainCompiler {
 			throws Exception {
 
 		assert processFile != null;
+		assert processFile.exists();
 		
 		CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
 
 		// custom imports for ease the use of the geometry types
 		ImportCustomizer icz = new ImportCustomizer();
-		icz.addStarImports("com.osmimport", "com.esri.core.geometry");
+		icz.addStarImports("com.osmimport", "com.esri.core.geometry", "com.osmimport.model");
 		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
 				"ESRI_GEOMETRY_POINT");
 		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
@@ -64,8 +65,15 @@ public class ChainCompiler {
 
 		compilerConfiguration.addCompilationCustomizers(icz);
 
-		GroovyScriptEngine gse = new GroovyScriptEngine(new URL[] { processFile
-				.getParentFile().toURL() });
+		File parentFile = processFile
+				.getParentFile();
+		
+		if (parentFile == null)
+		{
+			parentFile = new File("."); // fix, the file is null when a name is directly passed
+		}
+		
+		GroovyScriptEngine gse = new GroovyScriptEngine(new URL[] { parentFile.toURL() });
 		gse.setConfig(compilerConfiguration);
 		Binding binding = new Binding();
 		binding.setVariable("builder", new TBuilder());

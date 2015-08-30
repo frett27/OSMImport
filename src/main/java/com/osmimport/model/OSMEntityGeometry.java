@@ -33,6 +33,7 @@ public class OSMEntityGeometry extends OSMEntity {
 	
 	public OSMEntityGeometry(long id, Geometry g, Map<String, Object> fields) {
 		super(id, fields);
+		assert g != null;
 		this.geom = g;
 		this.type = g.getType();
 	}
