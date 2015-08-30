@@ -6,17 +6,27 @@ This documentation explain how to use the OSMImport project to create tables / f
 
 ## 5 Mins Startup
 
-download the install bundle in a directory.
+download the install bundle and put it in a directory of your choice.
+
+
+##Download PBF or OSM located datas
+
+if you dont have PBF or OSM file, you can download them at : [http://www.geofabrik.de/data/download.html](http://www.geofabrik.de/data/download.html) . geofabrik provide daily extraction of OSM datas in PBF or OSM (xml) files.
+
+##Choose an already existed script
+
+Existing scripts are located in the script folder
+
+##Run the commandline
 
 Place the OSM (PBF/XML) datafile and the script file, in a folder and run :
 
-
-	java -Xmx6g -ea -server -jar osmtoolsreader-all-0.3.jar -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
+	osmimport -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
 
 the output files are placed in the location defined in the stream file (the -s option).
 
 
-##Command line arguments
+##Command line parameters
 
 	
 	usage: osmimport
@@ -24,13 +34,17 @@ the output files are placed in the location defined in the stream file (the -s o
 	 -s,--streams <streams>     script file describing the streams
 	 -v <var>                   variable definition
 
+some scripts may have variable defined (for output gdb path, or other refinements), look at the script for mandatory variables.
+
+this article ([UsingVariable.md](UsingVariable.md)) explain in details how to use variable from command line.
 
 
-##Example of a script , that take only the geometries of points and lines that have keys and values.
+
+##Sample script , takes points and lines geometries with keys and values attached.
 
 
 	import com.esri.core.geometry.Geometry;
-	import com.poc.osm.model.OSMEntity;
+	import com.osmimport.model.OSMEntity;
 	
 	
 	// construct the processing graph

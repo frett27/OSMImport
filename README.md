@@ -57,6 +57,11 @@ other documentations can be found in the [doc](doc) folder
 
 don't hesitate to send pull requests or return of experience.
 
+#Ready to use scripts :
+
+- Buildings
+- Streets
+
 
 #Contributions
 
