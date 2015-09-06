@@ -57,7 +57,7 @@ public class FieldFactory extends AbstractFactory {
 			throw new InstantiationException("field type :" + name + " unknown");
 		}
 
-		return null; // handled
+		return builder; // handled
 		
 	}
 
