@@ -202,7 +202,7 @@ public class OSMImport {
 						TableOutputStream c = new TableOutputStream();
 						c.table = t;
 
-						File outFile = new File(folder, oc.tablename + ".csv");
+						File outFile = new File(folder, t.getName() + ".csv");
 
 						OutputStream fs = new BufferedOutputStream(
 								new FileOutputStream(outFile));
