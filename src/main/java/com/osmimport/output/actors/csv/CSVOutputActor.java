@@ -4,9 +4,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
 
-import sun.misc.BASE64Encoder;
 import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
@@ -16,9 +14,6 @@ import com.esri.core.geometry.GeometryEngine;
 import com.osmimport.actors.MeasuredActor;
 import com.osmimport.model.OSMAttributedEntity;
 import com.osmimport.model.OSMEntity;
-import com.osmimport.output.actors.gdb.messages.CompiledFieldsMessage;
-import com.osmimport.output.fields.AbstractFieldSetter;
-import com.osmimport.output.fields.GeometryFieldSetter;
 import com.osmimport.output.model.Field;
 import com.osmimport.output.model.FieldType;
 import com.osmimport.output.model.Table;
@@ -121,7 +116,7 @@ public class CSVOutputActor extends MeasuredActor {
 				Geometry geometry = ((OSMEntity) osme).getGeometry();
 				if (geometry != null) {
 					byte[] b = GeometryEngine.geometryToEsriShape(geometry);
-					curValue = Base64.encode(b);
+					curValue = Base64.encode(b).replaceAll("\n", "");
 				}
 
 			} else {
@@ -149,10 +144,9 @@ public class CSVOutputActor extends MeasuredActor {
 
 		} // for
 
-		if (sb.length() > 0) {
-			log.error("error on entity :" + osme.getId() + " :" + sb.toString());
-		}
-
+		// cr
+		sb.append('\n');
+		
 		// write line
 		outputStreamWriter.write(sb.toString());
 

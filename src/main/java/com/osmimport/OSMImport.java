@@ -249,7 +249,9 @@ public class OSMImport {
 		List<Field> allFields = t.getFields();
 		assert allFields != null;
 		for (Field f : allFields) {
-			if (f.getType() == FieldType.INTEGER) {
+			if (f.getType() == FieldType.GEOMETRY) {
+				// skipped because it is always added
+			} else if (f.getType() == FieldType.INTEGER) {
 				th.addIntegerField(f.getName());
 			} else if (f.getType() == FieldType.LONG) {
 				th.addLongField(f.getName());

@@ -14,6 +14,10 @@ public class FeatureClass extends Table {
 		this.geomType = geomType;
 		assert srs != null;
 		this.srs = srs;
+
+		// add geometry field
+		addField(new Field("shape", FieldType.GEOMETRY, null));
+
 	}
 
 	public EsriGeometryType getGeomType() {

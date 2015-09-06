@@ -7,7 +7,7 @@ rational :
 
 On the command line the '-v' option permit to define some variables that will be defined in the scrippt prefixed by "var_" to avoid naming collision :
 
-    osmimport -i [pbf file] -s [script path] -v "variable1=content" -v "variable2=othervalue" -v .... -v ...
+    osmimport -i [.pbf or .osm file] -s [script path] -v "variable1=content" -v "variable2=othervalue" -v .... -v ...
 
 multiple variables can be passed in repeating the -v option. All variable definition must be enclosed by quotes and defined using a "=" sign.
 

@@ -3,6 +3,24 @@
 
 - 28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
 - 16/08/2015 : version 0.5,add XML/OSM file support, bugs fixes
+- 06/09/2015 : version 0.6, add csv output, using base64 shape encoded geometries
+
+Version 0.6:
+------------
+- add output in csv for table/feature class, permit to use this tool with big data stacks
+
+incompatible changes :
+  
+  as the output is not only a GDB, out "gdb" property is renamed "sink" 
+
+before :
+	out(streams : [b], gdb : sortie, tablename:"streets")
+since 0.6 version:
+	out(streams : [b], sink : sortie, tablename:"streets")
+
+
+    - use
+
 
 Version 0.5:
 ------------

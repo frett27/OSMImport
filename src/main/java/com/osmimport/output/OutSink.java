@@ -20,6 +20,10 @@ public abstract class OutSink {
 	public String getPath() {
 		return path;
 	}
+	
+	public void setPath(String path) {
+		this.path = path;
+	}
 
 	public void addTable(Table t) {
 		tables.put(t.getName(), t);

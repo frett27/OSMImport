@@ -100,8 +100,8 @@ this article ([UsingVariable.md](UsingVariable.md)) explain in details how to us
 	
 		}
 		// flux de sortie
-		out(streams : t, gdb : sortie, tablename:"pts")
-		out(streams : l, gdb : sortie, tablename:"lines")
+		out(streams : t, sink: sortie, tablename:"pts")
+		out(streams : l, sink: sortie, tablename:"lines")
 	
 	
 	}
