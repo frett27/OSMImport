@@ -55,9 +55,8 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 		final long nbofworkers = Runtime.getRuntime().availableProcessors();
 
 		final long maxwaysToConstruct = (long) ((Runtime.getRuntime()
-				.maxMemory() * 1.0 - 4_000_000_000.0)
-				/ 2_000_000_000.0
-				* 60_000 * nbofworkers / 4.0);
+				.maxMemory() * 1.0 - 3_000_000_000.0) / ( 1_000_000_000.0 ) * 240_000 / nbofworkers);
+				   
 
 		for (int i = 0; i < nbofworkers; i++) {
 			ActorRef worker = getContext().actorOf(

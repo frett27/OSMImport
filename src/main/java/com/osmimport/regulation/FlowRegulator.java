@@ -92,8 +92,8 @@ public class FlowRegulator extends MeasuredActor {
 
 			}
 
-			if (cpt++ % 10 == 0) {
-				log.info("new computed velocity :" + vel + "(" + c
+			if (cpt++ % 100 == 0) {
+				log.info("current read velocity :" + vel + "(" + c
 						+ " elements)");
 				// consolidateAllMessages().dump();
 			}

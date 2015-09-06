@@ -22,7 +22,7 @@ All directives are placed in a builder.build section,
 
 ###Defining the output table / featureclass model
 
-inside the *declarative part*, the output model is **defined** using the **gdb directive**.
+inside the *declarative part*, the output model is **defined** using the **gdb or csv directive**.
 
 
 		// 
@@ -106,8 +106,8 @@ OSM entities passed have the following properties :
 The last part of the directives, is the "**out**" directive. This directive permit to define the mapping between the "fgdb model" and streams.
 
 		// flux de sortie
-		out(streams : t, gdb : sortie, tablename:"pts")
-		out(streams : l, gdb : sortie, tablename:"lines")
+		out(streams : t, sink : sortie, tablename:"pts")
+		out(streams : l, sink : sortie, tablename:"lines")
 	
 in the following example, the variable "t" containing a stream will be sinked to table/featureclass "pts" of the "sortie" gdb.
 

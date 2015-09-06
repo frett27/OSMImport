@@ -32,7 +32,6 @@ public class FieldFactory extends AbstractFactory {
 			}
 			b.currentTable.addStringField((String) value, size);
 
-			return null;
 
 		} else if ("_integer".equals(name)) {
 			int size = 4;
@@ -43,25 +42,23 @@ public class FieldFactory extends AbstractFactory {
 
 			b.currentTable.addIntegerField((String) value);
 
-			return null;
 
 		} else if ("_long".equals(name)) {
 
 			b.currentTable.addLongField((String) value);
-
-			return null;
 			
 			
 		} else if ("_double".equals(name)) {
 
 			b.currentTable.addDoubleField((String) value);
 
-			return null;
 
 		} else {
 			throw new InstantiationException("field type :" + name + " unknown");
 		}
 
+		return true; // handled
+		
 	}
 
 }

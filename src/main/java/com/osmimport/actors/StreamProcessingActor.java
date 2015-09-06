@@ -117,8 +117,8 @@ public class StreamProcessingActor extends MeasuredActor {
 			}
 			
 			handledOuput++;
-			if (handledOuput % 100000 == 0) {
-				log.info("" + handledOuput + " entity handled by actor "
+			if (log.isDebugEnabled() &&  handledOuput % 100000 == 0) {
+				log.debug("" + handledOuput + " entity handled by actor "
 						+ getSelf().path());
 			}
 
