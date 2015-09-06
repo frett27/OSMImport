@@ -5,6 +5,8 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Base64;
+
 import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
@@ -17,7 +19,6 @@ import com.osmimport.model.OSMEntity;
 import com.osmimport.output.model.Field;
 import com.osmimport.output.model.FieldType;
 import com.osmimport.output.model.Table;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
  * output into CSV fole for a table
@@ -115,7 +116,7 @@ public class CSVOutputActor extends MeasuredActor {
 				Geometry geometry = ((OSMEntity) osme).getGeometry();
 				if (geometry != null) {
 					byte[] b = GeometryEngine.geometryToEsriShape(geometry);
-					curValue = Base64.encode(b).replaceAll("\n", "");
+					curValue = Base64.encodeBase64String(b).replaceAll("\n", "");
 				}
 
 			} else {
