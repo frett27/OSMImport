@@ -153,7 +153,7 @@ public class OSMImport {
 					og.geodatabase = geodatabase;
 					for (Table t : r.listTables()) {
 
-						TableHelper h = convertTable(t);
+						TableHelper h = Tools.convertTable(t);
 
 						String tableDef = h.buildAsString();
 						System.out.println("creating table " + h.getName()
@@ -229,44 +229,7 @@ public class OSMImport {
 		this.outDestinations = g;
 	}
 
-	private TableHelper convertTable(Table t) throws Exception {
-		assert t != null;
-		TableHelper th = null;
-		if (t instanceof FeatureClass) {
-
-			FeatureClass fct = (FeatureClass) t;
-			if (!"WGS84".equals(fct.getSrs()))
-				throw new InstantiationException(
-						"only WGS84 SRS is supported for the moment");
-
-			th = TableHelper.newFeatureClass(fct.getName(), fct.getGeomType(),
-					TableHelper.constructW84SpatialReference());
-
-		} else {
-			th = TableHelper.newTable(t.getName());
-		}
-
-		List<Field> allFields = t.getFields();
-		assert allFields != null;
-		for (Field f : allFields) {
-			if (f.getType() == FieldType.GEOMETRY) {
-				// skipped because it is always added
-			} else if (f.getType() == FieldType.INTEGER) {
-				th.addIntegerField(f.getName());
-			} else if (f.getType() == FieldType.LONG) {
-				th.addLongField(f.getName());
-			} else if (f.getType() == FieldType.STRING) {
-				th.addStringField(f.getName(), f.getLength());
-			} else if (f.getType() == FieldType.DOUBLE) {
-				th.addDoubleField(f.getName());
-			} else {
-				throw new Exception("field type " + f.getName()
-						+ " unsupported");
-			}
-		}
-
-		return th;
-	}
+	
 
 	/**
 	 * main procedure
@@ -286,8 +249,12 @@ public class OSMImport {
 
 		ActorSystem sys = ActorSystem.create("osmcluster", osmclusterconfig);
 
+		long eventbuffer = osmclusterconfig.getLong("eventbuffer");
+		// scale for the number of available processors
+		eventbuffer = eventbuffer * Runtime.getRuntime().availableProcessors() / 4;
+		
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
-				"output", osmclusterconfig.getLong("eventbuffer")));
+				"output", eventbuffer));
 
 		openOutputDestinations();
 

@@ -235,7 +235,7 @@ public class ProcessModel {
 
 		List<ActorRef> actors = new ArrayList<ActorRef>();
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
 			// create the stream processing actor
 
 			Filter f = ss.filter;

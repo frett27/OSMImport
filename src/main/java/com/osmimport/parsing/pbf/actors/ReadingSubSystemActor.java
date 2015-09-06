@@ -7,12 +7,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import scala.concurrent.duration.Duration;
@@ -67,10 +66,11 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 	private Timer timer;
 
-	private BlockingQueue<ActorRef> generators = new LinkedBlockingQueue<ActorRef>();
+	private ArrayList<ActorRef> generators = new ArrayList<ActorRef>();
 
 	/**
 	 * constructor, take the dispatcher and flow regulator
+	 * 
 	 * @param dispatcher
 	 * @param flowRegulator
 	 */
@@ -288,13 +288,11 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 		if (OSM_DATA_HEADER.equals(header.getType())) {
 
-			ActorRef next = generators.take();
-			try {
-				tell(next, new BlobMessageWithNo(blob, cpt),
-						ActorRef.noSender());
-			} finally {
-				generators.add(next);
-			}
+			ActorRef next = generators.get((int) Math.random()
+					* generators.size());
+
+			tell(next, new BlobMessageWithNo(blob, cpt), ActorRef.noSender());
+
 		}
 
 	}
@@ -304,7 +302,7 @@ public class ReadingSubSystemActor extends MeasuredActor {
 	 */
 	private void regulate() {
 		try {
-		
+
 			double v = currentVelGetter.get();
 			// System.out.println("vel :" + v);
 

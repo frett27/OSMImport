@@ -97,11 +97,7 @@ public class StreamProcessingActor extends MeasuredActor {
 
 		OSMAttributedEntity e = (OSMAttributedEntity) message;
 
-		handledOuput++;
-		if (handledOuput % 100000 == 0) {
-			log.info("" + handledOuput + " entity handled by actor "
-					+ getSelf().path());
-		}
+		
 
 		try {
 			if (filter != null) {
@@ -118,6 +114,12 @@ public class StreamProcessingActor extends MeasuredActor {
 					}
 					return;
 				}
+			}
+			
+			handledOuput++;
+			if (handledOuput % 100000 == 0) {
+				log.info("" + handledOuput + " entity handled by actor "
+						+ getSelf().path());
 			}
 
 			List<OSMAttributedEntity> l = null;

@@ -27,15 +27,15 @@ import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
 public abstract class AbstractParsingSubSystem extends MeasuredActor {
 
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-	
+
 	protected ActorRef reading; // reading actor
 
 	protected ActorRef dispatcher;
 
 	protected ActorRef polygonDispatcher;
-	
+
 	protected ActorRef flowRegulator;
-	
+
 	public AbstractParsingSubSystem(ActorRef flowRegulator, ActorRef output) {
 		this.flowRegulator = flowRegulator;
 
@@ -44,24 +44,26 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 						flowRegulator), "polygon_dispatcher");
 
 		dispatcher = getContext().actorOf(
-				Props.create(WayParsingDispatcher.class,output, polygonDispatcher,
-						 flowRegulator), "dispatcher");
+				Props.create(WayParsingDispatcher.class, output,
+						polygonDispatcher, flowRegulator), "dispatcher");
 
 		// reading actor
 		reading = createReadingActor();
-		
 
 		// init the worker for ways
 
-		final long nbofworkers = 5;
+		final long nbofworkers = Runtime.getRuntime().availableProcessors();
 
 		final long maxwaysToConstruct = (long) ((Runtime.getRuntime()
-				.maxMemory() * 1.0 - 3_000_000_000.0) / 2_000_000_000.0 * 80_000 * nbofworkers);
+				.maxMemory() * 1.0 - 4_000_000_000.0)
+				/ 2_000_000_000.0
+				* 60_000 * nbofworkers / 4.0);
 
 		for (int i = 0; i < nbofworkers; i++) {
 			ActorRef worker = getContext().actorOf(
-					Props.create(WayConstructWorkerActor.class, dispatcher,polygonDispatcher,output,
-							maxwaysToConstruct / nbofworkers), "worker_" + i);
+					Props.create(WayConstructWorkerActor.class, dispatcher,
+							polygonDispatcher, output, maxwaysToConstruct
+									/ nbofworkers), "worker_" + i);
 
 			// initialize the worker
 			tell(worker, MessageParsingSystemStatus.INITIALIZE,
@@ -70,7 +72,7 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 		}
 
 		// init the works for polygons
-		
+
 		for (int i = 0; i < nbofworkers; i++) {
 			ActorRef worker = getContext().actorOf(
 					Props.create(RelationPolygonWorkerActor.class,
@@ -79,12 +81,11 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 			tell(worker, MessageParsingSystemStatus.INITIALIZE,
 					ActorRef.noSender());
 		}
-		
+
 	}
-	
+
 	protected abstract ActorRef createReadingActor();
-	
-	
+
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
