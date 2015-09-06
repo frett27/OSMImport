@@ -3,14 +3,13 @@ package com.osmimport.output.dsl;
 import groovy.util.AbstractFactory;
 import groovy.util.FactoryBuilderSupport;
 
-import java.util.List;
 import java.util.Map;
 
 import org.fgdbapi.thindriver.TableHelper;
-import org.fgdbapi.thindriver.xml.EsriGeometryType;
 
 import com.osmimport.output.GDBReference;
-import com.osmimport.output.dsl.TBuilder;
+import com.osmimport.output.OutSink;
+import com.osmimport.output.model.Table;
 
 /**
  * Table factory
@@ -20,33 +19,36 @@ public class TableFactory extends AbstractFactory {
 	public Object newInstance(FactoryBuilderSupport builder, Object name,
 			Object value, Map attributes) throws InstantiationException,
 			IllegalAccessException {
-		
+
 		System.out.println("TableFactory");
 
 		assert value instanceof String;
 
 		TBuilder tb = (TBuilder) builder;
-		tb.currentTableHelper = TableHelper.newTable((String)value);
+		tb.currentTable = new Table((String) value);
 
-		return tb.currentTableHelper;
+		return tb.currentTable;
 	}
-	
+
 	@Override
 	public void onNodeCompleted(FactoryBuilderSupport builder, Object parent,
 			Object node) {
-		
+
 		// attach the table to the gdb
-				assert node instanceof TableHelper;
+		assert node instanceof Table;
 
-				TableHelper th = (TableHelper) node;
+		Table table = (Table) node;
 
-				if (parent != null && parent instanceof GDBReference) {
-					GDBReference r = (GDBReference) parent;
-					r.addTable(th);
-				}
+		if (parent != null && parent instanceof OutSink) {
+			OutSink r = (OutSink) parent;
+			r.addTable(table);
+		} else 
+		{
+			throw new RuntimeException("error, table mmust be inside a gdb or csv element");
+		}
 
-				super.onNodeCompleted(builder, parent, node);
-		
+		super.onNodeCompleted(builder, parent, node);
+
 	}
-	
+
 }

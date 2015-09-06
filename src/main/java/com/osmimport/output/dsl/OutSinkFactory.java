@@ -14,7 +14,7 @@ import com.osmimport.output.dsl.TBuilder;
  * @author pfreydiere
  *
  */
-public class OutGdbFactory extends AbstractFactory {
+public class OutSinkFactory extends AbstractFactory {
 
 	@Override
 	public Object newInstance(FactoryBuilderSupport builder, Object name,

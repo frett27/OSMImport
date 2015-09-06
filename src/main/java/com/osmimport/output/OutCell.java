@@ -18,9 +18,9 @@ public class OutCell extends ModelElement {
 	public Stream[] streams;
 
 	/**
-	 * reference to the GDB
+	 * reference to the output sink
 	 */
-	public GDBReference gdb;
+	public OutSink sink;
 
 	/**
 	 * output table name or featureclass
@@ -35,7 +35,7 @@ public class OutCell extends ModelElement {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("OutCell / Streams :").append(Arrays.asList(streams)).append(" push in :")
-				.append(gdb).append('(').append(tablename).append(')');
+				.append(sink).append('(').append(tablename).append(')');
 		return sb.toString();
 	}
 

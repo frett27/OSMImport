@@ -22,7 +22,7 @@ import com.osmimport.output.GDBReference;
 import com.osmimport.output.OutCell;
 import com.osmimport.output.ProcessModel;
 import com.osmimport.output.Stream;
-import com.osmimport.output.actors.ChainCompiler;
+import com.osmimport.output.actors.gdb.ChainCompiler;
 
 public class TestClusterParsing extends TestCase {
 

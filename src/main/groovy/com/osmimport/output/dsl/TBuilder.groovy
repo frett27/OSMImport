@@ -1,17 +1,10 @@
 package com.osmimport.output.dsl;
 
-import org.fgdbapi.thindriver.TableHelper
-
-import com.osmimport.output.dsl.FeatureClassFactory;
-import com.osmimport.output.dsl.FieldFactory;
-import com.osmimport.output.dsl.GdbFactory;
-import com.osmimport.output.dsl.OutGdbFactory;
-import com.osmimport.output.dsl.StreamFactory;
-import com.osmimport.output.dsl.TableFactory;
 import com.osmimport.output.ClosureFilter
 import com.osmimport.output.ClosureTransform
 import com.osmimport.output.ProcessModel
 import com.osmimport.output.Stream
+import com.osmimport.output.model.Table
 
 /**
  * Builder for constructing the transform pipeline
@@ -23,7 +16,7 @@ class TBuilder extends FactoryBuilderSupport {
 
 	protected ProcessModel processModel= new ProcessModel();
 
-	protected TableHelper currentTableHelper;
+	protected Table currentTable;
 
 
 	public TBuilder(init = true) {
@@ -56,7 +49,8 @@ class TBuilder extends FactoryBuilderSupport {
 				memberName : "transform"))
 		
 		registerFactory("gdb", new GdbFactory());
-		registerFactory("out", new OutGdbFactory());
+		registerFactory("csv", new CsvFactory());
+		registerFactory("out", new OutSinkFactory());
 
 		registerFactory("table", new TableFactory());
 		registerFactory("featureclass", new FeatureClassFactory());

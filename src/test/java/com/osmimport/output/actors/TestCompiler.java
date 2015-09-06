@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 import com.osmimport.output.ProcessModel;
 import com.osmimport.output.Stream;
-import com.osmimport.output.actors.ChainCompiler;
+import com.osmimport.output.actors.gdb.ChainCompiler;
 
 /**
  * test the compilation options

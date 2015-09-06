@@ -1,27 +1,37 @@
 package com.osmimport;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
 import org.fgdbapi.thindriver.swig.Geodatabase;
-import org.fgdbapi.thindriver.swig.Table;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+import com.osmimport.output.CSVFolderReference;
 import com.osmimport.output.GDBReference;
 import com.osmimport.output.OutCell;
+import com.osmimport.output.OutSink;
 import com.osmimport.output.ProcessModel;
 import com.osmimport.output.Stream;
-import com.osmimport.output.actors.ChainCompiler;
-import com.osmimport.output.actors.CompiledTableOutputActor;
-import com.osmimport.output.actors.FieldsCompilerActor;
-import com.osmimport.output.actors.ChainCompiler.ValidateResult;
+import com.osmimport.output.actors.csv.CSVOutputActor;
+import com.osmimport.output.actors.gdb.ChainCompiler;
+import com.osmimport.output.actors.gdb.ChainCompiler.ValidateResult;
+import com.osmimport.output.actors.gdb.CompiledTableOutputActor;
+import com.osmimport.output.actors.gdb.FieldsCompilerActor;
+import com.osmimport.output.model.FeatureClass;
+import com.osmimport.output.model.Field;
+import com.osmimport.output.model.FieldType;
+import com.osmimport.output.model.Table;
 import com.osmimport.parsing.pbf.actors.PbfParsingSubSystemActor;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
@@ -44,10 +54,23 @@ public class OSMImport {
 
 	}
 
-	private Map<String, OpenedGeodatabase> geodatabases;
+	/**
+	 * reference destinations by path
+	 */
+	private Map<String, OutDestination> outDestinations;
 
+	/**
+	 * the process model
+	 */
 	private ProcessModel pm;
 
+	/**
+	 * load and copile the import script
+	 * 
+	 * @param script
+	 * @param additionalVariables
+	 * @throws Exception
+	 */
 	public void loadAndCompileScript(File script,
 			Map<String, String> additionalVariables) throws Exception {
 		assert script != null;
@@ -68,77 +91,188 @@ public class OSMImport {
 
 	}
 
-	private static class OpenedGeodatabase {
+	// base class for out destination
+	private static abstract class OutDestination {
+
+	}
+
+	// geodatabase destination
+	private static class OpenedGeodatabase extends OutDestination {
 		public Geodatabase geodatabase;
-		public Map<String, Table> tables = new HashMap<String, Table>();
+		public Map<String, org.fgdbapi.thindriver.swig.Table> tables = new HashMap<>();
+	}
+
+	private static class TableOutputStream {
+		public Table table;
+		public OutputStream outputStream;
+	}
+
+	// csv folder destination
+	private static class CsvFolder extends OutDestination {
+		public File folder;
+		public Map<String, TableOutputStream> files = new HashMap<>();
 	}
 
 	/**
-	 * create the needed tabled
+	 * create the needed tabled, and open all files
 	 * 
 	 * @param pm
 	 *            the processing model
-	 * @return a hash with all opened geodatabases
+	 * 
+	 * @return a hash with all opened outSinks
 	 * @throws Exception
 	 */
-	private void createGeodatabasesAndTables() throws Exception {
+	private void openOutputDestinations() throws Exception {
 
 		assert pm != null;
 
-		Map<String, OpenedGeodatabase> g = new HashMap<String, OpenedGeodatabase>();
+		Map<String, OutDestination> g = new HashMap<String, OutDestination>();
 
 		for (OutCell oc : pm.outs) {
 
 			// get output
-			GDBReference r = oc.gdb;
+			OutSink r = oc.sink;
 			String path = r.getPath();
 
-			Geodatabase geodatabase;
-
 			if (!g.containsKey(path)) {
-				// geodatabase as not been created yet
 
-				OpenedGeodatabase og = new OpenedGeodatabase();
+				OutDestination outDest = null;
 
-				System.out.println("create geodatabase " + path);
+				if (r instanceof GDBReference) {
 
-				// create the GDB
-				geodatabase = FGDBJNIWrapper.createGeodatabase(path);
-				og.geodatabase = geodatabase;
-				for (TableHelper h : r.listTables()) {
+					// geodatabase as not been created yet
 
-					String tableDef = h.buildAsString();
-					System.out.println("creating table " + h.getName()
-							+ " with definition : \n" + tableDef);
+					OpenedGeodatabase og = new OpenedGeodatabase();
+					outDest = og;
 
-					Table newTable = geodatabase.createTable(tableDef, "");
+					System.out.println("create geodatabase " + path);
 
-					System.out.println("table " + h.getName() + " created");
+					// create the GDB
+					Geodatabase geodatabase = FGDBJNIWrapper
+							.createGeodatabase(path);
+					og.geodatabase = geodatabase;
+					for (Table t : r.listTables()) {
 
-					// closing table to be sure the definition is correctly
-					// stored
+						TableHelper h = convertTable(t);
 
-					geodatabase.closeTable(newTable);
+						String tableDef = h.buildAsString();
+						System.out.println("creating table " + h.getName()
+								+ " with definition : \n" + tableDef);
 
-					System.out.println("open the table " + h.getName());
+						org.fgdbapi.thindriver.swig.Table newTable = geodatabase
+								.createTable(tableDef, "");
 
-					newTable = geodatabase.openTable(h.getName());
+						System.out.println("table " + h.getName() + " created");
 
-					og.tables.put(h.getName(), newTable);
+						// closing table to be sure the definition is correctly
+						// stored
 
-					System.out.println("successfully created");
+						geodatabase.closeTable(newTable);
 
+						System.out.println("open the table " + h.getName());
+
+						newTable = geodatabase.openTable(h.getName());
+
+						og.tables.put(h.getName(), newTable);
+
+						System.out.println("successfully created");
+
+					} // for
+
+				} else if (r instanceof CSVFolderReference) {
+
+					// work on the CSV reference
+					CsvFolder ref = new CsvFolder();
+
+					File folder = new File(path);
+
+					// create the file
+					if (!folder.exists()) {
+						folder.mkdirs();
+						if (!folder.exists()) {
+							throw new Exception("folder "
+									+ folder.getAbsolutePath()
+									+ " cannot be created");
+						}
+					}
+
+					ref.folder = folder;
+
+					for (Table t : r.listTables()) {
+						TableOutputStream c = new TableOutputStream();
+						c.table = t;
+
+						File outFile = new File(folder, oc.tablename + ".csv");
+
+						OutputStream fs = new BufferedOutputStream(
+								new FileOutputStream(outFile));
+
+						c.outputStream = fs;
+
+						ref.files.put(t.getName(), c);
+
+					}
+
+					outDest = ref;
+
+				} else {
+					throw new Exception();
 				}
 
-				g.put(path, og);
+				assert outDest != null;
+				g.put(path, outDest);
 
 			}
 
 		}// for outs
 
-		this.geodatabases = g;
+		this.outDestinations = g;
 	}
 
+	private TableHelper convertTable(Table t) throws Exception {
+		assert t != null;
+		TableHelper th = null;
+		if (t instanceof FeatureClass) {
+
+			FeatureClass fct = (FeatureClass) t;
+			if (!"WGS84".equals(fct.getSrs()))
+				throw new InstantiationException(
+						"only WGS84 SRS is supported for the moment");
+
+			th = TableHelper.newFeatureClass(fct.getName(), fct.getGeomType(),
+					TableHelper.constructW84SpatialReference());
+
+		} else {
+			th = TableHelper.newTable(t.getName());
+		}
+
+		List<Field> allFields = t.getFields();
+		assert allFields != null;
+		for (Field f : allFields) {
+			if (f.getType() == FieldType.INTEGER) {
+				th.addIntegerField(f.getName());
+			} else if (f.getType() == FieldType.LONG) {
+				th.addLongField(f.getName());
+			} else if (f.getType() == FieldType.STRING) {
+				th.addStringField(f.getName(), f.getLength());
+			} else if (f.getType() == FieldType.DOUBLE) {
+				th.addDoubleField(f.getName());
+			} else {
+				throw new Exception("field type " + f.getName()
+						+ " unsupported");
+			}
+		}
+
+		return th;
+	}
+
+	/**
+	 * main procedure
+	 * 
+	 * @param osmInputFile
+	 *            the input file
+	 * @throws Exception
+	 */
 	public void run(File osmInputFile) throws Exception {
 
 		assert pm != null;
@@ -153,46 +287,87 @@ public class OSMImport {
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
 				"output", osmclusterconfig.getLong("eventbuffer")));
 
-		createGeodatabasesAndTables();
+		openOutputDestinations();
 
 		// for each out, create the output actor
 		for (OutCell oc : pm.outs) {
 
 			// get output
-			GDBReference r = oc.gdb;
+			OutSink r = oc.sink;
 			String path = r.getPath();
 
-			if (!geodatabases.containsKey(path)) {
+			if (!outDestinations.containsKey(path)) {
 				throw new Exception("geodatabase " + path + " not found");
 			}
 
-			OpenedGeodatabase openedGeodatabase = geodatabases.get(path);
+			OutDestination outDest = outDestinations.get(path);
 
-			Table table = openedGeodatabase.tables.get(oc.tablename);
+			if (outDest instanceof OpenedGeodatabase) {
 
-			if (table == null)
-				throw new Exception("table " + oc.tablename + " not found");
+				OpenedGeodatabase openedGeodatabase = (OpenedGeodatabase) outDest;
 
-			String keyname = path + "_" + oc.tablename;
+				org.fgdbapi.thindriver.swig.Table table = openedGeodatabase.tables
+						.get(oc.tablename);
 
-			// ///////////////////////////////////////////////////////////////
-			// create output actors
+				if (table == null)
+					throw new Exception("table " + oc.tablename + " not found");
 
-			ActorRef tableCompiledOutputActor = sys.actorOf(
-					Props.create(CompiledTableOutputActor.class, table,
-							flowRegulator).withDispatcher("pdisp"),
-					Tools.toActorName("T__" + keyname));
-			flowRegulator.tell(new MessageRegulatorRegister(
-					tableCompiledOutputActor), ActorRef.noSender());
+				String keyname = path + "_" + oc.tablename;
 
-			ActorRef fieldsCompiler = sys.actorOf(
-					Props.create(FieldsCompilerActor.class, table,
-							tableCompiledOutputActor), Tools.toActorName("FC__"
-							+ keyname));
-			flowRegulator.tell(new MessageRegulatorRegister(fieldsCompiler),
-					ActorRef.noSender());
+				// ///////////////////////////////////////////////////////////////
+				// create output actors
 
-			oc._actorRef = fieldsCompiler;
+				ActorRef tableCompiledOutputActor = sys.actorOf(
+						Props.create(CompiledTableOutputActor.class, table,
+								flowRegulator).withDispatcher("pdisp"),
+						Tools.toActorName("T__" + keyname));
+				flowRegulator.tell(new MessageRegulatorRegister(
+						tableCompiledOutputActor), ActorRef.noSender());
+
+				ActorRef fieldsCompiler = sys.actorOf(Props.create(
+						FieldsCompilerActor.class, table,
+						tableCompiledOutputActor), Tools.toActorName("FC__"
+						+ keyname));
+				flowRegulator.tell(
+						new MessageRegulatorRegister(fieldsCompiler),
+						ActorRef.noSender());
+
+				oc._actorRef = fieldsCompiler;
+
+			} else if (outDest instanceof CsvFolder) {
+
+				// //
+				CsvFolder f = (CsvFolder) outDest;
+				TableOutputStream t = f.files.get(oc.tablename);
+
+				if (t == null)
+					throw new Exception("file " + oc.tablename + " not found");
+
+				assert t.outputStream != null;
+				assert t.table != null;
+
+				String keyname = path + "_" + oc.tablename;
+
+				// ///////////////////////////////////////////////////////////////
+				// create output actors
+
+				ActorRef csvOutputActor = sys.actorOf(
+						Props.create(CSVOutputActor.class, t.table,
+								t.outputStream, flowRegulator).withDispatcher(
+								"pdisp"),
+						// TODO prefs, refactor, for multithreaded
+						// output, each table must have a separate
+						// execution thread
+						Tools.toActorName("CSV__" + keyname));
+				flowRegulator.tell(
+						new MessageRegulatorRegister(csvOutputActor),
+						ActorRef.noSender());
+
+				oc._actorRef = csvOutputActor;
+
+			} else {
+				throw new Exception("unsupported out destination :" + outDest);
+			}
 
 		}// for outs
 
@@ -231,5 +406,4 @@ public class OSMImport {
 		sys.awaitTermination();
 
 	}
-
 }

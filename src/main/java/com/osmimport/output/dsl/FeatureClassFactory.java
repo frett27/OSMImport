@@ -9,8 +9,9 @@ import java.util.Map;
 import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.xml.EsriGeometryType;
 
-import com.osmimport.output.GDBReference;
-import com.osmimport.output.dsl.TBuilder;
+import com.osmimport.output.OutSink;
+import com.osmimport.output.model.FeatureClass;
+import com.osmimport.output.model.Table;
 
 /**
  * factory for a feature class
@@ -40,10 +41,9 @@ public class FeatureClassFactory extends AbstractFactory {
 
 		TBuilder tb = (TBuilder) builder;
 		try {
-			tb.currentTableHelper = TableHelper.newFeatureClass(
-					(String) l.get(0), (EsriGeometryType) l.get(1),
-					TableHelper.constructW84SpatialReference());
-			return tb.currentTableHelper;
+			tb.currentTable = new FeatureClass((String) l.get(0), (EsriGeometryType) l.get(1),
+					srs);
+			return tb.currentTable;
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
 		}
@@ -55,12 +55,12 @@ public class FeatureClassFactory extends AbstractFactory {
 			Object node) {
 
 		// attach the table to the gdb
-		assert node instanceof TableHelper;
+		assert node instanceof Table;
 
-		TableHelper th = (TableHelper) node;
+		Table th = (Table) node;
 
-		if (parent != null && parent instanceof GDBReference) {
-			GDBReference r = (GDBReference) parent;
+		if (parent != null && parent instanceof OutSink) {
+			OutSink r = (OutSink) parent;
 			r.addTable(th);
 		}
 

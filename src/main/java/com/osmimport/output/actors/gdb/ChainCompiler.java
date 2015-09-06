@@ -1,4 +1,4 @@
-package com.osmimport.output.actors;
+package com.osmimport.output.actors.gdb;
 
 import groovy.lang.Binding;
 import groovy.util.GroovyScriptEngine;

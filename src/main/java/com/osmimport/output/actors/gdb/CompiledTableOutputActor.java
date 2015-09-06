@@ -1,4 +1,4 @@
-package com.osmimport.output.actors;
+package com.osmimport.output.actors.gdb;
 
 import org.fgdbapi.thindriver.swig.Row;
 import org.fgdbapi.thindriver.swig.Table;
@@ -8,7 +8,7 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
 import com.osmimport.actors.MeasuredActor;
-import com.osmimport.output.actors.messages.CompiledFieldsMessage;
+import com.osmimport.output.actors.gdb.messages.CompiledFieldsMessage;
 import com.osmimport.output.fields.AbstractFieldSetter;
 
 public class CompiledTableOutputActor extends MeasuredActor {

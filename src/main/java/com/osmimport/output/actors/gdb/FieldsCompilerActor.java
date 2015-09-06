@@ -1,4 +1,4 @@
-package com.osmimport.output.actors;
+package com.osmimport.output.actors.gdb;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import com.esri.core.geometry.Geometry;
 import com.osmimport.actors.MeasuredActor;
 import com.osmimport.model.OSMAttributedEntity;
 import com.osmimport.model.OSMEntity;
-import com.osmimport.output.actors.messages.CompiledFieldsMessage;
+import com.osmimport.output.actors.gdb.messages.CompiledFieldsMessage;
 import com.osmimport.output.fields.AbstractFieldSetter;
 import com.osmimport.output.fields.GeometryFieldSetter;
 import com.osmimport.output.fields.IntegerFieldSetter;

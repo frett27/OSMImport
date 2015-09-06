@@ -10,32 +10,11 @@ import org.fgdbapi.thindriver.TableHelper;
  * 
  * @author pfreydiere
  */
-public class GDBReference {
-
-	private String path;
-	
-	private Map<String, TableHelper> tables = new HashMap<String,TableHelper>();
+public class GDBReference extends OutSink {
 
 	public GDBReference(String path) {
-		this.path = path;
+		super(path);
 	}
 
-	public String getPath() {
-		return path;
-	}
-	
-	public void addTable(TableHelper t)
-	{
-		tables.put(t.getName(), t);
-	}
-	
-	public TableHelper[] listTables(){
-		return tables.values().toArray(new TableHelper[0]);
-	}
-	
-	@Override
-	public String toString() {
-		return path;
-	}
 	
 }

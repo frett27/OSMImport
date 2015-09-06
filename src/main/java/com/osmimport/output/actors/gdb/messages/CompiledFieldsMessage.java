@@ -1,4 +1,4 @@
-package com.osmimport.output.actors.messages;
+package com.osmimport.output.actors.gdb.messages;
 
 import java.io.Serializable;
 

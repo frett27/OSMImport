@@ -23,37 +23,38 @@ public class FieldFactory extends AbstractFactory {
 		assert builder instanceof TBuilder; 
 		TBuilder b = (TBuilder) builder;
 
-		assert b.currentTableHelper != null;
+		assert b.currentTable != null;
 
 		if ("_text".equals(name)) {
 			int size = 255;
 			if (attributes.containsKey("size")) {
 				size = (Integer) attributes.get("size");
 			}
-			b.currentTableHelper.addStringField((String) value, size);
+			b.currentTable.addStringField((String) value, size);
 
 			return null;
 
 		} else if ("_integer".equals(name)) {
 			int size = 4;
 			if (attributes.containsKey("size")) {
+				// check this is an integer
 				size = (Integer) attributes.get("size");
 			}
 
-			b.currentTableHelper.addIntegerField((String) value);
+			b.currentTable.addIntegerField((String) value);
 
 			return null;
 
 		} else if ("_long".equals(name)) {
 
-			b.currentTableHelper.addLongField((String) value);
+			b.currentTable.addLongField((String) value);
 
 			return null;
 			
 			
 		} else if ("_double".equals(name)) {
 
-			b.currentTableHelper.addDoubleField((String) value);
+			b.currentTable.addDoubleField((String) value);
 
 			return null;
 
