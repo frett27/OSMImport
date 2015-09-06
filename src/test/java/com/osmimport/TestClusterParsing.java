@@ -8,10 +8,8 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
 import org.fgdbapi.thindriver.swig.Geodatabase;
-import org.fgdbapi.thindriver.swig.Table;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -23,6 +21,8 @@ import com.osmimport.output.OutCell;
 import com.osmimport.output.ProcessModel;
 import com.osmimport.output.Stream;
 import com.osmimport.output.actors.gdb.ChainCompiler;
+import com.osmimport.output.model.Table;
+import com.osmimport.tools.Tools;
 
 public class TestClusterParsing extends TestCase {
 
@@ -125,7 +125,7 @@ public class TestClusterParsing extends TestCase {
 		for (OutCell oc : pm.outs) {
 
 			// get output
-			GDBReference r = oc.gdb;
+			GDBReference r = (GDBReference)oc.sink;
 			String path = r.getPath();
 
 			ActorRef tableOutput = null;
@@ -141,12 +141,14 @@ public class TestClusterParsing extends TestCase {
 				geodatabase = FGDBJNIWrapper.createGeodatabase(path);
 				geodatabaseRefs.put(path, geodatabase);
 
-				for (TableHelper h : r.listTables()) {
+				for (Table h : r.listTables()) {
 					
-					String tableDef = h.buildAsString();
+					
+					
+					String tableDef = Tools.convertTable(h).buildAsString();
 					System.out.println("creating table " + h.getName()
 							+ " with definition : \n" + tableDef);
-					Table newTable = geodatabase.createTable(tableDef, "");
+					org.fgdbapi.thindriver.swig.Table newTable = geodatabase.createTable(tableDef, "");
 					
 					System.out.println("successfully created");
 
