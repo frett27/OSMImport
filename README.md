@@ -5,9 +5,9 @@ _Patrice Freydiere - 2015_
 
 ---
 
-Yet An Other OSM Import / Formatting OSM data tool
+Yet An Other OSM Import / Formatting OSM data tool - [Change Log](ChangeLog.md)
 
-This project aim to provide a simple **optimized command line for filtering / GIS structuring OSM PBF or OSM XML files**. The result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). 
+This project aim to provide a simple **optimized command line for filtering / GIS structuring OSM PBF or OSM XML files**. The result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). CSV output files are also supported since 0.6 version, allowing to have a smooth BigData shift for OSM data
 
 Since October 2014, lots of feedbacks have been implemented in the lastest version. This project **doesn't need a PostGIS database**, **you don't need extensive software stack**. This tools has been tested on Windows and Linux. 
 
@@ -18,19 +18,19 @@ This project use dirsuptive technology, an internal actors system using big data
 - **Windows** / **Linux** friendly (tested, but in practice should be run on all java compatible desktop / server machines)
 - **PBF / XML / OSM** input file support
 - **FileGeodatabase Output**, that can be natively read by ArcGIS Desktop or QGIS
-- **Multiple destinations output** 
-- Point / Line / Polygon / Relation **entities** handling
-	- **Way reconstruction**, **Polygon reconstruction**, to have a proper geometry, handled by the ESRI geometry library
-- Automatic **RAM memory management**
+- **CSV text files in a folder** for Hadoop/Big stacks
 - **Simple declarative groovy transformation script** 
 	- All **Groovy** and **Java third party are directly usable** in the script, for filtering and transformations.
 	- Simplified merge on a set of script to have different outputed database from a single run.
 	- **Scripts are Easy to share and maintain** (a single human readable .script file)
+- **Multiple destinations output on one run** (ability to merge import scripts)
+- **Way reconstruction**, **Polygon reconstruction**, to have a proper GIS geometry, handled by the ESRI geometry library
+- Automatic **RAM memory management**
 
 
 #Usage context - known usage
 
-- At minimum of 5go of RAM is necessary for a first load
+- A minimum of 5go of RAM is necessary for a first load
 	- Nota : RAM is used for processing complete ways and polygons, if RAM is not available, subsequent input file read are going to be done and will lead to decrease performances.
 
 A typical 32 Gb or RAM permit to handle France territory in a very nice timeframe. (please give us your benchmarks feedbacks and configurations)
@@ -40,8 +40,7 @@ A typical 32 Gb or RAM permit to handle France territory in a very nice timefram
 
 #Benchmarks
 
-- **More than 1 000 000 final entities processed per minute** on a standard laptop (1.7 Ghz INTEL i5, 2 physical cores, 8Gb RAM)), processing a french region takes about 10mins with 8Gb of RAM. Processing France with a 32gb of RAM takes about 1,5 Hour.
-
+- **More than 1 000 000 final entities processed per minute** on a standard laptop (1.7 Ghz INTEL i5, 2 physical cores, 8Gb RAM)), processing a french country takes about 10mins with 8Gb of RAM. Processing France with a 32gb of RAM takes about 1,5 Hour.
 
 
 #Download and install - Next actions
@@ -57,10 +56,10 @@ other documentations can be found in the [doc](doc) folder
 
 don't hesitate to send pull requests or return of experience.
 
-#Ready to use scripts :
+#Ready to use samples scripts :
 
-- Buildings
-- Streets
+- [Buildings](scripts/buildings.groovy) - extract buildings
+- [Streets](scripts/streets.groovy) - extract streets
 
 
 #Contributions
@@ -68,9 +67,10 @@ don't hesitate to send pull requests or return of experience.
 Contributions are welcome on :
 
 - documentation
-- scripts (integrated or not in business cases and usages)
+- scripts
 - code
 - enhancements
+- ...
 
 
 #Version 1.0 roadmap plan
@@ -78,6 +78,7 @@ Contributions are welcome on :
 - <strike>handling relationships</strike>
 - <strike>handling polygons</strike>
 - <strike>tables support</strike>
+- <strike>csv text files support</strike>
 - Work on simplify the writing of scripts
 - error logs, and feedbacks
 - clean logs

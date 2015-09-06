@@ -8,12 +8,13 @@ This documentation explain how to use the OSMImport project to create tables / f
 
 download the install bundle and put it in a directory of your choice.
 
-Version _0.5-SNAPSHOT_  
+
+###Version _0.5-SNAPSHOT_  
 
 **Windows 64 bits** - 
-[osmimport-0.5-SNAPSHOT.zip](https://s3-eu-west-1.amazonaws.com/osmimport-cli/osmimport-0.5-SNAPSHOT.zip)
+[osmimport-0.5-SNAPSHOT.zip](https://s3-eu-west-1.amazonaws.com/osmimport-cli/osmimport-0.5-SNAPSHOT.zip) - Nota: if you use the FGDB output file format, you will need to install redistribuable VC++ 2012 from microsoft, if not already installed.
 
-**Linux 64 bits** - TBD
+**Linux 64 bits** - @@TBD
 
 
 ##Download PBF or OSM located datas
@@ -22,7 +23,12 @@ if you dont have PBF or OSM file, you can download them at : [http://www.geofabr
 
 ##Choose an already existed script
 
-Existing scripts are located in the script folder
+Existing scripts are located in the **[scripts](../scripts)** folder
+
+* [streets.groovy](../scripts/streets.groovy) - Sample file to extract streets
+* [buildings.groovy](../scripts/buildings.groovy) - Sample file to extract buildings inFile geodatabase
+
+
 
 ##Run the commandline
 

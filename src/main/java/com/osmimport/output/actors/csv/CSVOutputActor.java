@@ -48,8 +48,7 @@ public class CSVOutputActor extends MeasuredActor {
 	public CSVOutputActor(Table t, OutputStream out, ActorRef flowRegulator) {
 		assert t != null;
 		assert out != null;
-		this.outputStreamWriter = new OutputStreamWriter(out,
-				Charset.forName("UTF-8"));
+		this.outputStreamWriter = new OutputStreamWriter(out);
 		this.t = t;
 		this.flowRegulatorActorRef = flowRegulator;
 
