@@ -322,7 +322,7 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 				if (t > 0.1) {
 					System.out.println("Velocity :" + v);
-					System.out.println("SlowDown the input reading :" + t);
+					// System.out.println("SlowDown the input reading :" + t);
 				}
 				Thread.sleep((long) (t * 1000));
 

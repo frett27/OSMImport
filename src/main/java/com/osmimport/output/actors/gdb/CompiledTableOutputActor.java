@@ -31,16 +31,14 @@ public class CompiledTableOutputActor extends MeasuredActor {
 	 * the flow regulator
 	 */
 	private ActorRef flowRegulatorActorRef;
-	
-	
+
 	public CompiledTableOutputActor(Table t, ActorRef flowRegulator) {
 		assert t != null;
 		this.table = t;
 		this.flowRegulatorActorRef = flowRegulator;
-		
 
 		table.setWriteLock();
-		table.setLoadOnlyMode(true);
+		// table.setLoadOnlyMode(true);
 
 	}
 
@@ -59,44 +57,46 @@ public class CompiledTableOutputActor extends MeasuredActor {
 	public void postStop() throws Exception {
 
 		log.info("Stopping actor" + getSelf());
-		table.setLoadOnlyMode(false);
+		// table.setLoadOnlyMode(false);
 		table.freeWriteLock();
-		
+
 		super.postStop();
 	}
 
-	
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
 		if (!(message instanceof CompiledFieldsMessage)) {
-			log.warning("message received is not a " + CompiledFieldsMessage.class.getSimpleName());
+			log.warning("message received is not a "
+					+ CompiledFieldsMessage.class.getSimpleName());
 			return;
 		}
 		CompiledFieldsMessage e = (CompiledFieldsMessage) message;
 		try {
-			Row r = table.createRowObject();
+			synchronized (CompiledTableOutputActor.class) {
 
-			// r.setInteger("OBJECTID", oid++);
+				Row r = table.createRowObject();
 
-			AbstractFieldSetter[] setters = e.getSetters();
-			for (AbstractFieldSetter f : setters) {
-				try {
-					f.store(r);
-				} catch (Exception ex) {
-					log.error(
-							"error in storing value on " + f + " :"
-									+ ex.getMessage(), ex);
+				// r.setInteger("OBJECTID", oid++);
+
+				AbstractFieldSetter[] setters = e.getSetters();
+				for (AbstractFieldSetter f : setters) {
+					try {
+						f.store(r);
+					} catch (Exception ex) {
+						log.error(
+								"error in storing value on " + f + " :"
+										+ ex.getMessage(), ex);
+					}
 				}
+
+				table.insertRow(r);
+				r.delete();
+				
 			}
 
-			table.insertRow(r);
-			
-
-			
 		} catch (Exception ex) {
-			log.error("error storing entity :" + e + ":" + ex.getMessage(),
-					ex);
+			log.error("error storing entity :" + e + ":" + ex.getMessage(), ex);
 		}
 		if (start != -1) {
 
@@ -115,8 +115,9 @@ public class CompiledTableOutputActor extends MeasuredActor {
 			if (start != -1)
 				t = (System.currentTimeMillis() - start);
 
-			log.info("" + oid + " elements, last chunk processed in " + t + "ms -> writing speed : "
-					+ ((10000.0) / t * 1000) + " o/s");
+			log.info("" + oid + " elements, last chunk processed in " + t
+					+ "ms -> writing speed : " + ((10000.0) / t * 1000)
+					+ " o/s");
 			start = System.currentTimeMillis();
 		}
 
