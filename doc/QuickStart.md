@@ -34,18 +34,35 @@ Existing scripts are located in the **[scripts](../scripts)** folder
 
 Place the OSM (PBF/XML) datafile and the script file, in a folder and run :
 
-	osmimport -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
+	osmimport import -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
 
 the output files are placed in the location defined in the stream file (the -s option).
 
 
 ##Command line parameters
 
+	>osmimport
+	OSM Import
+	   Available Commands :
+	    help : get help on commands
+	    import : import osm file with a transformation script
+	    copycsv : copy a csv file into a file geodatabase	
+
+
+	>osmimport import
 	
+	OSM Import
+	23:05:31.514 [main] DEBUG com.osmimport.MCLI - launching command :import
+	 error in arguments :Missing required options: i, s
 	usage: osmimport
-	 -i,--inputpbf <inputpbf>   input PBF OSM file
-	 -s,--streams <streams>     script file describing the streams
-	 -v <var>                   variable definition
+	 -i,--input <input>       [REQUIRED] input PBF or OSM file, this can be
+	                          .pbf or .osm files
+	 -s,--streams <streams>   [REQUIRED] script file describing the filtering
+	                          and transformations, (.groovy files)
+	 -v <var>                 [OPTIONAL] additional variables definition that
+	                          are mapped into var[name] in the script
+
+
 
 some scripts may have variable defined (for output gdb path, or other refinements), look at the script for mandatory variables.
 

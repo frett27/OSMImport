@@ -1,9 +1,31 @@
 
 #ChangeLog :
 
+- 27/09/2015 : add multiple actions on command line
 - 06/09/2015 : version 0.6, add csv output, using base64 shape encoded geometries
 - 16/08/2015 : version 0.5,add XML/OSM file support, bugs fixes
 - 28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
+
+Version 0.7
+-----------
+
+- refactor on cli invoke, now the first parameter on the command line is the action, currently , import and copycsv
+
+breaking change :
+
+  now the launch of the import is done with the following command line "osmimport **import** -s ... " the import keyword has been added to permit to have other additionals commands.
+
+before :
+
+	osmimport  -s ... -i .... -v ....
+ 
+now :
+
+	osmimport import -s ... -i .... -v ....
+
+options are unchanged
+
+Adding in this version of a copy command, to permit to convert a geometric CSV file to a file geodatabase, this permit to load fgdb from csv files.
 
 
 Version 0.6 (2015 september):
