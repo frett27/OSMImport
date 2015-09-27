@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
@@ -90,12 +91,31 @@ public class OSMImport {
 	// base class for out destination
 	private static abstract class OutDestination {
 
+		public abstract void closeAll() throws Exception;
+
 	}
 
 	// geodatabase destination
 	private static class OpenedGeodatabase extends OutDestination {
 		public Geodatabase geodatabase;
 		public Map<String, org.fgdbapi.thindriver.swig.Table> tables = new HashMap<>();
+
+		@Override
+		public void closeAll() {
+			assert geodatabase != null;
+			for (Entry<String, org.fgdbapi.thindriver.swig.Table> t : tables
+					.entrySet()) {
+				// info("closing table " + t.getKey());
+				try {
+					geodatabase.closeTable(t.getValue());
+				} catch (Exception ex) {
+					System.out.println("error closing :" + t.getKey() + " :"
+							+ ex.getMessage());
+				}
+			}
+
+		}
+
 	}
 
 	private static class TableOutputStream {
@@ -107,6 +127,19 @@ public class OSMImport {
 	private static class CsvFolder extends OutDestination {
 		public File folder;
 		public Map<String, TableOutputStream> files = new HashMap<>();
+
+		@Override
+		public void closeAll() throws Exception {
+			for (Entry<String, TableOutputStream> e : files.entrySet()) {
+				try {
+					e.getValue().outputStream.close();
+				} catch (Exception ex) {
+					System.out.println("error closing table " + e.getKey()
+							+ " :" + ex.getMessage());
+				}
+			}
+		}
+
 	}
 
 	/**
@@ -225,8 +258,6 @@ public class OSMImport {
 		this.outDestinations = g;
 	}
 
-	
-
 	/**
 	 * main procedure
 	 * 
@@ -247,8 +278,9 @@ public class OSMImport {
 
 		long eventbuffer = osmclusterconfig.getLong("eventbuffer");
 		// scale for the number of available processors
-		eventbuffer = eventbuffer * Runtime.getRuntime().availableProcessors() / 4;
-		
+		eventbuffer = eventbuffer * Runtime.getRuntime().availableProcessors()
+				/ 4;
+
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
 				"output", eventbuffer));
 
@@ -369,6 +401,13 @@ public class OSMImport {
 				ActorRef.noSender());
 
 		sys.awaitTermination();
+
+		System.out.println("closing files");
+
+		for (Entry<String, OutDestination> e : outDestinations.entrySet()) {
+			System.out.println("    closing " + e.getKey());
+			e.getValue().closeAll();
+		}
 
 	}
 }

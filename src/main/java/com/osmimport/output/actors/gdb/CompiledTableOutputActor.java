@@ -38,7 +38,7 @@ public class CompiledTableOutputActor extends MeasuredActor {
 		this.flowRegulatorActorRef = flowRegulator;
 
 		table.setWriteLock();
-		// table.setLoadOnlyMode(true);
+		table.setLoadOnlyMode(true);
 
 	}
 
@@ -57,8 +57,9 @@ public class CompiledTableOutputActor extends MeasuredActor {
 	public void postStop() throws Exception {
 
 		log.info("Stopping actor" + getSelf());
-		// table.setLoadOnlyMode(false);
+		table.setLoadOnlyMode(false);
 		table.freeWriteLock();
+		
 
 		super.postStop();
 	}

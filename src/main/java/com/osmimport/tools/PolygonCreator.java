@@ -59,16 +59,41 @@ public class PolygonCreator {
 		return sb.toString();
 	}
 
-	
-	private List<MultiPathAndRole> create(MultiPath[] multiPath, Role[] roles) {
-	
+	/**
+	 * convert the two arrays in one object list
+	 * 
+	 * @param multiPath
+	 * @param roles
+	 * @return
+	 */
+	private static List<MultiPathAndRole> create(MultiPath[] multiPath,
+			Role[] roles) {
+
+		assert multiPath != null;
+		assert roles != null;
+		assert multiPath.length == roles.length;
+
 		List<MultiPathAndRole> pathLeft = new ArrayList<>();
 		for (int i = 0; i < multiPath.length; i++) {
 			pathLeft.add(new MultiPathAndRole(multiPath[i], roles[i]));
 		}
 		return pathLeft;
 	}
-	
+
+	/**
+	 * create polygon
+	 * 
+	 * @param multiPath
+	 * @param roles
+	 * @return
+	 * @throws Exception
+	 */
+	public static Polygon createPolygon(MultiPath[] multiPath, Role[] roles)
+			throws Exception {
+
+		return createPolygon(create(multiPath, roles));
+
+	}
 
 	/**
 	 * create a polygon from multi path elements, passed arrays must have the
@@ -79,21 +104,12 @@ public class PolygonCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Polygon createPolygon(MultiPath[] multiPath, Role[] roles)
+	public static Polygon createPolygon(List<MultiPathAndRole> pathLeft)
 			throws Exception {
 
 		logger.debug("start create Polygon");
 
-		assert multiPath != null;
-		assert roles != null;
-		assert multiPath.length == roles.length;
-
 		Polygon finalPolygon = new Polygon();
-
-		List<MultiPathAndRole> pathLeft = new ArrayList<>();
-		for (int i = 0; i < multiPath.length; i++) {
-			pathLeft.add(new MultiPathAndRole(multiPath[i], roles[i]));
-		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("-- initial current stack :");
@@ -101,6 +117,9 @@ public class PolygonCreator {
 			logger.debug("--end");
 
 		}
+		assert pathLeft != null;
+		List<MultiPathAndRole> originalList = new ArrayList<>(pathLeft); // for
+																			// dumping
 
 		MultiPathAndRole current = null;
 
@@ -182,7 +201,6 @@ public class PolygonCreator {
 					logger.debug("--current stack :");
 					logger.debug(dump(pathLeft));
 					logger.debug("--end");
-
 				}
 
 				if (followingPathWithCorrectOrder != null) {
@@ -192,12 +210,14 @@ public class PolygonCreator {
 					// add the path to the current multipath
 
 					p.insertPoints(0, -1, followingPathWithCorrectOrder, 0, 1,
-							followingPathWithCorrectOrder.getPointCount() - 1, true); // skip the first point
+							followingPathWithCorrectOrder.getPointCount() - 1,
+							true); // skip the first point
 
 				} else {
 					// don't find a following path, and not closed !!!
 
-					// Construct a JSON with all elements
+					// Construct a JSON with all elements, for debugging or
+					// correct the initial geometry
 
 					StringBuffer sb = new StringBuffer();
 
@@ -205,7 +225,7 @@ public class PolygonCreator {
 					sb.append("   \"origin\": ");
 					sb.append("[");
 					boolean first = true;
-					for (int i = 0; i < multiPath.length; i++) {
+					for (int i = 0; i < originalList.size(); i++) {
 
 						if (!first)
 							sb.append(",");
@@ -213,8 +233,8 @@ public class PolygonCreator {
 						sb.append("{ \"geometry\" :");
 						sb.append(
 								GeometryEngine.geometryToJson(4623,
-										multiPath[i])).append(",");
-						sb.append(" \"role\": ").append('"').append(roles[i])
+										originalList.get(i).multiPath)).append(",");
+						sb.append(" \"role\": ").append('"').append(originalList.get(i).role)
 								.append('"').append("}");
 						first = false;
 
@@ -236,8 +256,8 @@ public class PolygonCreator {
 						sb.append(
 								GeometryEngine.geometryToJson(4623,
 										e.getMultiPath())).append(",");
-						sb.append(" \"role\": ").append(e.getRole())
-								.append("}");
+						sb.append(" \"role\": \"").append(e.getRole())
+								.append("\"}");
 						first = false;
 					}
 					sb.append("]");
@@ -260,7 +280,6 @@ public class PolygonCreator {
 
 					// FIXME reverse path ??? -> inner / outer, the proper
 					// orientation
-					
 
 					finalPolygon.add(p, false);
 					finished = true;
@@ -397,7 +416,7 @@ public class PolygonCreator {
 		assert p2 != null;
 
 		double euclidianDistance = euclidianDistance(p1, p2);
-		return euclidianDistance < 1e-20;
+		return euclidianDistance < 1e-14;
 
 	}
 

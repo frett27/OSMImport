@@ -62,7 +62,7 @@ public class CopyCSV implements CLICommand {
 
 		Option output = OptionBuilder.withArgName("output").hasArg()
 				.withLongOpt("output").isRequired()
-				.withDescription("destination output").create('o');
+				.withDescription("destination output file geodatabase").create('o');
 
 		Option structure = OptionBuilder
 				.withArgName("structure")
@@ -252,7 +252,7 @@ public class CopyCSV implements CLICommand {
 
 				} finally {
 
-					// newTable.freeWriteLock();
+					newTable.freeWriteLock();
 					newTable.setLoadOnlyMode(false);
 
 				}
