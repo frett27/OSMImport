@@ -1,4 +1,4 @@
-package com.osmimport.output.model;
+package com.osmimport.structures.model;
 
 public enum FieldType {
 

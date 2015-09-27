@@ -4,8 +4,11 @@ import org.fgdbapi.thindriver.swig.Row;
 
 public class StringFieldSetter extends AbstractFieldSetter {
 
-	public StringFieldSetter(String fieldName) {
+	private int sizeOfField;
+	
+	public StringFieldSetter(String fieldName, int sizeOfField) {
 		super(fieldName);
+		this.sizeOfField = sizeOfField;
 	}
 
 	private String value;
@@ -19,6 +22,15 @@ public class StringFieldSetter extends AbstractFieldSetter {
 		} else {
 			this.value = value.toString();
 		}
+		
+		// check size
+		if (this.value != null) {
+			if (this.value.length() > sizeOfField) {
+				System.out.println("value " + this.value + " too big for field name " + this.getFieldName() + " truncate");
+				this.value = this.value.substring(0, this.sizeOfField);
+			}
+		}
+		
 
 		return null;
 	}
@@ -37,7 +49,7 @@ public class StringFieldSetter extends AbstractFieldSetter {
 	
 	@Override
 	public AbstractFieldSetter clone() {
-		return new StringFieldSetter(fieldName);
+		return new StringFieldSetter(fieldName, sizeOfField);
 	}
 
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.fgdbapi.thindriver.TableHelper;
 
-import com.osmimport.output.model.Table;
+import com.osmimport.structures.model.Table;
 
 public abstract class OutSink {
 

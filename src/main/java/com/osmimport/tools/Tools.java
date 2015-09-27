@@ -9,10 +9,10 @@ import java.util.List;
 
 import org.fgdbapi.thindriver.TableHelper;
 
-import com.osmimport.output.model.FeatureClass;
-import com.osmimport.output.model.Field;
-import com.osmimport.output.model.FieldType;
-import com.osmimport.output.model.Table;
+import com.osmimport.structures.model.FeatureClass;
+import com.osmimport.structures.model.Field;
+import com.osmimport.structures.model.FieldType;
+import com.osmimport.structures.model.Table;
 
 /**
  * several static tools functions

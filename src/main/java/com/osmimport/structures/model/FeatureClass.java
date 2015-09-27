@@ -1,6 +1,8 @@
-package com.osmimport.output.model;
+package com.osmimport.structures.model;
 
 import org.fgdbapi.thindriver.xml.EsriGeometryType;
+
+import com.esri.core.geometry.Geometry;
 
 public class FeatureClass extends Table {
 
@@ -22,6 +24,29 @@ public class FeatureClass extends Table {
 
 	public EsriGeometryType getGeomType() {
 		return geomType;
+	}
+
+	public Geometry.Type getESRIGeomType() {
+
+		switch (geomType) {
+		case ESRI_GEOMETRY_POINT:
+			return Geometry.Type.Point;
+
+		case ESRI_GEOMETRY_POLYGON:
+			return Geometry.Type.Polygon;
+
+		case ESRI_GEOMETRY_POLYLINE:
+			return Geometry.Type.Polyline;
+
+		case ESRI_GEOMETRY_MULTIPOINT:
+			return Geometry.Type.MultiPoint;
+			
+			// multipatch unsupported
+		default:
+			throw new RuntimeException("unknown geometry " + geomType);
+
+		}
+
 	}
 
 	public String getSrs() {

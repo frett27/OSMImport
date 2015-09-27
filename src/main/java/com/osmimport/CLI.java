@@ -39,8 +39,6 @@ public class CLI {
 		logger.debug("Start the command line");
 		
 		System.out.println("Launching OSM Import Tools");
-
-		
 		
 		if (Runtime.getRuntime().maxMemory() < 5000000000L)
 			throw new Exception(

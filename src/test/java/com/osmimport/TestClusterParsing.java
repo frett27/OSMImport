@@ -21,7 +21,7 @@ import com.osmimport.output.OutCell;
 import com.osmimport.output.ProcessModel;
 import com.osmimport.output.Stream;
 import com.osmimport.output.actors.gdb.ChainCompiler;
-import com.osmimport.output.model.Table;
+import com.osmimport.structures.model.Table;
 import com.osmimport.tools.Tools;
 
 public class TestClusterParsing extends TestCase {

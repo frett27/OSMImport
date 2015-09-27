@@ -16,9 +16,9 @@ import com.esri.core.geometry.GeometryEngine;
 import com.osmimport.actors.MeasuredActor;
 import com.osmimport.model.OSMAttributedEntity;
 import com.osmimport.model.OSMEntity;
-import com.osmimport.output.model.Field;
-import com.osmimport.output.model.FieldType;
-import com.osmimport.output.model.Table;
+import com.osmimport.structures.model.Field;
+import com.osmimport.structures.model.FieldType;
+import com.osmimport.structures.model.Table;
 
 /**
  * output into CSV fole for a table

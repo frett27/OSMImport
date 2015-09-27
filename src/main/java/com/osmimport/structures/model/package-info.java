@@ -5,4 +5,4 @@
  * @author pfreydiere
  *
  */
-package com.osmimport.output.model;
+package com.osmimport.structures.model;

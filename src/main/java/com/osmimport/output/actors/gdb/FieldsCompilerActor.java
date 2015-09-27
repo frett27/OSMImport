@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.fgdbapi.thindriver.swig.FieldDef;
-import org.fgdbapi.thindriver.swig.FieldType;
 import org.fgdbapi.thindriver.swig.Table;
-import org.fgdbapi.thindriver.swig.VectorOfFieldDef;
 
 import akka.actor.ActorRef;
 import akka.event.Logging;
@@ -20,8 +17,6 @@ import com.osmimport.model.OSMEntity;
 import com.osmimport.output.actors.gdb.messages.CompiledFieldsMessage;
 import com.osmimport.output.fields.AbstractFieldSetter;
 import com.osmimport.output.fields.GeometryFieldSetter;
-import com.osmimport.output.fields.IntegerFieldSetter;
-import com.osmimport.output.fields.StringFieldSetter;
 
 /**
  * this actor compile the fields values for a new row
@@ -46,34 +41,7 @@ public class FieldsCompilerActor extends MeasuredActor {
 
 		log.debug("creating the compiled fields");
 
-		ArrayList<AbstractFieldSetter> r = new ArrayList<AbstractFieldSetter>();
-		VectorOfFieldDef fields = t.getFields();
-		if (fields != null) {
-
-			for (int i = 0; i < fields.size(); i++) {
-				FieldDef fieldDef = fields.get(i);
-
-				FieldType fieldType = fieldDef.getType();
-				String fieldName = fieldDef.getName();
-
-				if (FieldType.fieldTypeGeometry == fieldType) {
-					log.debug("adding geometry field " + fieldName);
-					r.add(new GeometryFieldSetter(fieldName));
-				} else if (FieldType.fieldTypeString == fieldType) {
-					log.debug("adding string field " + fieldName);
-					r.add(new StringFieldSetter(fieldName));
-				} else if (FieldType.fieldTypeInteger == fieldType) {
-					log.debug("adding integer field " + fieldName);
-					r.add(new IntegerFieldSetter(fieldName));
-				} else {
-					log.warning("field type "
-							+ fieldType
-							+ " is unsupported, it will not be added to the table/featureclass");
-				}
-
-			}
-
-		}
+		ArrayList<AbstractFieldSetter> r = GDBOutputTools.createCompiledFieldSetters(t);
 
 		compiledFields = r.toArray(new AbstractFieldSetter[0]);
 

@@ -9,7 +9,8 @@ import org.fgdbapi.thindriver.TableHelper;
 
 import com.osmimport.output.GDBReference;
 import com.osmimport.output.OutSink;
-import com.osmimport.output.model.Table;
+import com.osmimport.structures.model.Structure;
+import com.osmimport.structures.model.Table;
 
 /**
  * Table factory
@@ -24,10 +25,10 @@ public class TableFactory extends AbstractFactory {
 
 		assert value instanceof String;
 
-		TBuilder tb = (TBuilder) builder;
-		tb.currentTable = new Table((String) value);
+		TableBuilderConstruct tb = (TableBuilderConstruct) builder;
+		tb.setCurrentTable(new Table((String) value));
 
-		return tb.currentTable;
+		return tb.getCurrentTable();
 	}
 
 	@Override
@@ -42,9 +43,12 @@ public class TableFactory extends AbstractFactory {
 		if (parent != null && parent instanceof OutSink) {
 			OutSink r = (OutSink) parent;
 			r.addTable(table);
-		} else 
-		{
-			throw new RuntimeException("error, table mmust be inside a gdb or csv element");
+		} else if (builder instanceof TStructure) {
+			TStructure s = (TStructure) builder;
+			s.currentStructure.put(table.getName(), table);
+		} else {
+			throw new RuntimeException(
+					"error, table mmust be inside a gdb or csv element");
 		}
 
 		super.onNodeCompleted(builder, parent, node);

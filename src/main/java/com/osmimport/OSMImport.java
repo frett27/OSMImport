@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.fgdbapi.thindriver.TableHelper;
@@ -28,16 +27,13 @@ import com.osmimport.output.actors.gdb.ChainCompiler;
 import com.osmimport.output.actors.gdb.ChainCompiler.ValidateResult;
 import com.osmimport.output.actors.gdb.CompiledTableOutputActor;
 import com.osmimport.output.actors.gdb.FieldsCompilerActor;
-import com.osmimport.output.model.FeatureClass;
-import com.osmimport.output.model.Field;
-import com.osmimport.output.model.FieldType;
-import com.osmimport.output.model.Table;
 import com.osmimport.parsing.pbf.actors.PbfParsingSubSystemActor;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
 import com.osmimport.parsing.xml.XMLParsingSubSystemActor;
 import com.osmimport.regulation.FlowRegulator;
 import com.osmimport.regulation.MessageRegulatorRegister;
+import com.osmimport.structures.model.Table;
 import com.osmimport.tools.Tools;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -65,7 +61,7 @@ public class OSMImport {
 	private ProcessModel pm;
 
 	/**
-	 * load and copile the import script
+	 * load and compile the import script
 	 * 
 	 * @param script
 	 * @param additionalVariables
