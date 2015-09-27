@@ -112,7 +112,8 @@ public class MCLI {
 
 		CLICommand c = commandsReference.get(command);
 		logger.debug("launching command :" + command);
-
+		
+		
 		GnuParser p = new GnuParser();
 		CommandLine r = null;
 		try {
