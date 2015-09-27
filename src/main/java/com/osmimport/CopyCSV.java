@@ -37,24 +37,24 @@ import com.osmimport.structures.model.Structure;
 import com.osmimport.structures.model.Table;
 import com.osmimport.tools.Tools;
 
-public class CopyCSV {
+public class CopyCSV implements CLICommand {
 
 	static ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory
 			.getLogger(Logger.ROOT_LOGGER_NAME);
 
-	/**
-	 * main command line
-	 * 
-	 * @param args
-	 * @throws Exception
-	 */
-	public static void main(String[] args) throws Exception {
+	@Override
+	public String getCommandName() {
+		return "copycsv";
+	}
 
-		root.setLevel(Level.DEBUG);
+	@Override
+	public String getCommandDescription() {
+		return "copy a csv file into a file geodatabase";
+	}
 
-		System.out.println("Launching Copy Tools");
+	@Override
+	public Options getOptions() {
 
-		GnuParser p = new GnuParser();
 		Options options = new Options();
 		Option input = OptionBuilder.withArgName("input").hasArg()
 				.withLongOpt("input").isRequired().withDescription("input")
@@ -77,28 +77,27 @@ public class CopyCSV {
 		options.addOption(output);
 		options.addOption(structure);
 
+		return options;
+	}
+
+	@Override
+	public void execute(CommandLine cmdline) throws Exception {
+
+		System.out.println("Launching Copy Tools");
+
 		File finput = null;
 		File foutput = null;
 
 		File structureFile = null;
 
-		try {
-			CommandLine c = p.parse(options, args);
+		String inputfile = cmdline.getOptionValue('i');
+		finput = new File(inputfile);
 
-			String inputfile = c.getOptionValue('i');
-			finput = new File(inputfile);
+		String outputfile = cmdline.getOptionValue('o');
+		foutput = new File(outputfile);
 
-			String outputfile = c.getOptionValue('o');
-			foutput = new File(outputfile);
-
-			String sfile = c.getOptionValue('s');
-			structureFile = new File(sfile);
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			new HelpFormatter().printHelp("osmimport", options);
-			System.exit(1);
-		}
+		String sfile = cmdline.getOptionValue('s');
+		structureFile = new File(sfile);
 
 		assert finput != null;
 		assert foutput != null;
@@ -219,7 +218,7 @@ public class CopyCSV {
 									try {
 										f.setValue(entity.getFields().get(
 												f.getFieldName()));
-										//System.out.println(lineNumber);
+										// System.out.println(lineNumber);
 										f.store(r);
 									} catch (Exception ex) {
 										root.error("error in storing value on "
@@ -263,6 +262,11 @@ public class CopyCSV {
 
 		} // for
 
+	}
+	
+	@Override
+	public String getCommandLineStructure() {
+		return " " + getCommandName();
 	}
 
 }
