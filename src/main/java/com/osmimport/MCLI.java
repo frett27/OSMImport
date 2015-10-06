@@ -14,6 +14,9 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+
 /**
  * Multiplexer for commands associated to OSMImport
  * 
@@ -94,11 +97,17 @@ public class MCLI {
 		}
 	}
 
+	private static ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory
+			.getLogger(Logger.ROOT_LOGGER_NAME);
+
 	public static void main(String[] args) throws Exception {
+
 		System.out.println("OSM Import");
 
+		root.setLevel(Level.INFO);
+		
+		
 		if (args.length < 1) {
-
 			printGeneralUsage();
 		}
 

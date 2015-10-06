@@ -38,10 +38,11 @@ import com.osmimport.structures.model.Table;
 import com.osmimport.tools.Tools;
 
 public class CopyCSV implements CLICommand {
+	
+	private static ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+			.getLogger(CopyCSV.class);
 
-	static ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory
-			.getLogger(Logger.ROOT_LOGGER_NAME);
-
+	
 	@Override
 	public String getCommandName() {
 		return "copycsv";
@@ -221,7 +222,7 @@ public class CopyCSV implements CLICommand {
 										// System.out.println(lineNumber);
 										f.store(r);
 									} catch (Exception ex) {
-										root.error("error in storing value on "
+										logger.error("error in storing value on "
 												+ f + " :" + ex.getMessage(),
 												ex);
 									}
@@ -231,17 +232,17 @@ public class CopyCSV implements CLICommand {
 								r.delete();
 								long c = atomicLong.getAndAdd(1);
 								if (c % 100000 == 0) {
-									root.info("" + c + " elements copied");
+									logger.info("" + c + " elements copied");
 								}
 
 							} catch (Exception ex) {
-								root.error("error in storing entity " + entity);
+								logger.error("error in storing entity " + entity);
 							}
 						}
 
 						@Override
 						public void invalidLine(long lineNumber, String line) {
-							root.error("error parsing {}", line);
+							logger.error("error parsing {}", line);
 						}
 					});
 
