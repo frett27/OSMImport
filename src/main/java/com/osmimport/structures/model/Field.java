@@ -27,4 +27,9 @@ public class Field {
 		return length;
 	}
 	
+	@Override
+	public String toString() {
+		return name + "(type :" + type + ", length:" + length + ")";
+	}
+	
 }

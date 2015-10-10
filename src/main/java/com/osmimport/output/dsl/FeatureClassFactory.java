@@ -25,7 +25,7 @@ public class FeatureClassFactory extends AbstractFactory {
 			Object value, Map attributes) throws InstantiationException,
 			IllegalAccessException {
 
-		System.out.println("FeatureClassFactory");
+		// System.out.println("FeatureClassFactory");
 
 		assert value instanceof List;
 		List l = (List) value;

@@ -29,7 +29,7 @@ public class MCLI {
 			.getLogger(MCLI.class);
 
 	private static CLICommand[] registeredCommands = { new HelpCLI(),
-			new ImportCLI(), new CopyCSV() };
+			new ImportCLI(), new CopyCSV(), new ExportFGDB() };
 
 	public static class HelpCLI implements CLICommand {
 

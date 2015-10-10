@@ -103,4 +103,22 @@ public class Tools {
 		return th;
 	}
 
+	/**
+	 * add spaces in the string builder
+	 * @param sb
+	 * @param nb
+	 */
+	public static void space(StringBuilder sb,int nb)
+	{
+		assert sb != null;
+		
+		if (nb >=0)
+		{
+			for (int i = 0 ; i < nb;i++)
+			{
+				sb.append(' ');
+			}
+		}
+	}
+	
 }

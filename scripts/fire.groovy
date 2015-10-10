@@ -9,15 +9,28 @@
 	
 		// défini un flux de sortie, et description de la structure
 		sortie = gdb(path : var_gdb) {
-				featureclass("firestations", ESRI_GEOMETRY_POLYLINE,"WGS84") {
-				_integer('id')
+				featureclass("firestations", ESRI_GEOMETRY_POINT,"WGS84") {
+				_long('id')
 				_text("type")
 				_text("name")
 			}
+            featureclass("hydrant", ESRI_GEOMETRY_POINT, "WGS84") {
+
+				_long('id')
+				_text("type")
+				_text("diameter")
+				_text("pressure")
+				_text("position")
+                _integer("count")
+            }
+
+           
+
+
 		}
 	
-		// a stream
-		b = stream(osmstream, label:"streets") {
+		// a firestation stream
+		firestations = stream(osmstream, label:"firestation") {
 	
 			filter {
 				 e -> isPoint(e) && has(e,"amenity","fire_station")
@@ -30,10 +43,31 @@
 			}
 	
 		}
+
+        hydrant = stream(osmstream, label:"hydrant") {
+            filter {
+                e -> isPoint(e) && has(e, "emergency", "fire_hydrant")
+            }
+
+            transform { e ->
+                on(e).
+                map("fire_hydrant:type").into("type").
+                map("fire_hydrant:diameter").into("diameter").
+                map("fire_hydrant:pressure").into("pressure").
+                map("fire_hydrant:position").into("position").
+                map("fire_hydrant:count").into("count").
+                newValue("id", e.id).
+                end()
+
+            }
+            
+        }
+    
 	
 		
 		// flux de sortie
-		out(streams : [b], sink : sortie, tablename:"firestations")
+		out(streams : [firestations], sink : sortie, tablename:"firestations")
+		out(streams : [hydrant], sink : sortie, tablename:"hydrant")
 	
 	
 }

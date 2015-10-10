@@ -1,48 +1,42 @@
 package com.osmimport;
 
-import groovy.lang.Binding;
-import groovy.util.GroovyScriptEngine;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
 import org.fgdbapi.thindriver.swig.Geodatabase;
 import org.fgdbapi.thindriver.swig.Row;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-
 import com.osmimport.input.csv.CSVParser;
 import com.osmimport.input.csv.ParserCallBack;
 import com.osmimport.model.OSMAttributedEntity;
 import com.osmimport.output.actors.gdb.GDBOutputTools;
-import com.osmimport.output.dsl.TStructure;
 import com.osmimport.output.fields.AbstractFieldSetter;
 import com.osmimport.structures.model.Structure;
 import com.osmimport.structures.model.Table;
+import com.osmimport.tools.StructureTools;
 import com.osmimport.tools.Tools;
 
+/**
+ * this command push a csv file to a fgdb
+ * 
+ * @author pfreydiere
+ * 
+ */
 public class CopyCSV implements CLICommand {
-	
+
 	private static ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
 			.getLogger(CopyCSV.class);
 
-	
 	@Override
 	public String getCommandName() {
 		return "copycsv";
@@ -63,7 +57,8 @@ public class CopyCSV implements CLICommand {
 
 		Option output = OptionBuilder.withArgName("output").hasArg()
 				.withLongOpt("output").isRequired()
-				.withDescription("destination output file geodatabase").create('o');
+				.withDescription("destination output file geodatabase")
+				.create('o');
 
 		Option structure = OptionBuilder
 				.withArgName("structure")
@@ -105,68 +100,22 @@ public class CopyCSV implements CLICommand {
 		assert structureFile != null;
 
 		CopyCSV c = new CopyCSV();
-		c.readStructure(structureFile);
+		logger.debug("reading structure file :{}", structureFile);
+		structure = StructureTools.readStructure(structureFile);
+		logger.debug("structure file read : {}", structure);
 
 		c.input = finput;
 		c.output = foutput;
 
+		logger.debug("launch copy");
 		c.copy();
+		logger.debug("copy done");
 
 	}
 
 	private File input;
 	private File output;
 	private Structure structure;
-
-	public Structure readStructure(File structureFile) throws Exception {
-		assert structureFile != null;
-		assert structureFile.exists();
-
-		CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
-
-		// custom imports for ease the use of the geometry types
-		ImportCustomizer icz = new ImportCustomizer();
-		icz.addStarImports("com.osmimport", "com.esri.core.geometry",
-				"com.osmimport.model");
-		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
-				"ESRI_GEOMETRY_POINT");
-		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
-				"ESRI_GEOMETRY_MULTIPOINT");
-		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
-				"ESRI_GEOMETRY_POLYLINE");
-		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
-				"ESRI_GEOMETRY_POLYGON");
-		icz.addStaticImport("org.fgdbapi.thindriver.xml.EsriGeometryType",
-				"ESRI_GEOMETRY_MULTI_PATCH");
-
-		compilerConfiguration.addCompilationCustomizers(icz);
-
-		File parentFile = structureFile.getParentFile();
-
-		if (parentFile == null) {
-			parentFile = new File("."); // fix, the file is null when a name is
-										// directly passed
-		}
-
-		GroovyScriptEngine gse = new GroovyScriptEngine(
-				new URL[] { parentFile.toURL() });
-		gse.setConfig(compilerConfiguration);
-		Binding binding = new Binding();
-		binding.setVariable("builder", new TStructure());
-		binding.setVariable("out", System.out);
-
-		Object result = gse.run(structureFile.getName(), binding);
-
-		if (result == null || !(result instanceof Structure)) {
-			throw new Exception(
-					"invalid script, it must return the structure, the script return :"
-							+ result);
-		}
-
-		structure = (Structure) result;
-		return structure;
-
-	}
 
 	public void copy() throws Exception {
 
@@ -222,9 +171,10 @@ public class CopyCSV implements CLICommand {
 										// System.out.println(lineNumber);
 										f.store(r);
 									} catch (Exception ex) {
-										logger.error("error in storing value on "
-												+ f + " :" + ex.getMessage(),
-												ex);
+										logger.error(
+												"error in storing value on "
+														+ f + " :"
+														+ ex.getMessage(), ex);
 									}
 								}
 
@@ -236,7 +186,8 @@ public class CopyCSV implements CLICommand {
 								}
 
 							} catch (Exception ex) {
-								logger.error("error in storing entity " + entity);
+								logger.error("error in storing entity "
+										+ entity, ex);
 							}
 						}
 
@@ -264,7 +215,7 @@ public class CopyCSV implements CLICommand {
 		} // for
 
 	}
-	
+
 	@Override
 	public String getCommandLineStructure() {
 		return " " + getCommandName();

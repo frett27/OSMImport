@@ -34,6 +34,19 @@ class Transform {
 		this
 	}
 	
+	Transform keep(List<String> fields)
+	{
+		if (!fields) {
+			return this
+		}
+		
+		fields.each {
+			keep(it)
+		}
+		
+		this
+	}
+	
 	Transform newValue(String field, Object value)
 	{
 		if (field == null) {

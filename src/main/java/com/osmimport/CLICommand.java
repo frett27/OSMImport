@@ -17,14 +17,15 @@ public interface CLICommand {
 	String getCommandName();
 
 	/**
-	 * description of the command
+	 * description of the command for enrich commandline help
 	 * 
 	 * @return
 	 */
 	String getCommandDescription();
 
 	/**
-	 * launching options
+	 * launching options, used for parsing elements and check all elements are syntaxically correct
+	 * these options are also used for help description for the command
 	 * 
 	 * @return
 	 */
@@ -33,14 +34,15 @@ public interface CLICommand {
 	/**
 	 * get the command line structure for the help
 	 * 
-	 * @return
+	 * @return return the command line structure for the command
 	 */
 	String getCommandLineStructure();
 
 	/**
-	 * execute the command with the parsed command line
+	 * execute the command with command line, 
+	 * the command is responsible to parse and grammatically check the options and parameters
 	 * 
-	 * @param cmdline
+	 * @param cmdline the command line
 	 * @throws Exception
 	 */
 	void execute(CommandLine cmdline) throws Exception;
