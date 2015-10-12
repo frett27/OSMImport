@@ -1,7 +1,3 @@
-import com.esri.core.geometry.Geometry
-import com.osmimport.model.OSMEntity
-import com.osmimport.model.OSMEntityGeometry
-
 
 // construction de la chaine
 builder.build(osmstream) {
@@ -19,25 +15,18 @@ builder.build(osmstream) {
 	b = stream(osmstream, label:"streets") {
 
 		filter {
-			 e -> e instanceof OSMEntity &&
-			   e.geometryType == Geometry.Type.Polyline  && e.getFields() && e.getFields().containsKey("highway")
+			 e -> isPolyline(e) && has(e,"highway")
 		}
 		
 		transform {  e ->
-			String t = e.getFields().get("highway")
-			String name = e.getFields()?.get("name")
-			e.getFields()?.clear()
-			e.setValue("id",e.id)
-			e.setValue("name", name)
-			e.setValue("type", t)
-			return e;
+            on(e).keep("name").keep("highway").newValue("id",e.id).end()
 		}
 
 	}
 
 	
 	// flux de sortie
-	out(streams : [b], gdb : sortie, tablename:"streets")
+	out(streams : [b], sink : sortie, tablename:"streets")
 
 	
 }

@@ -92,7 +92,7 @@ public class CompiledTableOutputActor extends MeasuredActor {
 				}
 
 				table.insertRow(r);
-				r.delete();
+				// r.delete(); 
 				
 			}
 

@@ -25,7 +25,7 @@ This project use dirsuptive technology, an internal actors system using big data
 	- **Scripts are Easy to share and maintain** (a single human readable .script file)
 - **Multiple destinations output on one run** (ability to merge import scripts)
 - **Way reconstruction**, **Polygon reconstruction**, to have a proper GIS geometry, handled by the ESRI geometry library
-- Automatic **RAM memory management**
+- Automatic **RAM memory management** (manage the RAM consumption)
 
 
 #Usage context - known usage
@@ -79,7 +79,9 @@ Contributions are welcome on :
 - <strike>handling polygons</strike>
 - <strike>tables support</strike>
 - <strike>csv text files support</strike>
-- Work on simplify the writing of scripts
+- <strike>Work on simplify the writing of scripts</strike>
+- fix erroneous polygon reconstruction
+- propose a sample script gallery for common operations
 - error logs, and feedbacks
 - clean logs
 - extend fields type to Date (supported fields: integer, string, long, floats)
