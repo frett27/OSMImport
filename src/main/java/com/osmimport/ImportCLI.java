@@ -66,6 +66,7 @@ public class ImportCLI implements CLICommand {
 		options.addOption(script);
 		options.addOption(variables);
 		options.addOption(eventBuffer);
+		options.addOption(maxways);
 		return options;
 	}
 

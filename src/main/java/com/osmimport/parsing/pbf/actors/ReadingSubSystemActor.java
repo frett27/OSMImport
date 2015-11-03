@@ -308,9 +308,9 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 			// velocity between 0 and 1000
 
-			double maxTimeToWaitIf0 = 10.0;
+			double maxTimeToWaitIf0 = 5.0;
 			
-			double timeToWaitif1000 = 0.005;
+			double timeToWaitif1000 = 0.001;
 
 			double t = maxTimeToWaitIf0 - maxTimeToWaitIf0 / 1000.0 * v
 					+ timeToWaitif1000;

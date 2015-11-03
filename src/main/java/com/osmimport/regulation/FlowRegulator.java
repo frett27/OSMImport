@@ -28,9 +28,9 @@ public class FlowRegulator extends MeasuredActor {
 	private long consigne;
 
 	private double vel;
-	private double Kp = 0.000004;
-	private double Ki = 0.0000004;
-	private double Kd = 0.000005;
+	private double Kp = 0.00006;
+	private double Ki = 0.000006;
+	private double Kd = 0.00005;
 
 	public FlowRegulator(String counterName, long consigne) {
 		this.consigne = consigne;

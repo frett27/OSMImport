@@ -67,8 +67,8 @@ builder.build(osmstream) {
 	
 	
 	// flux de sortie
-	out(streams : [b,l], gdb : sortie, tablename:"buildings")
-	// out(streams : l, gdb : sortie, tablename:"buildings_line")
+	out(streams : [b,l], sink : sortie, tablename:"buildings")
+	// out(streams : l, sink : sortie, tablename:"buildings_line")
 	
 }
 
