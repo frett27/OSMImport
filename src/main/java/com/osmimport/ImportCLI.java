@@ -59,7 +59,7 @@ public class ImportCLI implements CLICommand {
 				.withType(Long.class).create('e');
 
 		Option maxways = OptionBuilder.withArgName("maxways").hasArg()
-				.withDescription("Number of ways to handle by pass")
+				.withDescription("Number of ways to handle by pass for each worker")
 				.withType(Long.class).create("m");
 
 		options.addOption(input);
