@@ -36,7 +36,8 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 
 	protected ActorRef flowRegulator;
 
-	public AbstractParsingSubSystem(ActorRef flowRegulator, ActorRef output) {
+	public AbstractParsingSubSystem(ActorRef flowRegulator, ActorRef output,
+			Long maxWaysToCreateForWorker) {
 		this.flowRegulator = flowRegulator;
 
 		polygonDispatcher = getContext().actorOf(
@@ -54,9 +55,14 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 
 		final long nbofworkers = Runtime.getRuntime().availableProcessors();
 
-		final long maxwaysToConstruct = (long) ((Runtime.getRuntime()
-				.maxMemory() * 1.0 - 3_000_000_000.0) / ( 1_000_000_000.0 ) * 240_000 / nbofworkers);
-				   
+		long nbways4worker;
+		if (maxWaysToCreateForWorker != null) {
+			nbways4worker = maxWaysToCreateForWorker;
+		} else {
+			nbways4worker = (long) ((Runtime.getRuntime().maxMemory() * 1.0 - 3_000_000_000.0) / (1_000_000_000.0) * 240_000 / nbofworkers);
+		}
+
+		final long maxwaysToConstruct = nbways4worker;
 
 		for (int i = 0; i < nbofworkers; i++) {
 			ActorRef worker = getContext().actorOf(

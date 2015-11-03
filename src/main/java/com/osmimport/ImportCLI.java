@@ -15,7 +15,7 @@ public class ImportCLI implements CLICommand {
 	public String getCommandName() {
 		return "import";
 	}
-	
+
 	@Override
 	public String getCommandLineStructure() {
 		return " " + getCommandName();
@@ -29,9 +29,14 @@ public class ImportCLI implements CLICommand {
 	@Override
 	public Options getOptions() {
 		Options options = new Options();
-		Option input = OptionBuilder.withArgName("input").hasArg()
-				.withLongOpt("input").isRequired()
-				.withDescription("[REQUIRED] input PBF or OSM file, this can be .pbf or .osm files ").create('i');
+		Option input = OptionBuilder
+				.withArgName("input")
+				.hasArg()
+				.withLongOpt("input")
+				.isRequired()
+				.withDescription(
+						"[REQUIRED] input PBF or OSM file, this can be .pbf or .osm files ")
+				.create('i');
 
 		Option script = OptionBuilder
 				.withArgName("streams")
@@ -49,19 +54,27 @@ public class ImportCLI implements CLICommand {
 						"[OPTIONAL] additional variables definition that are mapped into var[name] in the script")
 				.withValueSeparator(',').create('v');
 
+		Option eventBuffer = OptionBuilder.withArgName("eventbuffer").hasArg()
+				.withDescription("Buffer of events to maintain")
+				.withType(Long.class).create('e');
+
+		Option maxways = OptionBuilder.withArgName("maxways").hasArg()
+				.withDescription("Number of ways to handle by pass")
+				.withType(Long.class).create("m");
+
 		options.addOption(input);
 		options.addOption(script);
 		options.addOption(variables);
+		options.addOption(eventBuffer);
 		return options;
 	}
 
 	@Override
 	public void execute(CommandLine c) throws Exception {
-		
+
 		if (Runtime.getRuntime().maxMemory() < 5000000000L)
 			throw new Exception(
 					"Command line must be launched with a least 5go of memory, using -Xmx5g");
-
 
 		Map<String, String> variableMap = new HashMap<>();
 
@@ -93,9 +106,20 @@ public class ImportCLI implements CLICommand {
 
 		OSMImport osmImport = new OSMImport();
 
+		String maxWys = c.getOptionValue("m");
+		if (maxWys != null) {
+			osmImport.setMaxWaysToRemember(Long.parseLong(maxWys));
+		}
+
+		String events = c.getOptionValue("e");
+		if (events != null) {
+			osmImport.setOverridenEventBuffer(Long.parseLong(events));
+		}
+
 		// load and compile script to be sure there are no errors in it
 		osmImport.loadAndCompileScript(sf, variableMap);
 
+		// run the import
 		osmImport.run(inputpbfosmfile);
 
 	}

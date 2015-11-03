@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import org.fgdbapi.thindriver.TableHelper;
 import org.fgdbapi.thindriver.swig.FGDBJNIWrapper;
 import org.fgdbapi.thindriver.swig.Geodatabase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -47,9 +49,11 @@ import com.typesafe.config.ConfigFactory;
  */
 public class OSMImport {
 
-	public OSMImport() {
+	private static Logger log = LoggerFactory.getLogger(OSMImport.class);
 
-	}
+	private Long maxWaysToRemember = null;
+
+	private Long overridenEventBuffer = null;
 
 	/**
 	 * reference destinations by path
@@ -60,6 +64,27 @@ public class OSMImport {
 	 * the process model
 	 */
 	private ProcessModel pm;
+
+	public OSMImport() {
+
+	}
+
+	/**
+	 * define the overriden max ways to remember, other wise, use the predefined
+	 * configuration
+	 * 
+	 * @param maxWaysToRemember
+	 */
+	public void setMaxWaysToRemember(Long maxWaysToRemember) {
+		this.maxWaysToRemember = maxWaysToRemember;
+	}
+
+	/**
+	 * define an overriden event buffer
+	 */
+	public void setOverridenEventBuffer(Long overridenEventBuffer) {
+		this.overridenEventBuffer = overridenEventBuffer;
+	}
 
 	/**
 	 * load and compile the import script
@@ -272,14 +297,23 @@ public class OSMImport {
 
 		Config config = ConfigFactory.load();
 
+		log.debug("get osmcluster config");
 		Config osmclusterconfig = config.getConfig("osmcluster");
 
 		ActorSystem sys = ActorSystem.create("osmcluster", osmclusterconfig);
 
-		long eventbuffer = osmclusterconfig.getLong("eventbuffer");
-		// scale for the number of available processors
-		eventbuffer = eventbuffer * Runtime.getRuntime().availableProcessors()
-				/ 4;
+		long eventbuffer;
+
+		if (overridenEventBuffer != null) {
+			eventbuffer = overridenEventBuffer;
+		} else {
+
+			eventbuffer = osmclusterconfig.getLong("eventbuffer");
+			// scale for the number of available processors
+			eventbuffer = eventbuffer
+					* Runtime.getRuntime().availableProcessors() / 4;
+		}
+		log.info("eventbuffer to maintain :{}", eventbuffer);
 
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
 				"output", eventbuffer));
@@ -385,7 +419,8 @@ public class OSMImport {
 		}
 
 		ActorRef parsingSubSystem = sys.actorOf(Props.create(
-				parsingSubSystemClass, flowRegulator, resultActor));
+				parsingSubSystemClass, flowRegulator, resultActor,
+				maxWaysToRemember));
 		flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem),
 				ActorRef.noSender());
 

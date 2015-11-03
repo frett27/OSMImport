@@ -65,8 +65,7 @@ public class ParsingOutput extends MeasuredActor {
 				log.info("All Points have been processed");
 			}
 			
-			
-
+		
 		}  else {
 			unhandled(message);
 		}

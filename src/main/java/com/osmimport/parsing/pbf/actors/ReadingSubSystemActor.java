@@ -123,7 +123,7 @@ public class ReadingSubSystemActor extends MeasuredActor {
 		getContext()
 				.system()
 				.scheduler()
-				.scheduleOnce(Duration.create(10, TimeUnit.SECONDS), getSelf(),
+				.scheduleOnce(Duration.create(2, TimeUnit.SECONDS), getSelf(),
 						TICK_FOR_PID_UPDATE, getContext().dispatcher(), null);
 	}
 
@@ -308,7 +308,8 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 			// velocity between 0 and 1000
 
-			double maxTimeToWaitIf0 = 1.0;
+			double maxTimeToWaitIf0 = 10.0;
+			
 			double timeToWaitif1000 = 0.005;
 
 			double t = maxTimeToWaitIf0 - maxTimeToWaitIf0 / 1000.0 * v
@@ -329,7 +330,8 @@ public class ReadingSubSystemActor extends MeasuredActor {
 			} while (currentVelGetter.get() < 1);
 
 		} catch (Exception ex) {
-
+			log.error("error in regulation :" + ex.getMessage());
+			log.debug("error :" + ex.getMessage(), ex);
 		}
 	}
 

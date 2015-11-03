@@ -10,8 +10,8 @@ public class XMLParsingSubSystemActor extends AbstractParsingSubSystem {
 
 	
 	
-	public XMLParsingSubSystemActor(ActorRef flowRegulator, ActorRef output) {
-		super(flowRegulator, output);
+	public XMLParsingSubSystemActor(ActorRef flowRegulator, ActorRef output, Long maxWysToConstruct) {
+		super(flowRegulator, output, maxWysToConstruct);
 	}
 
 	@Override

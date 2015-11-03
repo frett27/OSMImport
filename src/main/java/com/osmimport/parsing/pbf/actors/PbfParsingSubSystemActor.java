@@ -19,8 +19,8 @@ public class PbfParsingSubSystemActor extends AbstractParsingSubSystem {
 	private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
 
-	public PbfParsingSubSystemActor(ActorRef flowRegulator, ActorRef output) {
-		super(flowRegulator, output);
+	public PbfParsingSubSystemActor(ActorRef flowRegulator, ActorRef output, Long maxWysToConstruct) {
+		super(flowRegulator, output, maxWysToConstruct);
 
 	}
 	
