@@ -203,10 +203,10 @@ public class CopyCSV implements CLICommand {
 					System.out.println("successfully created");
 
 				} finally {
-
-					newTable.freeWriteLock();
+					
 					newTable.setLoadOnlyMode(false);
-
+					newTable.freeWriteLock();
+					
 				}
 			} finally {
 				geodatabase.closeTable(newTable);
