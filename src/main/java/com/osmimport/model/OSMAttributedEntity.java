@@ -1,6 +1,5 @@
 package com.osmimport.model;
 
-import java.io.Externalizable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +10,15 @@ public class OSMAttributedEntity {
 
 	protected OSMAttributedEntity() {
 
+	}
+
+	public OSMAttributedEntity copy() {
+		OSMAttributedEntity ep = new OSMAttributedEntity();
+		ep.id = id;
+		if (fields != null) {
+			ep.setFields(new HashMap<String, Object>(fields));
+		}
+		return ep;
 	}
 
 	/**

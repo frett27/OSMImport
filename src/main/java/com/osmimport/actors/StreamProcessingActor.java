@@ -125,7 +125,9 @@ public class StreamProcessingActor extends MeasuredActor {
 			List<OSMAttributedEntity> l = null;
 
 			if (transform != null) {
-				l = transform.transform(e);
+				// clone the entity to maintain safety
+				// WARN this is a performance issue, but save time in handling the process
+				l = transform.transform(e.copy());
 			} else {
 				l = new ArrayList<OSMAttributedEntity>();
 				l.add(e);

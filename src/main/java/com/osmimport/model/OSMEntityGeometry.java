@@ -14,8 +14,7 @@ import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Geometry.Type;
 
 public class OSMEntityGeometry extends OSMEntity {
-	
-	
+
 	/**
 	 * the geometry
 	 */
@@ -26,16 +25,27 @@ public class OSMEntityGeometry extends OSMEntity {
 	 */
 	private Geometry.Type type;
 
-	protected OSMEntityGeometry()
-	{
+	protected OSMEntityGeometry() {
 		super();
 	}
-	
+
 	public OSMEntityGeometry(long id, Geometry g, Map<String, Object> fields) {
 		super(id, fields);
 		assert g != null;
 		this.geom = g;
 		this.type = g.getType();
+	}
+
+	@Override
+	public OSMAttributedEntity copy() {
+		OSMEntityGeometry eg = new OSMEntityGeometry();
+		if (fields != null)
+			eg.setFields(new HashMap<String, Object>(fields));
+		eg.id = id;
+		eg.type = type;
+		eg.geom = geom.copy();
+
+		return eg;
 	}
 
 	public Geometry getGeometry() {
