@@ -64,8 +64,6 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 
 		final long maxwaysToConstruct = nbways4worker;
 
-		log.info("maxways to construct for all actors :" + maxwaysToConstruct);
-
 		for (int i = 0; i < nbofworkers; i++) {
 			ActorRef worker = getContext().actorOf(
 					Props.create(WayConstructWorkerActor.class, dispatcher,

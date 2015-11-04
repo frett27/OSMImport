@@ -60,7 +60,7 @@ public class ImportCLI implements CLICommand {
 
 		Option maxways = OptionBuilder.withArgName("maxways").hasArg()
 				.withDescription("Number of ways to handle by pass for each worker")
-				.withType(Long.class).create('m');
+				.withType(Long.class).create("m");
 
 		options.addOption(input);
 		options.addOption(script);
@@ -107,12 +107,12 @@ public class ImportCLI implements CLICommand {
 
 		OSMImport osmImport = new OSMImport();
 
-		String maxWys = c.getOptionValue('m');
+		String maxWys = c.getOptionValue("m");
 		if (maxWys != null) {
 			osmImport.setMaxWaysToRemember(Long.parseLong(maxWys));
 		}
 
-		String events = c.getOptionValue('e');
+		String events = c.getOptionValue("e");
 		if (events != null) {
 			osmImport.setOverridenEventBuffer(Long.parseLong(events));
 		}

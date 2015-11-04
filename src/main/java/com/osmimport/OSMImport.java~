@@ -314,7 +314,6 @@ public class OSMImport {
 					* Runtime.getRuntime().availableProcessors() / 4;
 		}
 		log.info("eventbuffer to maintain :{}", eventbuffer);
-		log.info("maxways to handle for each worker : {}", this.maxWaysToRemember);
 
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
 				"output", eventbuffer));
