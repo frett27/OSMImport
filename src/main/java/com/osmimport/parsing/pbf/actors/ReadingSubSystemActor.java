@@ -115,7 +115,8 @@ public class ReadingSubSystemActor extends MeasuredActor {
 	private File currentFile = null;
 
 	private double currentVel = 100;
-
+	
+	
 	@Override
 	public void preStart() throws Exception {
 		super.preStart();
@@ -194,7 +195,7 @@ public class ReadingSubSystemActor extends MeasuredActor {
 							getSelf());
 					nbofRead.inc();
 					timer.time();
-
+					
 					SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
 							"hh:mm:ss");
 					String start = "Begin :"

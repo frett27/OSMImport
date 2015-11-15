@@ -3,10 +3,12 @@ package com.osmimport.parsing.pbf.actors;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import akka.actor.ActorRef;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import scala.concurrent.duration.Duration;
 
 import com.osmimport.actors.MeasuredActor;
 import com.osmimport.messages.MessageNodes;
@@ -39,6 +41,12 @@ public class WayParsingDispatcher extends MeasuredActor {
 	 * number of file read
 	 */
 	private int startreadingFileCounter = 0;
+
+	
+	private int attemptsToAskForNeedMoreRead = MAX_ATTEMPTS_TO_END_PROCESS;
+
+	private static final int MAX_ATTEMPTS_TO_END_PROCESS = 10;
+
 
 	public WayParsingDispatcher(ActorRef outputRef, ActorRef polygonDispatcher,
 			ActorRef flowRegulator) {
@@ -78,6 +86,9 @@ public class WayParsingDispatcher extends MeasuredActor {
 
 			} else if (m == MessageClusterRegistration.ASK_IF_NEED_MORE_READ) {
 
+				
+				
+				
 				// supervisor tell if all blocks have been completed
 				if (stillneedmoreread || startreadingFileCounter <= 3) {
 					// respond to the state
@@ -86,13 +97,32 @@ public class WayParsingDispatcher extends MeasuredActor {
 							MessageClusterRegistration.NEED_MORE_READ,
 							getSelf());
 				} else {
-					log.info("All Blocks read");
-					tell(getSender(),
-							MessageClusterRegistration.ALL_BLOCKS_READ,
-							getSelf());
-
-					tell(getContext().parent(),
-							MessageParsingSystemStatus.END_JOB, getSelf());
+					
+					// two cases : the workers doesn't have respond yet
+					// or nothing to process
+					
+					if (!stillneedmoreread && attemptsToAskForNeedMoreRead > 0)
+					{
+						
+						getContext()
+						.system()
+						.scheduler()
+						.scheduleOnce(Duration.create(10, TimeUnit.SECONDS), getSelf(),
+								MessageClusterRegistration.ASK_IF_NEED_MORE_READ, getContext().dispatcher(), null);
+						
+					} else 
+					{
+					
+					
+						log.info("All Blocks read");
+						tell(getSender(),
+								MessageClusterRegistration.ALL_BLOCKS_READ,
+								getSelf());
+	
+						tell(getContext().parent(),
+								MessageParsingSystemStatus.END_JOB, getSelf());
+						
+					}
 
 				}
 
@@ -111,6 +141,7 @@ public class WayParsingDispatcher extends MeasuredActor {
 			if (message == MessageParsingSystemStatus.START_READING_FILE) {
 				startreadingFileCounter++;
 				stillneedmoreread = false;
+				attemptsToAskForNeedMoreRead = MAX_ATTEMPTS_TO_END_PROCESS;
 			}
 
 			log.info("message to all workers :" + message);

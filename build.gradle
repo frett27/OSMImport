@@ -5,7 +5,7 @@ apply plugin: 'groovy'
 apply plugin: 'distribution'
 
 group = 'osmtools'
-version = '0.7.6-SNAPSHOT'
+version = '0.7.7-SNAPSHOT'
 
 description = """tools for handling import of osm datas into filegeodatabases"""
 
@@ -57,7 +57,7 @@ dependencies {
 	// tools for metrics reporting
     compile group: 'com.yammer.metrics', name: 'metrics-core', version:'2.2.0'
 	// file geodatabase dependency
-    compile group: 'org.jfgdb', name: 'jfgdb', version:'0.1.2'
+    compile group: 'org.jfgdb', name: 'jfgdb', version:'0.1.1'
 	// groovy for import DSL
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version:'2.3.7'
 
