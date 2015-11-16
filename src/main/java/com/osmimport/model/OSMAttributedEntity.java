@@ -7,6 +7,7 @@ import java.util.Map;
 public class OSMAttributedEntity {
 
 	protected long id;
+
 	protected Map<String, Object> fields;
 
 	protected OSMAttributedEntity() {
@@ -75,6 +76,18 @@ public class OSMAttributedEntity {
 	@Override
 	public String toString() {
 		return "" + id + "(" + fields + ")";
+	}
+
+	
+	public OSMAttributedEntity copy() {
+
+		Map<String, Object> f = this.fields;
+		if (f != null) {
+			f = new HashMap<String, Object>(f);
+		}
+
+		return new OSMAttributedEntity(this.id, f);
+
 	}
 
 }

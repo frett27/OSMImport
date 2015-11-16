@@ -129,5 +129,19 @@ public class OSMEntityGeometry extends OSMEntity {
 	public void writeExternal(ObjectOutput out) throws IOException {
 		writeExternalMapDB(out);
 	}
+	
+	@Override
+	public OSMAttributedEntity copy() {
+
+
+		Map<String, Object> f = this.fields;
+		if (f != null) {
+			f = new HashMap<String, Object>(f);
+		}
+
+		return new OSMEntityGeometry(this.id,this.geom, f);
+		
+	}
+	
 
 }

@@ -125,7 +125,7 @@ public class StreamProcessingActor extends MeasuredActor {
 			List<OSMAttributedEntity> l = null;
 
 			if (transform != null) {
-				l = transform.transform(e);
+				l = transform.transform(e.copy());
 			} else {
 				l = new ArrayList<OSMAttributedEntity>();
 				l.add(e);

@@ -122,4 +122,17 @@ public class OSMEntityPoint extends OSMEntity {
 	}
 
 	
+	@Override
+	public OSMAttributedEntity copy() {
+
+
+		Map<String, Object> f = this.fields;
+		if (f != null) {
+			f = new HashMap<String, Object>(f);
+		}
+
+		return new OSMEntityPoint(this.id,this.x, this.y, f);
+		
+	}
+	
 }
