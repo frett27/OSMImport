@@ -87,8 +87,6 @@ public class WayParsingDispatcher extends MeasuredActor {
 			} else if (m == MessageClusterRegistration.ASK_IF_NEED_MORE_READ) {
 
 				
-				
-				
 				// supervisor tell if all blocks have been completed
 				if (stillneedmoreread || startreadingFileCounter <= 3) {
 					// respond to the state
@@ -101,19 +99,21 @@ public class WayParsingDispatcher extends MeasuredActor {
 					// two cases : the workers doesn't have respond yet
 					// or nothing to process
 					
-					if (!stillneedmoreread && attemptsToAskForNeedMoreRead > 0)
+					if (!stillneedmoreread && (attemptsToAskForNeedMoreRead-- >= 0))
 					{
+						log.info("still have trials, wait for response from busy workers");
 						
 						getContext()
 						.system()
 						.scheduler()
 						.scheduleOnce(Duration.create(10, TimeUnit.SECONDS), getSelf(),
-								MessageClusterRegistration.ASK_IF_NEED_MORE_READ, getContext().dispatcher(), null);
+								MessageClusterRegistration.ASK_IF_NEED_MORE_READ, 
+								getContext().dispatcher(), null);
 						
 					} else 
 					{
 					
-					
+						log.info("no responses after several trials, should have no ways to construct");
 						log.info("All Blocks read");
 						tell(getSender(),
 								MessageClusterRegistration.ALL_BLOCKS_READ,
