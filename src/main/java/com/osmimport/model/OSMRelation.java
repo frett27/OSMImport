@@ -15,8 +15,7 @@ public class OSMRelation extends OSMAttributedEntity {
 
 	private List<OSMRelatedObject> relations;
 
-	public OSMRelation(long id, Map<String, Object> fields,
-			List<OSMRelatedObject> relations) {
+	public OSMRelation(long id, Map<String, Object> fields, List<OSMRelatedObject> relations) {
 		super(id, fields);
 
 		this.relations = relations;
@@ -29,14 +28,19 @@ public class OSMRelation extends OSMAttributedEntity {
 
 	@Override
 	public OSMAttributedEntity copy() {
-		OSMRelation ep = new OSMRelation(id, fields, relations);
-		if (fields != null) {
-			ep.setFields(new HashMap<String, Object>(fields));
+
+		Map<String, Object> f = this.fields;
+		if (f != null) {
+			f = new HashMap<String, Object>(f);
 		}
-		if (relations != null) {
-			ep.relations = new ArrayList<>(relations);
+
+		List<OSMRelatedObject> r = this.relations;
+		if (r != null) {
+			r = new ArrayList<OSMRelatedObject>(r);
 		}
-		return ep;
+
+		return new OSMRelation(this.id, f, r);
+
 	}
 
 }

@@ -6,20 +6,14 @@ import java.util.Map;
 public class OSMAttributedEntity {
 
 	protected long id;
+
 	protected Map<String, Object> fields;
 
 	protected OSMAttributedEntity() {
 
 	}
 
-	public OSMAttributedEntity copy() {
-		OSMAttributedEntity ep = new OSMAttributedEntity();
-		ep.id = id;
-		if (fields != null) {
-			ep.setFields(new HashMap<String, Object>(fields));
-		}
-		return ep;
-	}
+	
 
 	/**
 	 * constructor of the OSMAttributedEntity, by default, make a copy of the
@@ -83,6 +77,18 @@ public class OSMAttributedEntity {
 	@Override
 	public String toString() {
 		return "" + id + "(" + fields + ")";
+	}
+
+	
+	public OSMAttributedEntity copy() {
+
+		Map<String, Object> f = this.fields;
+		if (f != null) {
+			f = new HashMap<String, Object>(f);
+		}
+
+		return new OSMAttributedEntity(this.id, f);
+
 	}
 
 }

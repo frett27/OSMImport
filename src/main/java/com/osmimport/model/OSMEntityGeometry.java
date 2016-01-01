@@ -36,17 +36,7 @@ public class OSMEntityGeometry extends OSMEntity {
 		this.type = g.getType();
 	}
 
-	@Override
-	public OSMAttributedEntity copy() {
-		OSMEntityGeometry eg = new OSMEntityGeometry();
-		if (fields != null)
-			eg.setFields(new HashMap<String, Object>(fields));
-		eg.id = id;
-		eg.type = type;
-		eg.geom = geom.copy();
-
-		return eg;
-	}
+	
 
 	public Geometry getGeometry() {
 		return geom;
@@ -139,5 +129,19 @@ public class OSMEntityGeometry extends OSMEntity {
 	public void writeExternal(ObjectOutput out) throws IOException {
 		writeExternalMapDB(out);
 	}
+
+	
+	@Override
+	public OSMAttributedEntity copy() {
+		OSMEntityGeometry eg = new OSMEntityGeometry();
+		if (fields != null)
+			eg.setFields(new HashMap<String, Object>(fields));
+		eg.id = id;
+		eg.type = type;
+		eg.geom = geom.copy();
+
+		return eg;
+	}
+	
 
 }

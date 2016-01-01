@@ -30,18 +30,7 @@ public class OSMEntityPoint extends OSMEntity {
 		this.y = y;
 	}
 	
-	@Override
-	public OSMAttributedEntity copy() {
-		OSMEntityPoint ep = new OSMEntityPoint();
-		if (fields != null){
-			ep.setFields(new HashMap<String, Object>(fields));
-		}
-		ep.id = id;
-		ep.x = x;
-		ep.y = y;
-		
-		return ep;
-	}
+	
 	
 	@Override
 	public Geometry getGeometry() {
@@ -134,5 +123,16 @@ public class OSMEntityPoint extends OSMEntity {
 		writeExternalMapDB(out);
 	}
 
+	
+	@Override
+	public OSMAttributedEntity copy() {
+		Map<String, Object> f = this.fields;
+		if (f != null) {
+			f = new HashMap<String, Object>(f);
+		}
+		return new OSMEntityPoint(this.id,this.x, this.y, f);
+	}
+	
+	
 	
 }

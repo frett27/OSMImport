@@ -6,7 +6,9 @@ Problem we want to solve :
 - speedup the availability of OSM Data into an HDFS cluster
 - lean the Hadoop processing of OSM Datas
 
+#Status
 
+Partially implements
 
 #Requirements
 
