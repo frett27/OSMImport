@@ -42,11 +42,9 @@ public class WayParsingDispatcher extends MeasuredActor {
 	 */
 	private int startreadingFileCounter = 0;
 
-	
 	private int attemptsToAskForNeedMoreRead = MAX_ATTEMPTS_TO_END_PROCESS;
 
 	private static final int MAX_ATTEMPTS_TO_END_PROCESS = 10;
-
 
 	public WayParsingDispatcher(ActorRef outputRef, ActorRef polygonDispatcher,
 			ActorRef flowRegulator) {
@@ -58,7 +56,8 @@ public class WayParsingDispatcher extends MeasuredActor {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.osmimport.actors.MeasuredActor#onReceiveMeasured(java.lang.Object)
+	 * @see
+	 * com.osmimport.actors.MeasuredActor#onReceiveMeasured(java.lang.Object)
 	 */
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
@@ -77,8 +76,6 @@ public class WayParsingDispatcher extends MeasuredActor {
 					log.info("way dispatcher " + getSender() + " registered");
 				}
 
-				
-
 			} else if (m == MessageClusterRegistration.NEED_MORE_READ) {
 
 				// some workers send NEED_More_READ
@@ -86,7 +83,6 @@ public class WayParsingDispatcher extends MeasuredActor {
 
 			} else if (m == MessageClusterRegistration.ASK_IF_NEED_MORE_READ) {
 
-				
 				// supervisor tell if all blocks have been completed
 				if (stillneedmoreread || startreadingFileCounter <= 3) {
 					// respond to the state
@@ -95,33 +91,34 @@ public class WayParsingDispatcher extends MeasuredActor {
 							MessageClusterRegistration.NEED_MORE_READ,
 							getSelf());
 				} else {
-					
+
 					// two cases : the workers doesn't have respond yet
 					// or nothing to process
-					
-					if (!stillneedmoreread && (attemptsToAskForNeedMoreRead-- >= 0))
-					{
+
+					if (!stillneedmoreread
+							&& (attemptsToAskForNeedMoreRead-- >= 0)) {
 						log.info("still have trials, wait for response from busy workers");
-						
+
 						getContext()
-						.system()
-						.scheduler()
-						.scheduleOnce(Duration.create(10, TimeUnit.SECONDS), getSelf(),
-								MessageClusterRegistration.ASK_IF_NEED_MORE_READ, 
-								getContext().dispatcher(), null);
-						
-					} else 
-					{
-					
+								.system()
+								.scheduler()
+								.scheduleOnce(
+										Duration.create(10, TimeUnit.SECONDS),
+										getSelf(),
+										MessageClusterRegistration.ASK_IF_NEED_MORE_READ,
+										getContext().dispatcher(), null);
+
+					} else {
+
 						log.info("no responses after several trials, should have no ways to construct");
 						log.info("All Blocks read");
 						tell(getSender(),
 								MessageClusterRegistration.ALL_BLOCKS_READ,
 								getSelf());
-	
+
 						tell(getContext().parent(),
 								MessageParsingSystemStatus.END_JOB, getSelf());
-						
+
 					}
 
 				}
@@ -161,14 +158,16 @@ public class WayParsingDispatcher extends MeasuredActor {
 
 			// get the partition number for ways
 
-			assert wayDispatcher.size() > 0;
+			if (wayDispatcher.size() > 0) {
+				assert wayDispatcher.size() > 0;
 
-			int partition = (int) (mwtc.getBlockid() % wayDispatcher.size());
+				int partition = (int) (mwtc.getBlockid() % wayDispatcher.size());
 
-			// inform the right actor
-			ActorRef a = wayDispatcher.toArray(new ActorRef[0])[partition];
-			// send the way to the proper partition
-			tell(a, message, getSelf());
+				// inform the right actor
+				ActorRef a = wayDispatcher.toArray(new ActorRef[0])[partition];
+				// send the way to the proper partition
+				tell(a, message, getSelf());
+			}
 
 		} else if (message instanceof MessageNodes) {
 

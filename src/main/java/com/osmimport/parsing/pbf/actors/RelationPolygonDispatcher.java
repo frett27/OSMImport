@@ -51,13 +51,10 @@ public class RelationPolygonDispatcher extends MeasuredActor {
 				// themselves
 
 				polygonsDispatcher.add(getSender());
-
 				if (log.isInfoEnabled()) {
 					log.info("polygon dispatcher " + getSender()
 							+ " registered");
 				}
-
-				
 
 			} else {
 				unhandled(message);
@@ -71,10 +68,8 @@ public class RelationPolygonDispatcher extends MeasuredActor {
 			if (message == MessageParsingSystemStatus.INITIALIZE)
 				return; // worker are initialized an other way
 
-
 			log.info("message to all workers :" + message);
 
-			// send nodes to way construct actors
 			for (Iterator iterator = polygonsDispatcher.iterator(); iterator
 					.hasNext();) {
 				ActorRef a = (ActorRef) iterator.next();
@@ -89,19 +84,21 @@ public class RelationPolygonDispatcher extends MeasuredActor {
 
 			// get the partition number for ways
 
-			assert polygonsDispatcher.size() > 0;
-
-			int partition = (int) (mwtc.getBlockid() % polygonsDispatcher
-					.size());
-
-			// inform the right actor
-			ActorRef a = polygonsDispatcher.toArray(new ActorRef[0])[partition];
-			// send the way to the proper partition
-			tell(a, message, getSelf());
-
+			if (polygonsDispatcher.size() > 0) {
+				assert polygonsDispatcher.size() > 0;
+	
+				int partition = (int) (mwtc.getBlockid() % polygonsDispatcher
+						.size());
+	
+				// inform the right actor
+				ActorRef a = polygonsDispatcher.toArray(new ActorRef[0])[partition];
+				// send the way to the proper partition
+				tell(a, message, getSelf());
+			}
+			
 		} else if (message instanceof MessageWay) {
 
-			// send nodes to way construct actors
+			// send way to construct actors
 			for (Iterator iterator = polygonsDispatcher.iterator(); iterator
 					.hasNext();) {
 				ActorRef a = (ActorRef) iterator.next();
