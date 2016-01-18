@@ -1,12 +1,19 @@
 
 #ChangeLog :
 
-- 10/10/2015 : add export command to export featureclasses and tables into geojson
+- 17/01/2016 : documentation enhancements, full transforming DSL documentation, in the reference documentation file. adding polygon creation failing reports.
+- 10/10/2015 : add export command to export featureclasses and tables into geojson geometry format for csv export
 - 27/09/2015 : add multiple actions on command line
 - 06/09/2015 : version 0.6, add csv output, using base64 shape encoded geometries
 - 16/08/2015 : version 0.5,add XML/OSM file support, bugs fixes
 - 28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
 
+Version 0.7.8
+-------------
+
+Adding the reporting about failure in polygon creation, on import command line. This permit to log all the errors associated to polygon creation.
+
+add -l option for import , permit to log in separate files all failures in polygon construct.
 
 
 Version 0.7.5
@@ -98,7 +105,7 @@ since 0.6 version:
 
 see [CSV output format](CSVOutputFormat.md) for details about CSV export.
 
-
+this rename permit to use other output format , ie : csv. And is necessary for future use.
 
 
 Version 0.5 (2015 june):

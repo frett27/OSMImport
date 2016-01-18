@@ -1,14 +1,15 @@
 package com.osmimport.parsing.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.esri.core.geometry.MultiPath;
 import com.esri.core.geometry.Polygon;
 import com.osmimport.model.OSMEntity;
 import com.osmimport.model.OSMEntityGeometry;
-import com.osmimport.tools.PolygonCreator;
+import com.osmimport.tools.IReport;
+import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
+import com.osmimport.tools.polygoncreator.PolygonCreator;
 
 /**
  * relation to construct
@@ -18,7 +19,7 @@ import com.osmimport.tools.PolygonCreator;
  */
 public class PolygonToConstruct extends BaseEntityToConstruct implements
 		Serializable {
-	
+
 	/**
 	 * 
 	 */
@@ -30,16 +31,16 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 
 	private Role[] idsRole;
 
+
 	public PolygonToConstruct(long id, long[] refids,
 			Map<String, Object> currentConstructedFields, Role[] idsRoles) {
 		super(id, refids, currentConstructedFields);
 		this.idsRole = idsRoles;
-
 		assert idsRoles.length == refids.length;
 	}
 
 	@Override
-	public OSMEntity constructOSMEntity() {
+	public OSMEntity constructOSMEntity(IReport invalidPolygonFeedBack) {
 
 		try {
 
@@ -48,14 +49,18 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 				g[i] = (MultiPath) associatedEntity[i].getGeometry();
 			}
 			try {
+				IInvalidPolygonConstructionFeedBack f = null;
+				if (invalidPolygonFeedBack instanceof IInvalidPolygonConstructionFeedBack) {
+					f = (IInvalidPolygonConstructionFeedBack)invalidPolygonFeedBack;
+				}
 
 				return new OSMEntityGeometry(this.id,
-						PolygonCreator.createPolygon(g, idsRole), this.fields);
+						PolygonCreator.createPolygon(g, idsRole,
+								f), this.fields);
 
 			} catch (Exception ex) {
 
-				System.err.println("bad polygon "
-						+ this.id);
+				System.err.println("bad polygon " + this.id);
 				ex.printStackTrace(System.err);
 
 				// System.out.println(" Dumping faulty Polygon / Polyline :");

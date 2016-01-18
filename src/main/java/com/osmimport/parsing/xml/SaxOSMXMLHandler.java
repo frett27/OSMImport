@@ -19,6 +19,7 @@ import com.osmimport.parsing.model.PolygonToConstruct.Role;
 import com.osmimport.parsing.model.WayToConstruct;
 import com.osmimport.parsing.pbf.actors.messages.MessagePolygonToConstruct;
 import com.osmimport.parsing.pbf.actors.messages.MessageWayToConstruct;
+import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
 
 /**
  * sax handler for osm objects, a simple state machine for parsing the osm
@@ -69,6 +70,7 @@ public class SaxOSMXMLHandler extends DefaultHandler {
 		assert listener != null;
 		this.listener = listener;
 		this.blockid = blockid;
+
 	}
 
 	@Override
@@ -162,7 +164,7 @@ public class SaxOSMXMLHandler extends DefaultHandler {
 			currentLon = null;
 			currentLat = null;
 			currentObjectId = null;
-			
+
 			checkFlush();
 
 		} else if ("way".equals(qName)) {
@@ -182,7 +184,7 @@ public class SaxOSMXMLHandler extends DefaultHandler {
 			currentObjectId = null;
 			wayNodeReferences = null;
 			currentConstructedFields = null;
-			
+
 			checkFlush();
 
 		} else if ("relation".equals(qName)) {
@@ -213,12 +215,11 @@ public class SaxOSMXMLHandler extends DefaultHandler {
 					}
 
 					Map<String, Object> polyfields = currentConstructedFields;
-					if (polyfields != null)
-					{
+					if (polyfields != null) {
 						polyfields = new HashMap<>();
 						polyfields.putAll(currentConstructedFields);
 					}
-					
+
 					polygons.add(new PolygonToConstruct(currentObjectId, rella
 							.getArray(), polyfields, roles
 							.toArray(new Role[roles.size()])));
@@ -237,7 +238,7 @@ public class SaxOSMXMLHandler extends DefaultHandler {
 			currentRelatedObjects = null;
 
 			checkFlush();
-			
+
 		}
 
 	}

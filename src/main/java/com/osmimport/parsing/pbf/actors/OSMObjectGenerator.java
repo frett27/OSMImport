@@ -23,6 +23,7 @@ import com.osmimport.parsing.model.PolygonToConstruct.Role;
 import com.osmimport.parsing.model.WayToConstruct;
 import com.osmimport.parsing.pbf.actors.messages.MessagePolygonToConstruct;
 import com.osmimport.parsing.pbf.actors.messages.MessageWayToConstruct;
+import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
 
 import crosby.binary.Osmformat.DenseNodes;
 import crosby.binary.Osmformat.Node;
@@ -44,6 +45,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 	private ActorRef flowRegulator;
 
+	
 	public OSMObjectGenerator(ActorRef dispatcher, ActorRef flowRegulator) {
 		this.dispatcher = dispatcher;
 		this.flowRegulator = flowRegulator;
@@ -60,27 +62,20 @@ public class OSMObjectGenerator extends MeasuredActor {
 		if (log.isDebugEnabled())
 			log.debug(getSelf() + " " + System.currentTimeMillis()
 					+ " handle block " + b.getCounter());
-		
 
 		parseRelations(b);
 
 		ArrayList<WayToConstruct> ways = constructWays(b);
 		if (ways != null) {
-				tell(dispatcher,
-						new MessageWayToConstruct(b.getCounter(), ways),
-						getSelf());
+			tell(dispatcher, new MessageWayToConstruct(b.getCounter(), ways),
+					getSelf());
 		}
 
-		
 		List<OSMEntityPoint> allNodes = constructNodesTreeSet(b);
 		if (allNodes != null) {
 			// emit the nodes received ...
 			tell(dispatcher, new MessageNodes(allNodes), getSelf());
 		}
-
-		
-
-		
 
 	}
 
@@ -149,7 +144,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 						String msg = "unknown relation type for object " + id
 								+ " and relation " + rid;
 						log.warning(msg);
-						throw new RuntimeException(msg); 
+						throw new RuntimeException(msg);
 					}
 
 					if (relatedObjects == null) {
@@ -185,18 +180,17 @@ public class OSMObjectGenerator extends MeasuredActor {
 					}
 
 					HashMap<String, Object> polyfields = flds;
-					if (polyfields != null)
-					{
+					if (polyfields != null) {
 						// clone the attributes
 						polyfields = new HashMap<>();
 						polyfields.putAll(flds);
 					}
-					
-					polygons.add(new PolygonToConstruct(id, Arrays.copyOf(
-							polyRelids, polyCountRel), polyfields, Arrays.copyOf(
-							polyRoles, polyCountRel)));
 
-				} 
+					polygons.add(new PolygonToConstruct(id, Arrays.copyOf(
+							polyRelids, polyCountRel), polyfields, Arrays
+							.copyOf(polyRoles, polyCountRel)));
+
+				}
 
 				if (outRels == null) {
 					outRels = new ArrayList<>();
@@ -326,7 +320,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 							if (flds == null) {
 								flds = new HashMap<String, Object>();
 							}
-							
+
 							flds.put(k, v);
 
 							// System.out.println(k + "->" + v);
@@ -337,8 +331,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 				} catch (Exception ex) {
 					System.out.println("error : " + ex.getMessage());
 				}
-				OSMEntityPoint o = new OSMEntityPoint(lastId, ctx.parseLon(lastLon),
-						ctx.parseLat(lastLat), flds);
+				OSMEntityPoint o = new OSMEntityPoint(lastId,
+						ctx.parseLon(lastLon), ctx.parseLat(lastLat), flds);
 				parsedNodes.add(o);
 
 			}
@@ -365,8 +359,9 @@ public class OSMObjectGenerator extends MeasuredActor {
 					fields.put(k, v);
 				}
 
-				OSMEntityPoint o = new OSMEntityPoint(thenode.getId(),ctx.parseLon(thenode.getLon()),
-						ctx.parseLat(thenode.getLat()) ,fields);
+				OSMEntityPoint o = new OSMEntityPoint(thenode.getId(),
+						ctx.parseLon(thenode.getLon()), ctx.parseLat(thenode
+								.getLat()), fields);
 				parsedNodes.add(o);
 
 			}

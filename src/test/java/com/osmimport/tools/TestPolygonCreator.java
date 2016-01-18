@@ -22,7 +22,7 @@ import com.esri.core.geometry.MultiPath;
 import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.Polyline;
 import com.osmimport.parsing.model.PolygonToConstruct.Role;
-import com.osmimport.tools.PolygonCreator;
+import com.osmimport.tools.polygoncreator.PolygonCreator;
 
 public class TestPolygonCreator extends TestCase {
 

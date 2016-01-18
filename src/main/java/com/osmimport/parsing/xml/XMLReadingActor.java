@@ -25,6 +25,7 @@ import com.osmimport.parsing.pbf.actors.messages.MessageClusterRegistration;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
 import com.osmimport.regulation.MessageRegulatorStatus;
+import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.Timer;
@@ -57,7 +58,10 @@ public class XMLReadingActor extends MeasuredActor {
 
 	private int READ_BUFFER_SIZE = 1000000;
 
-	public XMLReadingActor(ActorRef dispatcher, ActorRef flowRegulator) {
+
+	public XMLReadingActor(
+			ActorRef dispatcher,
+			ActorRef flowRegulator) {
 		assert dispatcher != null;
 		assert flowRegulator != null;
 
@@ -155,11 +159,7 @@ public class XMLReadingActor extends MeasuredActor {
 											tell(dispatcher, objects,
 													ActorRef.noSender());
 										}
-									}
-
-							);
-							
-							
+									});
 
 						} catch (EOFException eof) {
 							// end of the read

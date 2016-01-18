@@ -21,6 +21,7 @@ import com.osmimport.parsing.pbf.actors.messages.MessageClusterRegistration;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessagePolygonToConstruct;
 import com.osmimport.regulation.FlowRegulator;
+import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;
 
@@ -34,7 +35,7 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 	/**
 	 * the registry to know which points are necessary for a constructing way
 	 */
-	private OSMEntityConstructRegistry reg = new OSMEntityConstructRegistry();
+	private OSMEntityConstructRegistry reg;
 
 	/**
 	 * handled blocks, list of handled blocks for ways
@@ -64,11 +65,17 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 	 */
 	private Counter polygonsMetrics;
 
-	public RelationPolygonWorkerActor(ActorRef polygonDispatcher,
-			ActorRef output) {
+	private IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack;
+
+	public RelationPolygonWorkerActor(
+			ActorRef polygonDispatcher,
+			ActorRef output,
+			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack) {
 
 		this.polygonDispatcher = polygonDispatcher;
 		this.output = output;
+		this.invalidPolygonConstructionFeedBack = invalidPolygonConstructionFeedBack;
+		reg = new OSMEntityConstructRegistry(invalidPolygonConstructionFeedBack);
 
 		polygonsMetrics = Metrics.newCounter(FlowRegulator.class, getSelf()
 				.path().name() + " polygons number left to construct");
@@ -79,7 +86,8 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 	public void preStart() throws Exception {
 		super.preStart();
 
-		// in case some polygon are correctly constructed, this listener is called
+		// in case some polygon are correctly constructed, this listener is
+		// called
 		reg.setEntityConstructListener(new OSMEntityConstructListener() {
 
 			int c = 0;
@@ -216,7 +224,7 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 	 * @throws Exception
 	 */
 	protected void reset() throws Exception {
-		reg = new OSMEntityConstructRegistry();
+		reg = new OSMEntityConstructRegistry(invalidPolygonConstructionFeedBack);
 		preStart();
 		currentState = State.REGISTRATION_PHASE;
 		log.debug("current state :" + currentState);

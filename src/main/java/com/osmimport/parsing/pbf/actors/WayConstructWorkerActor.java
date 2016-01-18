@@ -42,7 +42,7 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	/**
 	 * the registry to know which points are necessary for a constructing way
 	 */
-	private OSMEntityConstructRegistry reg = new OSMEntityConstructRegistry();
+	private OSMEntityConstructRegistry reg = new OSMEntityConstructRegistry(null);
 
 	/**
 	 * handled blocks, list of handled blocks for ways
@@ -99,7 +99,10 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	@Override
 	public void preStart() throws Exception {
 		super.preStart();
+		resetState();
+	}
 
+	public void resetState() {
 		reg.setEntityConstructListener(new OSMEntityConstructListener() {
 			@Override
 			public void signalOSMEntity(OSMEntity e) {
@@ -177,7 +180,7 @@ public class WayConstructWorkerActor extends MeasuredActor {
 
 				} else if (message == MessageParsingSystemStatus.TERMINATE) {
 
-					reset();
+					resetState();
 
 				} else {
 					unhandled(message);
@@ -250,8 +253,8 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	 * @throws Exception
 	 */
 	protected void reset() throws Exception {
-		reg = new OSMEntityConstructRegistry();
-		preStart();
+		reg = new OSMEntityConstructRegistry(null);
+		resetState(); // reregister the elements
 		currentState = State.REGISTRATION_PHASE;
 		log.debug("current state :" + currentState);
 	}

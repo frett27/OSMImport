@@ -16,7 +16,8 @@ import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.MapGeometry;
 import com.esri.core.geometry.Polyline;
 import com.osmimport.parsing.model.PolygonToConstruct.Role;
-import com.osmimport.tools.PolygonCreator.MultiPathAndRole;
+import com.osmimport.tools.polygoncreator.MultiPathAndRole;
+import com.osmimport.tools.polygoncreator.PolygonCreator;
 
 public class TestBadPolygons extends TestCase {
 

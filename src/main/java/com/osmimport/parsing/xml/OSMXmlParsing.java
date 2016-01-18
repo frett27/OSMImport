@@ -17,39 +17,40 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.osmimport.messages.ParsingObjects;
 import com.osmimport.model.OSMAttributedEntity;
+import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
 
 public class OSMXmlParsing {
 
-//	/**
-//	 * parse a fragment of XML (may not have a root element)
-//	 * 
-//	 * @param is
-//	 *            input stream
-//	 * @throws Exception
-//	 */
-//	public void parseFragment(InputStream is) throws Exception {
-//
-//		assert is != null;
-//
-//		SAXParser parser = createParser();
-//
-//		// add a fake root for parsing with sax
-//		Enumeration<InputStream> streams = Collections.enumeration(Arrays
-//				.asList(new InputStream[] {
-//						new ByteArrayInputStream("<root>".getBytes()), is,
-//						new ByteArrayInputStream("</root>".getBytes()), }));
-//
-//		SequenceInputStream seqStream = new SequenceInputStream(streams);
-//
-//		parser.parse(seqStream, new SaxOSMXMLHandler(0,
-//				new ParsingObjectsListener() {
-//					@Override
-//					public void emit(ParsingObjects objects) {
-//						System.out.println("constructed objects :" + objects);
-//					}
-//				}));
-//
-//	}
+	// /**
+	// * parse a fragment of XML (may not have a root element)
+	// *
+	// * @param is
+	// * input stream
+	// * @throws Exception
+	// */
+	// public void parseFragment(InputStream is) throws Exception {
+	//
+	// assert is != null;
+	//
+	// SAXParser parser = createParser();
+	//
+	// // add a fake root for parsing with sax
+	// Enumeration<InputStream> streams = Collections.enumeration(Arrays
+	// .asList(new InputStream[] {
+	// new ByteArrayInputStream("<root>".getBytes()), is,
+	// new ByteArrayInputStream("</root>".getBytes()), }));
+	//
+	// SequenceInputStream seqStream = new SequenceInputStream(streams);
+	//
+	// parser.parse(seqStream, new SaxOSMXMLHandler(0,
+	// new ParsingObjectsListener() {
+	// @Override
+	// public void emit(ParsingObjects objects) {
+	// System.out.println("constructed objects :" + objects);
+	// }
+	// }));
+	//
+	// }
 
 	/**
 	 * create the instance of SAXParser

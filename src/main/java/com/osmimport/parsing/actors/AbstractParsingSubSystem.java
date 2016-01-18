@@ -16,6 +16,7 @@ import com.osmimport.parsing.pbf.actors.WayConstructWorkerActor;
 import com.osmimport.parsing.pbf.actors.WayParsingDispatcher;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
+import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
 
 /**
  * abstract class for defining a parsing sub system, strategy might differ
@@ -30,14 +31,17 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 
 	protected ActorRef reading; // reading actor
 
-	protected ActorRef dispatcher;
+	protected ActorRef dispatcher; // dispatcher
 
 	protected ActorRef polygonDispatcher;
 
 	protected ActorRef flowRegulator;
 
-	public AbstractParsingSubSystem(ActorRef flowRegulator, ActorRef output,
-			Long maxWaysToCreateForWorker) {
+	public AbstractParsingSubSystem(
+			ActorRef flowRegulator,
+			ActorRef output,
+			Long maxWaysToCreateForWorker,
+			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack) {
 		this.flowRegulator = flowRegulator;
 
 		polygonDispatcher = getContext().actorOf(
@@ -81,12 +85,17 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 		// init the works for polygons
 
 		for (int i = 0; i < nbofworkers; i++) {
+			
 			ActorRef worker = getContext().actorOf(
 					Props.create(RelationPolygonWorkerActor.class,
-							polygonDispatcher, output), "polygon_worker_" + i);
+							polygonDispatcher, output,
+							invalidPolygonConstructionFeedBack),
+					"polygon_worker_" + i);
+			
 			// initialize the worker
 			tell(worker, MessageParsingSystemStatus.INITIALIZE,
 					ActorRef.noSender());
+			
 		}
 
 	}

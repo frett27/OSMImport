@@ -37,7 +37,9 @@ import com.osmimport.parsing.xml.XMLParsingSubSystemActor;
 import com.osmimport.regulation.FlowRegulator;
 import com.osmimport.regulation.MessageRegulatorRegister;
 import com.osmimport.structures.model.Table;
+import com.osmimport.tools.IReport;
 import com.osmimport.tools.Tools;
+import com.osmimport.tools.polygoncreator.ConsoleInvalidPolygonFeedBackReporter;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -65,6 +67,11 @@ public class OSMImport {
 	 */
 	private ProcessModel pm;
 
+	/**
+	 * log for the entities processing
+	 */
+	private IReport report;
+
 	public OSMImport() {
 
 	}
@@ -84,6 +91,15 @@ public class OSMImport {
 	 */
 	public void setOverridenEventBuffer(Long overridenEventBuffer) {
 		this.overridenEventBuffer = overridenEventBuffer;
+	}
+
+	/**
+	 * define the report object that will be used for the entities construct
+	 * 
+	 * @param report
+	 */
+	public void setReport(IReport report) {
+		this.report = report;
 	}
 
 	/**
@@ -213,9 +229,16 @@ public class OSMImport {
 						System.out.println("creating table " + h.getName()
 								+ " with definition : \n" + tableDef);
 
-						org.fgdbapi.thindriver.swig.Table newTable = geodatabase
-								.createTable(tableDef, "");
-
+						org.fgdbapi.thindriver.swig.Table newTable;
+						try {
+							newTable = geodatabase.createTable(tableDef, "");
+						} catch (Exception ex) {
+							System.out.println("ERROR in creating table "
+									+ h.getName());
+							System.out.println("ERROR  table definition : "
+									+ tableDef);
+							throw ex;
+						}
 						System.out.println("table " + h.getName() + " created");
 
 						// closing table to be sure the definition is correctly
@@ -314,7 +337,8 @@ public class OSMImport {
 					* Runtime.getRuntime().availableProcessors() / 4;
 		}
 		log.info("eventbuffer to maintain :{}", eventbuffer);
-		log.info("maxways to handle for each worker : {}", this.maxWaysToRemember);
+		log.info("maxways to handle for each worker : {}",
+				this.maxWaysToRemember);
 
 		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
 				"output", eventbuffer));
@@ -419,9 +443,15 @@ public class OSMImport {
 			System.out.println("Use xml parsing subsystem");
 		}
 
-		ActorRef parsingSubSystem = sys.actorOf(Props.create(
-				parsingSubSystemClass, flowRegulator, resultActor,
-				maxWaysToRemember));
+		IReport r = new ConsoleInvalidPolygonFeedBackReporter();
+		if (this.report != null) {
+			r = this.report;
+		}
+		
+		ActorRef parsingSubSystem = sys
+				.actorOf(Props.create(parsingSubSystemClass, flowRegulator,
+						resultActor, maxWaysToRemember,
+						r));
 		flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem),
 				ActorRef.noSender());
 

@@ -9,6 +9,7 @@ import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.Polyline;
 import com.osmimport.model.OSMEntity;
 import com.osmimport.model.OSMEntityGeometry;
+import com.osmimport.tools.IReport;
 
 public class WayToConstruct extends BaseEntityToConstruct implements Serializable {
 
@@ -35,8 +36,10 @@ public class WayToConstruct extends BaseEntityToConstruct implements Serializabl
 	 * 
 	 * @return
 	 */
-	public OSMEntity constructOSMEntity() {
+	public OSMEntity constructOSMEntity(IReport report) {
 
+		// no report used because it is not relevant
+		
 		String area = null;
 		if (fields != null) {
 			area = (String) fields.get("area");

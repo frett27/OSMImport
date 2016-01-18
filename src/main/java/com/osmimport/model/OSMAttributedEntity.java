@@ -13,6 +13,9 @@ public class OSMAttributedEntity {
 
 	}
 
+	public OSMAttributedEntity(long id){
+		this(id, null);
+	}
 	
 
 	/**

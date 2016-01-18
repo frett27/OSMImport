@@ -1,6 +1,7 @@
 package com.osmimport.parsing.model;
 
 import com.osmimport.model.OSMEntity;
+import com.osmimport.tools.IReport;
 
 class EntityConstructReference {
 
@@ -35,8 +36,8 @@ class EntityConstructReference {
 		return false;
 	}
 
-	public OSMEntity getOSMEntity() {
-		return c.constructOSMEntity();
+	public OSMEntity getOSMEntity(IReport report) {
+		return c.constructOSMEntity(report);
 	}
 
 	@Override

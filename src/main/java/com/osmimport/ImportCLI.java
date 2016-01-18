@@ -9,6 +9,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
+import com.osmimport.tools.polygoncreator.FolderFeedbackReporter;
+
 public class ImportCLI implements CLICommand {
 
 	@Override
@@ -58,15 +60,26 @@ public class ImportCLI implements CLICommand {
 				.withDescription("Buffer of events to maintain")
 				.withType(Long.class).create('e');
 
-		Option maxways = OptionBuilder.withArgName("maxways").hasArg()
-				.withDescription("Number of ways to handle by pass for each worker")
+		Option maxways = OptionBuilder
+				.withArgName("maxways")
+				.hasArg()
+				.withDescription(
+						"Number of ways to handle by pass for each worker")
 				.withType(Long.class).create('m');
+
+		Option logfolder = OptionBuilder
+				.withArgName("logfolder")
+				.hasArg()
+				.withDescription(
+						"activate the entity log report, and specify the folder in which the entities report are created")
+				.create('l');
 
 		options.addOption(input);
 		options.addOption(script);
 		options.addOption(variables);
 		options.addOption(eventBuffer);
 		options.addOption(maxways);
+		options.addOption(logfolder);
 		return options;
 	}
 
@@ -119,6 +132,19 @@ public class ImportCLI implements CLICommand {
 
 		// load and compile script to be sure there are no errors in it
 		osmImport.loadAndCompileScript(sf, variableMap);
+
+		String logfolder = c.getOptionValue('l');
+		if (logfolder != null) {
+			System.out.println("activate entity log in :" + logfolder);
+			File lf = new File(logfolder);
+			if (lf.exists() && lf.isDirectory()) {
+				System.out.println("  use the current folder");
+			}
+
+			lf.mkdirs();
+
+			osmImport.setReport(new FolderFeedbackReporter(lf));
+		}
 
 		// run the import
 		osmImport.run(inputpbfosmfile);

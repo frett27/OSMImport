@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.osmimport.model.OSMEntity;
+import com.osmimport.tools.IReport;
 
 public abstract class BaseEntityToConstruct {
 
@@ -52,7 +53,12 @@ public abstract class BaseEntityToConstruct {
 		refids = null; // free mem
 	}
 
-	public abstract OSMEntity constructOSMEntity();
+	/**
+	 * construct the underlying geometry
+	 * @param report
+	 * @return
+	 */
+	public abstract OSMEntity constructOSMEntity(IReport report);
 
 	@Override
 	public String toString() {
