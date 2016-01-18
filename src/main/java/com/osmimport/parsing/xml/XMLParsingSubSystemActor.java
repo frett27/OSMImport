@@ -4,7 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 
 import com.osmimport.parsing.actors.AbstractParsingSubSystem;
-import com.osmimport.parsing.pbf.actors.ReadingSubSystemActor;
+import com.osmimport.parsing.actors.ParsingLevel;
 import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
 
 public class XMLParsingSubSystemActor extends AbstractParsingSubSystem {
@@ -13,8 +13,10 @@ public class XMLParsingSubSystemActor extends AbstractParsingSubSystem {
 			ActorRef flowRegulator,
 			ActorRef output,
 			Long maxWysToConstruct,
-			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack) {
-		super(flowRegulator, output, maxWysToConstruct, invalidPolygonConstructionFeedBack);
+			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack,
+			ParsingLevel parsingLevel) {
+		super(flowRegulator, output, maxWysToConstruct,
+				invalidPolygonConstructionFeedBack, parsingLevel);
 	}
 
 	@Override

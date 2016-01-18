@@ -6,6 +6,7 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
 import com.osmimport.parsing.actors.AbstractParsingSubSystem;
+import com.osmimport.parsing.actors.ParsingLevel;
 import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
 
 public class PbfParsingSubSystemActor extends AbstractParsingSubSystem {
@@ -16,9 +17,10 @@ public class PbfParsingSubSystemActor extends AbstractParsingSubSystem {
 			ActorRef flowRegulator,
 			ActorRef output,
 			Long maxWysToConstruct,
-			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack) {
+			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack, 
+			ParsingLevel parsingLevel) {
 		super(flowRegulator, output, maxWysToConstruct,
-				invalidPolygonConstructionFeedBack);
+				invalidPolygonConstructionFeedBack, parsingLevel);
 
 	}
 

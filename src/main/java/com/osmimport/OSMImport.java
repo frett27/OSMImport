@@ -30,6 +30,7 @@ import com.osmimport.output.actors.gdb.ChainCompiler;
 import com.osmimport.output.actors.gdb.ChainCompiler.ValidateResult;
 import com.osmimport.output.actors.gdb.CompiledTableOutputActor;
 import com.osmimport.output.actors.gdb.FieldsCompilerActor;
+import com.osmimport.parsing.actors.ParsingLevel;
 import com.osmimport.parsing.pbf.actors.PbfParsingSubSystemActor;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
@@ -72,6 +73,11 @@ public class OSMImport {
 	 */
 	private IReport report;
 
+	/**
+	 * level of parsing
+	 */
+	private ParsingLevel parsingLevel = ParsingLevel.PARSING_LEVEL_POLYGON;
+
 	public OSMImport() {
 
 	}
@@ -102,7 +108,14 @@ public class OSMImport {
 		this.report = report;
 	}
 
-	
+	/**
+	 * define the parsing level
+	 * @param p the parsing level
+	 */
+	public void setParsingLevel(ParsingLevel p) {
+		assert p != null;
+		this.parsingLevel = p;
+	}
 
 	/**
 	 * load and compile the import script
@@ -451,12 +464,11 @@ public class OSMImport {
 		if (this.report != null) {
 			r = this.report;
 		}
-		
-		ActorRef parsingSubSystem = sys
-				.actorOf(Props.create(parsingSubSystemClass, flowRegulator,
-						resultActor, maxWaysToRemember,
-						r));
-		
+
+		ActorRef parsingSubSystem = sys.actorOf(Props.create(
+				parsingSubSystemClass, flowRegulator, resultActor,
+				maxWaysToRemember, r, parsingLevel));
+
 		flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem),
 				ActorRef.noSender());
 

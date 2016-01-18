@@ -9,6 +9,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
+import com.osmimport.parsing.actors.ParsingLevel;
 import com.osmimport.tools.polygoncreator.FolderFeedbackReporter;
 
 public class ImportCLI implements CLICommand {
@@ -74,12 +75,22 @@ public class ImportCLI implements CLICommand {
 						"activate the entity log report, and specify the folder in which the entities report are created")
 				.create('l');
 
+		Option parsinglevel = OptionBuilder
+				.withArgName("parsinglevel")
+				.hasArg()
+				.withType(Integer.class)
+				.withDescription(
+						"level of parsing, 0 -> only points, 1 -> points and lines, 2 -> points, lines and polygons. By defaut, the level 2 is taken")
+				.create('p');
+
 		options.addOption(input);
 		options.addOption(script);
 		options.addOption(variables);
 		options.addOption(eventBuffer);
 		options.addOption(maxways);
 		options.addOption(logfolder);
+		options.addOption(parsinglevel);
+
 		return options;
 	}
 
@@ -128,6 +139,12 @@ public class ImportCLI implements CLICommand {
 		String events = c.getOptionValue('e');
 		if (events != null) {
 			osmImport.setOverridenEventBuffer(Long.parseLong(events));
+		}
+
+		String parsingLevel = c.getOptionValue('p');
+		if (parsingLevel != null) {
+			osmImport.setParsingLevel(ParsingLevel.fromInt(Integer
+					.parseInt(parsingLevel)));
 		}
 
 		// load and compile script to be sure there are no errors in it

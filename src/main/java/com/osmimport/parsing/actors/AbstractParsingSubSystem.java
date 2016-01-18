@@ -41,8 +41,9 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 			ActorRef flowRegulator,
 			ActorRef output,
 			Long maxWaysToCreateForWorker,
-			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack) {
-		
+			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack,
+			ParsingLevel parsingLevel) {
+
 		this.flowRegulator = flowRegulator;
 
 		polygonDispatcher = getContext().actorOf(
@@ -64,42 +65,47 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 		if (maxWaysToCreateForWorker != null) {
 			nbways4worker = maxWaysToCreateForWorker;
 		} else {
-			nbways4worker = (long) ((Runtime.getRuntime().maxMemory() * 1.0 - 3_000_000_000.0) 
-					/ (1_000_000_000.0) * 240_000 / nbofworkers);
+			nbways4worker = (long) ((Runtime.getRuntime().maxMemory() * 1.0 - 3_000_000_000.0) / (1_000_000_000.0) * 240_000 / nbofworkers);
 		}
 
 		final long maxwaysToConstruct = nbways4worker;
 
 		log.info("maxways to construct for all actors :" + maxwaysToConstruct);
 
-		for (int i = 0; i < nbofworkers; i++) {
-			ActorRef worker = getContext().actorOf(
-					Props.create(WayConstructWorkerActor.class, dispatcher,
-							polygonDispatcher, output, maxwaysToConstruct
-									/ nbofworkers), "worker_" + i);
-			// initialize the worker
-			tell(worker, MessageParsingSystemStatus.INITIALIZE,
-					ActorRef.noSender());
+		if (parsingLevel.getValue() >= ParsingLevel.PARSING_LEVEL_LINE
+				.getValue()) {
+
+			for (int i = 0; i < nbofworkers; i++) {
+				ActorRef worker = getContext().actorOf(
+						Props.create(WayConstructWorkerActor.class, dispatcher,
+								polygonDispatcher, output, maxwaysToConstruct
+										/ nbofworkers), "worker_" + i);
+				// initialize the worker
+				tell(worker, MessageParsingSystemStatus.INITIALIZE,
+						ActorRef.noSender());
+			}
+
 		}
 
-		// init the works for polygons
-
-		for (int i = 0; i < nbofworkers; i++) {
-			ActorRef worker = getContext().actorOf(
-					Props.create(RelationPolygonWorkerActor.class,
-							polygonDispatcher, output,
-							invalidPolygonConstructionFeedBack),
-					"polygon_worker_" + i);
-			// initialize the worker
-			tell(worker, MessageParsingSystemStatus.INITIALIZE,
-					ActorRef.noSender());
+		if (parsingLevel.getValue() >= ParsingLevel.PARSING_LEVEL_POLYGON
+				.getValue()) {
+			// init the works for polygons
+			for (int i = 0; i < nbofworkers; i++) {
+				ActorRef worker = getContext().actorOf(
+						Props.create(RelationPolygonWorkerActor.class,
+								polygonDispatcher, output,
+								invalidPolygonConstructionFeedBack),
+						"polygon_worker_" + i);
+				// initialize the worker
+				tell(worker, MessageParsingSystemStatus.INITIALIZE,
+						ActorRef.noSender());
+			}
 		}
+
 	}
 
-	
 	protected abstract ActorRef createReadingActor();
 
-	
 	@Override
 	public void onReceiveMeasured(Object message) throws Exception {
 
