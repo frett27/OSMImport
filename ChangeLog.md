@@ -15,6 +15,7 @@ Adding the reporting about failure in polygon creation, on import command line. 
 
 add -l option for import , permit to log in separate files all failures in polygon construct.
 
+add -p option for limiting the polyline, polygon creation (save time in polygons, or lignes are useless)
 
 Version 0.7.5
 -------------
