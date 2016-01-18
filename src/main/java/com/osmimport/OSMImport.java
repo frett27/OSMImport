@@ -102,6 +102,8 @@ public class OSMImport {
 		this.report = report;
 	}
 
+	
+
 	/**
 	 * load and compile the import script
 	 * 
@@ -430,9 +432,11 @@ public class OSMImport {
 		pm.computeChildrens();
 		pm.compactAndExtractOthers();
 
+		// result actor contains the main processing flow
 		ActorRef resultActor = pm.getOrCreateActorRef(sys, pm.mainStream,
 				flowRegulator);
 
+		// create the parsing subsystem
 		Class parsingSubSystemClass = XMLParsingSubSystemActor.class;
 
 		String lowerCaseFileName = osmInputFile.getName().toLowerCase();
@@ -452,6 +456,7 @@ public class OSMImport {
 				.actorOf(Props.create(parsingSubSystemClass, flowRegulator,
 						resultActor, maxWaysToRemember,
 						r));
+		
 		flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem),
 				ActorRef.noSender());
 
@@ -468,7 +473,7 @@ public class OSMImport {
 
 		sys.awaitTermination();
 
-		System.out.println("closing files");
+		System.out.println("end of system, closing files");
 
 		for (Entry<String, OutDestination> e : outDestinations.entrySet()) {
 			System.out.println("    closing " + e.getKey());

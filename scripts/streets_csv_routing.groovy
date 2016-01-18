@@ -19,29 +19,23 @@ builder.build(osmstream) {
 	// a stream
 	b = stream(osmstream, label:"streets") {
 
-		filter {
-			 e -> e instanceof OSMEntity &&
-			   e.geometryType == Geometry.Type.Polyline  && e.getFields() && e.getFields().containsKey("highway")
+		filter { e ->
+			isPolyline(e) && has(e,"highway")
 		}
-		
+
 		transform {  e ->
-			String t = e.getFields().get("highway")
-			String name = e.getFields()?.get("name")
-			String oneway = e.getFields()?.get("oneway")
-			e.getFields()?.clear()
-			e.setValue("id",e.id)
-			e.setValue("name", name)
-			e.setValue("type", t)
-			e.setValue("oneway",oneway)
+			on(e).map("highway").into("type").
+					keep("name").
+					keep("oneway").
+					newValue("id", e.id).end()
 			return e;
 		}
 
 	}
 
-	
 	// flux de sortie
 	out(streams : [b], sink : sortie, tablename:"streets")
 
-	
 }
+
 

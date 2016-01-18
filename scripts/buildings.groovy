@@ -20,15 +20,13 @@ builder.build(osmstream) {
 	b = stream(osmstream, label:"buildings") {
 
 		filter {
-			 e -> e instanceof OSMEntity &&
-			   e.geometryType == Geometry.Type.Polygon  && e.getFields() && e.getFields().containsKey("building")
+			 e -> 
+			 isPolygon(e) && has(e,"building") 
 		}
 		
 		transform {  e ->
+			on(e).newValue("id",e.id).map("building").into("type").end()
 			String t = e.getFields().get("building")
-			e.getFields()?.clear()
-			e.setValue("id",e.id)
-			e.setValue("type", t)
 			return e;
 		}
 
@@ -37,30 +35,28 @@ builder.build(osmstream) {
 	l = stream(osmstream, label:"building lines") {
 		
 		filter {
-			 e -> e instanceof OSMEntity &&
-			   e.geometryType == Geometry.Type.Polyline && e.getFields() && e.getFields().containsKey("building")
+			 e -> isPolyline(e) && has(e,"building")
 		}
 		
 		transform {
 			 e ->
 			
-			Geometry g = e.getGeometry()
-			if (g == null || g.isEmpty())
-			{
-				return null;
-			}
-			
-			Polygon p = new Polygon()
-			p.add((MultiPath)g,false)
-			
-			Map<String,String> newFields = new HashMap<String,String>()
-			newFields.put("type",e.getFields().get("building") )
-			newFields.put("id", e.getId())
-			
-			f = new OSMEntityGeometry(e.getId(), p ,newFields);
-			
-			
-			return f;
+				Geometry g = e.getGeometry()
+				if (g == null || g.isEmpty())
+				{
+					return null;
+				}
+				
+				Polygon p = new Polygon()
+				p.add((MultiPath)g,false)
+				
+				Map<String,String> newFields = new HashMap<String,String>()
+				newFields.put("type",e.getFields().get("building") )
+				newFields.put("id", e.getId())
+				
+				f = new OSMEntityGeometry(e.getId(), p ,newFields);
+				
+				return f;
 		}
 		
 	}

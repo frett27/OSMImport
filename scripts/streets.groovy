@@ -13,21 +13,16 @@ builder.build(osmstream) {
 
 	// a stream
 	b = stream(osmstream, label:"streets") {
-
-		filter {
-			 e -> isPolyline(e) && has(e,"highway")
+		filter { e ->
+			isPolyline(e) && has(e,"highway")
 		}
-		
 		transform {  e ->
-            on(e).keep("name").keep("highway").newValue("id",e.id).end()
+			on(e).keep("name").keep("highway").newValue("id",e.id).end()
 		}
-
 	}
 
-	
 	// flux de sortie
 	out(streams : [b], sink : sortie, tablename:"streets")
 
-	
 }
 

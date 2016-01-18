@@ -38,12 +38,12 @@ builder.build(osmstream) {
 
 	attributed = stream(osmstream, label:"Attribute collecting") {
 		transform { e->
-		
             if (e.fields) {
                 // there are entities   
                 return e.fields.collect { k,v ->
                     def oa = new OSMAttributedEntity(-1)
-                    oa.setValue(k,v)
+                    oa.setValue("key",k)
+                    oa.setValue("value",v)
                 }
             }
 			

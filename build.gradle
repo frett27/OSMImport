@@ -7,131 +7,114 @@ apply plugin: 'distribution'
 group = 'osmtools'
 version = '0.7.8-SNAPSHOT'
 
-description = """tools for handling import of osm datas into filegeodatabases"""
+description = """tools for handling import of osm datas into filegeodatabases, csv"""
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 eclipse {
-    classpath {
-       downloadSources=true
-    }
+	classpath { downloadSources=true }
 }
 
 sourceSets {
-    main {
-        groovy {
-            srcDirs = ['src/main/java','src/main/groovy']
-        }
-		java {
-	            srcDirs = []
+	main {
+		groovy {
+			srcDirs = ['src/main/java', 'src/main/groovy']
 		}
-		resources {
-		    srcDirs = ['src/main/resources']
-		}
-    }
+		java { srcDirs = [] }
+		resources { srcDirs = ['src/main/resources'] }
+	}
 
-    test {
-        groovy {
-            srcDirs = ['src/test/java','src/test/groovy']
-        }
-		java {
-	            srcDirs = []
+	test {
+		groovy {
+			srcDirs = ['src/test/java', 'src/test/groovy']
 		}
-    }
+		java { srcDirs = [] }
+	}
 }
 
 repositories {
-     mavenLocal()   
-     maven { url "http://repo.maven.apache.org/maven2" }
-     maven { url "http://repo.akka.io/snapshots" }
+	mavenLocal()
+	maven { url "http://repo.maven.apache.org/maven2" }
+	maven { url "http://repo.akka.io/snapshots" }
 }
 
 dependencies {
-	
+
 	// PBF binary structures
-    //compile group: 'crosby.binary', name: 'osmpbf', version:'1.3.3'
- compile files('externallibs/osmpbf-1.3.3.jar')	
+	//compile group: 'crosby.binary', name: 'osmpbf', version:'1.3.3'
+	compile files('externallibs/osmpbf-1.3.3.jar')
 	// Aka dependencies
-    compile group: 'com.typesafe.akka', name: 'akka-actor_2.10', version:'2.4-SNAPSHOT'
+	compile group: 'com.typesafe.akka', name: 'akka-actor_2.10', version:'2.4-SNAPSHOT'
 	// tools for metrics reporting
-    compile group: 'com.yammer.metrics', name: 'metrics-core', version:'2.2.0'
+	compile group: 'com.yammer.metrics', name: 'metrics-core', version:'2.2.0'
 	// file geodatabase dependency
-    compile group: 'org.jfgdb', name: 'jfgdb', version:'0.1.1'
+	compile group: 'org.jfgdb', name: 'jfgdb', version:'0.1.1'
 	// groovy for import DSL
-    compile group: 'org.codehaus.groovy', name: 'groovy-all', version:'2.3.7'
+	compile group: 'org.codehaus.groovy', name: 'groovy-all', version:'2.3.7'
 
 	// used for command line interpretation
-    compile group: 'commons-cli', name: 'commons-cli', version:'1.2'
-	
+	compile group: 'commons-cli', name: 'commons-cli', version:'1.2'
+
 	// used by akka
-    compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.13'
-    
-    // base 64
-    compile 'commons-codec:commons-codec:1.10'
+	compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.13'
+
+	// base 64
+	compile 'commons-codec:commons-codec:1.10'
 
 	// test dependencies
-    testCompile group: 'junit', name: 'junit', version:'4.11'
+	testCompile group: 'junit', name: 'junit', version:'4.11'
 	testCompile group: 'ch.qos.logback', name:'logback-classic',version:'1.0.13'
-	
+
 }
 
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
 	manifest {
-        attributes 'Implementation-Title': 'OSM Import',  
-        	'Implementation-Version': version,
-        	'Main-Class': 'com.osmimport.MCLI'
-    }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it).matching {
-        exclude 'META-INF/**.RSA'
-        exclude 'META-INF/MANIFEST.MF'
-    } } }
-    with jar
+		attributes 'Implementation-Title': 'OSM Import',
+		'Implementation-Version': version,
+		'Main-Class': 'com.osmimport.MCLI'
+	}
+	baseName = project.name + '-all'
+	from {
+		configurations.compile.collect {
+			it.isDirectory() ? it : zipTree(it).matching {
+				exclude 'META-INF/**.RSA'
+				exclude 'META-INF/MANIFEST.MF'
+			} } }
+	with jar
 }
 
-
-
 configurations.all {
-
-	resolutionStrategy {
-	
-		force 'com.google.protobuf:protobuf-java:2.6.0'	
-		
-	}
-}	
-
-
+	resolutionStrategy { force 'com.google.protobuf:protobuf-java:2.6.0'	 }
+}
 
 distributions {
-    main {
-        baseName = "osmimport"
-        contents {
-            with copySpec {
-                from ( "$buildDir/libs" )
-                {
-                    include "*.jar"
-                }
-            } 
-            
-            with copySpec {
-                if (System.getProperty("file.separator") == "/") {
-                    from { "src/main/distscript/nix" }
-                } else {
-                    from { "src/main/distscript/windows" }
-                }
-            }
-             
-            with copySpec{
-                // include the jre in the build
-                def jrePath = new File(System.getProperty("java.home"))
-                from { jrePath }
-                into { 'jre' }
-            } 
-        }
+	main {
+		baseName = "osmimport"
+		contents {
+			with copySpec {
+				from ( "$buildDir/libs" )
+				{ include "*.jar" }
+			}
 
-    }
+			with copySpec {
+				if (System.getProperty("file.separator") == "/") {
+					from { "src/main/distscript/nix" }
+				} else {
+					from { "src/main/distscript/windows" }
+				}
+			}
+
+			with copySpec{
+				// include the jre in the build
+				def jrePath = new File(System.getProperty("java.home"))
+				from { jrePath }
+				into { 'jre' }
+			}
+		}
+
+	}
 
 }
 
