@@ -224,6 +224,9 @@ public class RelationPolygonWorkerActor extends MeasuredActor {
 	 * @throws Exception
 	 */
 	protected void reset() throws Exception {
+
+		log.info("reset worker " + getSelf());
+
 		reg = new OSMEntityConstructRegistry(invalidPolygonConstructionFeedBack);
 		preStart();
 		currentState = State.REGISTRATION_PHASE;

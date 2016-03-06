@@ -193,22 +193,29 @@ public class SaxOSMXMLHandler extends DefaultHandler {
 			if (currentRelatedObjects != null) {
 				LongArray rella = new LongArray(30);
 				ArrayList<Role> roles = new ArrayList<>();
+
+				boolean hasOuter = false;
+				
 				for (OSMRelatedObject o : currentRelatedObjects) {
-					if ("inner".equals(o.getRole())
-							|| "outer".equals(o.getRole())) {
+
+					if ("way".equalsIgnoreCase(o.getType())) {
+
 						rella.add(o.getRelatedId());
 
-						Role r = Role.OUTER;
-						if ("inner".equals(o.getRole())) {
+						Role r = Role.UNDEFINED;
+						if ("outer".equals(o.getRole())) {
+							r = Role.OUTER;
+							hasOuter = true;
+						} else if ("inner".equals(o.getRole())) {
 							r = Role.INNER;
 						}
-
 						roles.add(r);
+
 					}
 
 				}
 
-				if (roles.size() > 0) {
+				if (roles.size() > 0 && hasOuter) {
 					// emit polygon
 					if (polygons == null) {
 						polygons = new ArrayList<>();

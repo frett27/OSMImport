@@ -1,7 +1,7 @@
 OSMImport
 =========
 
-_Patrice Freydiere - 2015_
+_Patrice Freydiere - 2015 - 2016_
 
 ---
 
@@ -80,7 +80,7 @@ Contributions are welcome on :
 - <strike>tables support</strike>
 - <strike>csv text files support</strike>
 - <strike>Work on simplify the writing of scripts</strike>
-- fix erroneous polygon reconstruction
+- <strike>fix erroneous polygon reconstruction</strike>
 - propose a sample script gallery for common operations
 - error logs, and feedbacks
 - clean logs

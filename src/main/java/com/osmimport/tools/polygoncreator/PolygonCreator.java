@@ -341,7 +341,7 @@ public class PolygonCreator {
 
 			MultiPathAndRole e = left.get(i);
 
-			if (e.getRole() != searchRole)
+			if (e.getRole() != searchRole && e.getRole() != Role.UNDEFINED)
 				continue;
 
 			MultiPath p = e.getMultiPath();
@@ -378,7 +378,7 @@ public class PolygonCreator {
 
 			MultiPathAndRole e = left.get(i);
 
-			if (e.getRole() != searchRole)
+			if (e.getRole() != searchRole && e.getRole() != Role.UNDEFINED)
 				continue;
 
 			MultiPath p = e.getMultiPath();

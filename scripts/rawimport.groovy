@@ -44,6 +44,7 @@ builder.build(osmstream) {
                     def oa = new OSMAttributedEntity(-1)
                     oa.setValue("key",k)
                     oa.setValue("value",v)
+                    oa
                 }
             }
 			

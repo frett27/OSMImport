@@ -52,7 +52,7 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	/**
 	 * max way to handle by reading
 	 */
-	private long maxWayToConstruct = 80000;
+	private long maxWayToConstruct;
 
 	private enum State {
 		REGISTRATION_PHASE, PROCESSING_PHASE
@@ -253,6 +253,7 @@ public class WayConstructWorkerActor extends MeasuredActor {
 	 * @throws Exception
 	 */
 	protected void reset() throws Exception {
+		log.info("reset worker " + getSelf());
 		reg = new OSMEntityConstructRegistry(null);
 		resetState(); // reregister the elements
 		currentState = State.REGISTRATION_PHASE;

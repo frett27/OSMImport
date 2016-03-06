@@ -45,7 +45,6 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 	private ActorRef flowRegulator;
 
-	
 	public OSMObjectGenerator(ActorRef dispatcher, ActorRef flowRegulator) {
 		this.dispatcher = dispatcher;
 		this.flowRegulator = flowRegulator;
@@ -122,6 +121,8 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 				List<OSMRelatedObject> relatedObjects = null;
 
+				boolean hasOuter = false;
+				
 				long rid = 0;
 				for (int i = 0; i < r.getMemidsCount(); i++) {
 					rid += r.getMemids(i);
@@ -156,13 +157,19 @@ public class OSMObjectGenerator extends MeasuredActor {
 							stringType));
 
 					// for polygons
-					if (("outer".equals(role) || "inner".equals(role))
-							&& mt == MemberType.WAY) {
+					if (mt == MemberType.WAY) {
 						// polygon construct relation
 
+						Role relrole = Role.UNDEFINED;
+						if ("outer".equals(role)) {
+							relrole = Role.OUTER;
+							hasOuter = true;
+						} else if ("inner".equals(role)) {
+							relrole = Role.INNER;
+						}
+
 						polyRelids[polyCountRel] = rid;
-						polyRoles[polyCountRel] = ("outer".equals(role) ? Role.OUTER
-								: Role.INNER);
+						polyRoles[polyCountRel] = relrole;
 						polyCountRel++;
 
 					}
@@ -173,7 +180,7 @@ public class OSMObjectGenerator extends MeasuredActor {
 
 				// the relation contains, polygon features
 
-				if (polyCountRel > 0) {
+				if (polyCountRel > 0 && hasOuter) {
 
 					if (polygons == null) {
 						polygons = new ArrayList<>();

@@ -65,6 +65,7 @@ public abstract class AbstractParsingSubSystem extends MeasuredActor {
 		if (maxWaysToCreateForWorker != null) {
 			nbways4worker = maxWaysToCreateForWorker;
 		} else {
+            // thumbs rules, may not be correct if heavy transforms
 			nbways4worker = (long) ((Runtime.getRuntime().maxMemory() * 1.0 - 3_000_000_000.0) / (1_000_000_000.0) * 240_000 / nbofworkers);
 		}
 

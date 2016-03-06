@@ -74,7 +74,7 @@ public class FlowRegulator extends MeasuredActor {
 
 			double error = 1.0 * consigne - c;
 
-			if (error < -consigne) {
+			if (error < -consigne/3.0) { // if error is more than consigne, fall fast
 				// fast fall back
 				vel = 0;
 

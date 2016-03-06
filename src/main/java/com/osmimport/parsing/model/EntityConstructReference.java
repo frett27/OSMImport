@@ -28,7 +28,7 @@ class EntityConstructReference {
 		}
 
 		c.associatedEntity[objectIdx] = entity;
-		if (c.fill.get() == 0) {
+		if (c.fill.get() <= 0) {
 			// finished
 			return true;
 		}

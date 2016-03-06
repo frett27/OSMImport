@@ -26,7 +26,7 @@ public class PolygonToConstruct extends BaseEntityToConstruct implements
 	private static final long serialVersionUID = 744578977292873100L;
 
 	public enum Role {
-		OUTER, INNER
+		OUTER, INNER, UNDEFINED
 	}
 
 	private Role[] idsRole;

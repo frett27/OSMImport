@@ -74,7 +74,7 @@ public class CompiledTableOutputActor extends MeasuredActor {
 		}
 		CompiledFieldsMessage e = (CompiledFieldsMessage) message;
 		try {
-			synchronized (CompiledTableOutputActor.class) {
+			// synchronized (CompiledTableOutputActor.class) {
 
 				Row r = table.createRowObject();
 
@@ -94,7 +94,7 @@ public class CompiledTableOutputActor extends MeasuredActor {
 				table.insertRow(r);
 				// r.delete(); 
 				
-			}
+			//}
 
 		} catch (Exception ex) {
 			log.error("error storing entity :" + e + ":" + ex.getMessage(), ex);
