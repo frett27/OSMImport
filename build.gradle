@@ -116,11 +116,13 @@ distributions {
 			with copySpec {
 				// include documentation in the bundle
 				from { "doc" }
+                into { 'doc' }
 				
 			}
         	with copySpec {
 				// include scripts examples to distribution
 				from { "scripts" }
+				into { "scripts" }
 			}
 			
 		}
