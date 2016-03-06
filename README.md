@@ -40,7 +40,12 @@ A typical 32 Gb or RAM permit to handle France territory in a very nice timefram
 
 #Benchmarks
 
-- **More than 1 000 000 final entities processed per minute** on a standard laptop (1.7 Ghz INTEL i5, 2 physical cores, 8Gb RAM)), processing a french department takes about 10mins with 8Gb of RAM. Processing France with a 32gb of RAM takes about 1,5 Hour.
+for simple scenarios (light write pressure):
+
+- **More than 1 000 000 final entities processed per minute** on a standard laptop (1.7 Ghz INTEL i5, 2 physical cores, 8Gb RAM, 5400 rpm Hard Drive)), processing a french department takes about 10mins with 8Gb of RAM. Processing France with a 32gb of RAM takes about 1,5 Hour.
+
+For eaviest writing pressure and full stack, with script ramimport.groovy exporting in gdb, an admin level 1 of france, take about 40 mins, with the same hardware as above.
+
 
 
 #Download and install - Next actions

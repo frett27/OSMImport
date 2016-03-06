@@ -9,12 +9,24 @@ This documentation explain how to use the OSMImport project to create tables / f
 download the install bundle and put it in a directory of your choice.
 
 
-###Version _0.5-SNAPSHOT_  
+###Version _0.7.10-SNAPSHOT_  
 
 **Windows 64 bits** - 
-[osmimport-0.5-SNAPSHOT.zip](https://s3-eu-west-1.amazonaws.com/osmimport-cli/osmimport-0.5-SNAPSHOT.zip) - Nota: if you use the FGDB output file format, you will need to install redistribuable VC++ 2012 from microsoft, if not already installed.
+[osmimport-0.7.10-SNAPSHOT.zip](https://s3-eu-west-1.amazonaws.com/osmimport-cli/osmimport-0.7.10-SNAPSHOT.zip) - Nota: if you use the FGDB output file format, you will need to install redistribuable VC++ 2012 from microsoft, if not already installed.
 
-**Linux 64 bits** - @@TBD
+**Linux 64 bits** - ** Coming **
+
+
+
+###From the Git Repo
+
+> you must have a java installed
+
+	git clone https://github.com/frett27/osmimport.git
+
+	gradlew fatJar
+
+> the resulting standalone jar will be located in `build/libs`
 
 
 ##Download PBF or OSM located datas
@@ -26,7 +38,7 @@ if you dont have PBF or OSM file, you can download them at : [http://www.geofabr
 Existing scripts are located in the **[scripts](../scripts)** folder
 
 * [streets.groovy](../scripts/streets.groovy) - Sample file to extract streets
-* [buildings.groovy](../scripts/buildings.groovy) - Sample file to extract buildings inFile geodatabase
+* [buildings.groovy](../scripts/buildings.groovy) - Sample file to extract buildings in FileGeodatabase
 
 
 
@@ -34,34 +46,30 @@ Existing scripts are located in the **[scripts](../scripts)** folder
 
 Place the OSM (PBF/XML) datafile and the script file, in a folder and run :
 
-	osmimport import -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
+	java -Xmx6g -jar [pathto]/osmtoolsreader-all-0.7.10-SNAPSHOT.jar import -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
 
 the output files are placed in the location defined in the stream file (the -s option).
 
 
 ##Command line parameters
 
-	>osmimport
-	OSM Import
-	   Available Commands :
-	    help : get help on commands
-	    import : import osm file with a transformation script
-	    copycsv : copy a csv file into a file geodatabase	
+	C:\projets\OSMImport>java -Xmx6g -jar build\libs\osmtoolsreader-all-0.7.10-SNAPSHOT.jar help import
 
-
-	>osmimport import
-	
-	OSM Import
-	23:05:31.514 [main] DEBUG com.osmimport.MCLI - launching command :import
-	 error in arguments :Missing required options: i, s
-	usage: osmimport
-	 -i,--input <input>       [REQUIRED] input PBF or OSM file, this can be
-	                          .pbf or .osm files
-	 -s,--streams <streams>   [REQUIRED] script file describing the filtering
-	                          and transformations, (.groovy files)
-	 -v <var>                 [OPTIONAL] additional variables definition that
-	                          are mapped into var[name] in the script
-
+		OSM Import
+		usage: osmimport  import
+		 -e <eventbuffer>         Buffer of events to maintain
+		 -i,--input <input>       [REQUIRED] input PBF or OSM file, this can be
+		                          .pbf or .osm files
+		 -l <logfolder>           activate the entity log report, and specify the
+		                          folder in which the entities report are created
+		 -m <maxways>             Number of ways to handle by pass for each worker
+		 -p <parsinglevel>        level of parsing, 0 -> only points, 1 -> points
+		                          and lines, 2 -> points, lines and polygons. By
+		                          defaut, the level 2 is taken
+		 -s,--streams <streams>   [REQUIRED] script file describing the filtering
+		                          and transformations, (.groovy files)
+		 -v <var>                 [OPTIONAL] additional variables definition that
+		                          are mapped into var[name] in the script
 
 
 some scripts may have variable defined (for output gdb path, or other refinements), look at the script for mandatory variables.
