@@ -20,7 +20,7 @@ download the install bundle and put it in a directory of your choice.
 
 ###From the Git Repo
 
-> you must have a java installed
+> you must have a JDK java 7 (or up) installed, for compiling
 
 	git clone https://github.com/frett27/osmimport.git
 
