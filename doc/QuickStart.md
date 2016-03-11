@@ -12,7 +12,7 @@ download the install bundle and put it in a directory of your choice.
 ###Version _0.7.10-SNAPSHOT_  
 
 **Windows 64 bits** - 
-[osmimport-0.7.10-SNAPSHOT.zip](https://s3-eu-west-1.amazonaws.com/osmimport-cli/osmimport-0.7.10-SNAPSHOT.zip) - Nota: if you use the FGDB output file format, you will need to install redistribuable VC++ 2012 from microsoft, if not already installed.
+[osmimport-0.7.11-SNAPSHOT.zip](https://s3-eu-west-1.amazonaws.com/osmimport-cli/osmimport-0.7.11-SNAPSHOT.zip) - Nota: if you use the FGDB output file format, you will need to install redistribuable VC++ 2012 from microsoft, if not already installed.
 
 **Linux 64 bits** - ** Coming **
 
