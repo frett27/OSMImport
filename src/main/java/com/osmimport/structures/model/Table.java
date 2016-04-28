@@ -55,5 +55,16 @@ public class Table {
 		Field f = new Field(name, FieldType.DOUBLE, null);
 		return addField(f);
 	}
-
+	
+	public Table addSingleField(String name) {
+		Field f = new Field(name, FieldType.SINGLE, null);
+		return addField(f);
+	}
+	
+	public Table addSmallIntegerField(String name) {
+		Field f = new Field(name, FieldType.SHORT, null);
+		return addField(f);
+	}
+	
+	
 }

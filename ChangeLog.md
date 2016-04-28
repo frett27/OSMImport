@@ -1,12 +1,20 @@
 
 #ChangeLog :
 
+- 25/04/2016 : add support for double, single fields, reading for CSV files in directory
 - 17/01/2016 : documentation enhancements, full transforming DSL documentation, in the reference documentation file. adding polygon creation failing reports.
 - 10/10/2015 : add export command to export featureclasses and tables into geojson geometry format for csv export
 - 27/09/2015 : add multiple actions on command line
 - 06/09/2015 : version 0.6, add csv output, using base64 shape encoded geometries
 - 16/08/2015 : version 0.5,add XML/OSM file support, bugs fixes
 - 28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
+
+
+Version 0.7.12
+--------------
+
+Add support for several other primitive types (Short, Float), add reading of CSV files located in a directory, with rels, points, ways and polygons as input. This permit to use the flink tools to generate the constructed OSM elements and process them using this commandline.
+
 
 Version 0.7.8
 -------------

@@ -94,6 +94,10 @@ public class Tools {
 				th.addStringField(f.getName(), f.getLength());
 			} else if (f.getType() == FieldType.DOUBLE) {
 				th.addDoubleField(f.getName());
+			} else if (f.getType() == FieldType.SINGLE) {
+				th.addDoubleField(f.getName());
+			} else if (f.getType() == FieldType.SHORT) {
+				th.addIntegerField(f.getName());
 			} else {
 				throw new Exception("field type " + f.getName()
 						+ " unsupported");

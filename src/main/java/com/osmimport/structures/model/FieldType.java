@@ -2,6 +2,6 @@ package com.osmimport.structures.model;
 
 public enum FieldType {
 
-	INTEGER, LONG, STRING, DOUBLE, GEOMETRY;
-	
+	INTEGER, LONG, SHORT, STRING, DOUBLE, SINGLE, GEOMETRY;
+
 }

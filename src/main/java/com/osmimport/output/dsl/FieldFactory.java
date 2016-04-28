@@ -20,7 +20,7 @@ public class FieldFactory extends AbstractFactory {
 			Object value, Map attributes) throws InstantiationException,
 			IllegalAccessException {
 
-		assert builder instanceof TableBuilderConstruct; 
+		assert builder instanceof TableBuilderConstruct;
 		TableBuilderConstruct b = (TableBuilderConstruct) builder;
 
 		assert b.getCurrentTable() != null;
@@ -32,7 +32,6 @@ public class FieldFactory extends AbstractFactory {
 			}
 			b.getCurrentTable().addStringField((String) value, size);
 
-
 		} else if ("_integer".equals(name)) {
 			int size = 4;
 			if (attributes.containsKey("size")) {
@@ -42,23 +41,28 @@ public class FieldFactory extends AbstractFactory {
 
 			b.getCurrentTable().addIntegerField((String) value);
 
-
 		} else if ("_long".equals(name)) {
 
 			b.getCurrentTable().addLongField((String) value);
-			
-			
+
 		} else if ("_double".equals(name)) {
 
 			b.getCurrentTable().addDoubleField((String) value);
 
+		} else if ("_float".equals(name)) {
+
+			b.getCurrentTable().addSingleField((String) value);
+
+		} else if ("_short".equals(name)) {
+
+			b.getCurrentTable().addSmallIntegerField((String) value);
 
 		} else {
 			throw new InstantiationException("field type :" + name + " unknown");
 		}
 
 		return builder; // handled
-		
+
 	}
 
 }

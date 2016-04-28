@@ -220,8 +220,17 @@ public class ExportFGDB implements CLICommand {
 																+ r.getInteger(f
 																		.getName());
 														break;
+													case SHORT:
+														v = ""
+																+ r.getShort(f
+																		.getName());
+														break;
+													case SINGLE:
+														v = ""
+																+ r.getFloat(f
+																		.getName());
 													case STRING:
-														
+
 														String s = r
 																.getString(f
 																		.getName());

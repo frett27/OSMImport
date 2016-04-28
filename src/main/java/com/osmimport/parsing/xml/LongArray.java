@@ -16,7 +16,7 @@ public class LongArray {
 
 	public void add(long l) {
 		if (nbelements == array.length) {
-			// cow
+			// copy on write
 			array = Arrays.copyOf(array, array.length + capacity);
 		}
 		array[nbelements++] = l;

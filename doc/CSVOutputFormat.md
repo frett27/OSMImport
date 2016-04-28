@@ -4,7 +4,7 @@
 Each table and featureclass output will be generated in a proper file.
 
 Every records are generated in a text file, using the current local charset encoding. With a `'\\n'` endline character.
-Geometries are encoded in base64, containing a the ShapeFile Format geometry description. Esri geometry java project on github is able to directly load the geometry in Java Object, as JTS, or other java geometry toolkits.
+**Geometries are encoded in base64**, containing a the ShapeFile Format geometry description. Esri geometry java project on github is able to directly load the geometry in Java Object, as JTS, or other java geometry toolkits.
 
 Strings are encoded with a leading and trailing `"` character
 

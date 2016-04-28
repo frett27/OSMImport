@@ -28,6 +28,7 @@ public class CSVParser {
 			.getLogger(CSVParser.class);
 
 	private Table table;
+	
 	private ParserCallBack pcb;
 
 	/**
@@ -102,7 +103,7 @@ public class CSVParser {
 					case INTEGER:
 						if (s != null && !"".equals(s)) {
 							try {
-								fldsValue.put(f.getName(), Long.parseLong(s));
+								fldsValue.put(f.getName(), Integer.parseInt(s));
 							} catch (Exception ex) {
 								logger.info("line " + lnr.getLineNumber()
 										+ ", on field " + f.getName()
@@ -110,17 +111,17 @@ public class CSVParser {
 							}
 						}
 						break;
-					// case LONG:
-					// if (s != null && !"".equals(s)) {
-					// try {
-					// fldsValue.put(f.getName(), Long.parseLong(s));
-					// } catch (Exception ex) {
-					// logger.info(
-					// "line {}, on field {} -> fail to parse Integer {}",
-					// lnr.getLineNumber(), f.getName(), s);
-					// }
-					// }
-					// break;
+					case LONG:
+						if (s != null && !"".equals(s)) {
+							try {
+								fldsValue.put(f.getName(), Long.parseLong(s));
+							} catch (Exception ex) {
+								logger.info(
+										"line {}, on field {} -> fail to parse Integer {}",
+										lnr.getLineNumber(), f.getName(), s);
+							}
+						}
+						break;
 					case STRING:
 						if (s != null) {
 							fldsValue.put(f.getName(), s);
@@ -217,9 +218,6 @@ public class CSVParser {
 
 		sb = sb.replace(0, sb.length(), "");
 		return s.toString();
-
-		// throw new Exception("implementation error");
-
 	}
 
 }

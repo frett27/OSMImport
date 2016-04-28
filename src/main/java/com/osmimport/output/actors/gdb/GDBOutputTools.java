@@ -8,10 +8,12 @@ import org.fgdbapi.thindriver.swig.Table;
 import org.fgdbapi.thindriver.swig.VectorOfFieldDef;
 import org.slf4j.LoggerFactory;
 
-import com.osmimport.input.csv.CSVParser;
 import com.osmimport.output.fields.AbstractFieldSetter;
+import com.osmimport.output.fields.DoubleFieldSetter;
+import com.osmimport.output.fields.FloatFieldSetter;
 import com.osmimport.output.fields.GeometryFieldSetter;
 import com.osmimport.output.fields.IntegerFieldSetter;
+import com.osmimport.output.fields.ShortFieldSetter;
 import com.osmimport.output.fields.StringFieldSetter;
 
 public class GDBOutputTools {
@@ -40,7 +42,17 @@ public class GDBOutputTools {
 				} else if (FieldType.fieldTypeInteger == fieldType) {
 					log.debug("adding integer field " + fieldName);
 					r.add(new IntegerFieldSetter(fieldName));
-				} else {
+				} else if (FieldType.fieldTypeSmallInteger == fieldType) {
+					log.debug("adding short field " + fieldName);
+					r.add(new ShortFieldSetter(fieldName));
+				} else if (FieldType.fieldTypeDouble == fieldType) {
+					log.debug("adding double field " + fieldName);
+					r.add(new DoubleFieldSetter(fieldName));
+				} else if (FieldType.fieldTypeSingle == fieldType) {
+					log.debug("adding single field " + fieldName);
+					r.add(new FloatFieldSetter(fieldName));
+				}
+				else {
 					log.warn("field type "
 							+ fieldType
 							+ " is unsupported, it will not be added to the table/featureclass");

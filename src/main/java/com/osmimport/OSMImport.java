@@ -31,6 +31,7 @@ import com.osmimport.output.actors.gdb.ChainCompiler.ValidateResult;
 import com.osmimport.output.actors.gdb.CompiledTableOutputActor;
 import com.osmimport.output.actors.gdb.FieldsCompilerActor;
 import com.osmimport.parsing.actors.ParsingLevel;
+import com.osmimport.parsing.csv.CSVFolderParsingSubSystem;
 import com.osmimport.parsing.pbf.actors.PbfParsingSubSystemActor;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
@@ -110,7 +111,9 @@ public class OSMImport {
 
 	/**
 	 * define the parsing level
-	 * @param p the parsing level
+	 * 
+	 * @param p
+	 *            the parsing level
 	 */
 	public void setParsingLevel(ParsingLevel p) {
 		assert p != null;
@@ -456,8 +459,14 @@ public class OSMImport {
 		if (lowerCaseFileName.endsWith(".pbf")) {
 			System.out.println("Using pbf parser subsystem");
 			parsingSubSystemClass = PbfParsingSubSystemActor.class;
-		} else {
+		} else if (lowerCaseFileName.endsWith(".xml")
+				|| lowerCaseFileName.endsWith(".osm")) {
 			System.out.println("Use xml parsing subsystem");
+		} else if (osmInputFile.isDirectory()) {
+			System.out.println("Use csv folder parsing subsystem");
+			parsingSubSystemClass = CSVFolderParsingSubSystem.class;
+		} else {
+			throw new Exception("unsupported input format");
 		}
 
 		IReport r = new ConsoleInvalidPolygonFeedBackReporter();
