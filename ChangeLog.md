@@ -15,6 +15,8 @@ Version 0.7.12
 
 Add support for several other primitive types (Short, Float), add reading of CSV files located in a directory, with rels, points, ways and polygons as input. This permit to use the flink tools to generate the constructed OSM elements and process them using this commandline.
 
+OSM Flink tools can now be chained with osmimport.
+
 
 Version 0.7.8
 -------------
