@@ -5,6 +5,10 @@ _Patrice Freydiere - 2015 - 2016_
 
 ---
 
+
+![](https://travis-ci.org/frett27/OSMImport.svg?branch=master)
+
+
 Yet An Other OSM Import / Formatting OSM data tool - [Change Log](ChangeLog.md)
 
 This project aim to provide a simple **optimized command line for filtering / GIS structuring OSM PBF or OSM XML files**. The result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). CSV output files are also supported since 0.6 version, allowing to have a smooth BigData shift for OSM data
