@@ -117,8 +117,8 @@ public class CSVParser {
 								fldsValue.put(f.getName(), Long.parseLong(s));
 							} catch (Exception ex) {
 								logger.info(
-										"line {}, on field {} -> fail to parse Integer {}",
-										lnr.getLineNumber(), f.getName(), s);
+										"line {}, on field {} -> fail to parse Integer {}", new Object[]{
+										(Integer)lnr.getLineNumber(), f.getName(), s});
 							}
 						}
 						break;
