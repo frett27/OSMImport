@@ -13,16 +13,16 @@ Yet An Other OSM Import / Formatting OSM data tool - [Change Log](ChangeLog.md)
 
 This project aim to provide a simple **optimized command line for filtering / GIS structuring OSM PBF or OSM XML files**. The result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). CSV output files are also supported since 0.6 version, allowing to have a smooth BigData shift for OSM data
 
-Since October 2014, lots of feedbacks have been implemented in the lastest version. This project **doesn't need a PostGIS database**, **you don't need extensive software stack**. This tools has been tested on Windows and Linux. 
+Since October 2014, lots of feedbacks have been implemented in the lastest version. This project **doesn't need PostGIS database**, **or extensive software stack**. This tools has been tested on Windows (x64) and Linux (x64). 
 
 This project use dirsuptive technology, an internal actors system using big data principles (streams, no sequencial read), proposing a disruptive performance experience. This tool benefit directly from a Muticore machine, 
 
 #Features
 
 - **Windows** / **Linux** friendly (tested, but in practice should be run on all java compatible desktop / server machines)
-- **PBF / XML / OSM** input file support
+- **PBF / XML / OSM / CSV Big Data Folder Input** input file support
 - **FileGeodatabase Output**, that can be natively read by ArcGIS Desktop or QGIS
-- **CSV text files in a folder** for Hadoop/Big stacks
+- **Create CSV text files in a folder** for Hadoop/Big stacks
 - **Simple declarative groovy transformation script** 
 	- All **Groovy** and **Java third party are directly usable** in the script, for filtering and transformations.
 	- Simplified merge on a set of script to have different outputed database from a single run.
@@ -46,9 +46,9 @@ A typical 32 Gb or RAM permit to handle France territory in a very nice timefram
 
 for simple scenarios (light write pressure):
 
-- **More than 1 000 000 final entities processed per minute** on a standard laptop (1.7 Ghz INTEL i5, 2 physical cores, 8Gb RAM, 5400 rpm Hard Drive)), processing a french department takes about 10mins with 8Gb of RAM. Processing France with a 32gb of RAM takes about 1,5 Hour.
+- **More than 1 000 000 final entities processed per minute** for simple transformations on a standard laptop (1.7 Ghz INTEL i5, 2 physical cores, 8Gb RAM, 5400 rpm Hard Drive)), processing a french department takes about 10mins with 8Gb of RAM. Processing France with a 32gb of RAM takes about 1,5 Hour.
 
-For eaviest writing pressure and full stack, with script ramimport.groovy exporting in gdb, an admin level 1 of france, take about 40 mins, with the same hardware as above.
+For heaviest writing pressure and full stack, with script ramimport.groovy exporting in gdb, an admin level 1 of france, take about 40 mins, with the same hardware as above.
 
 
 
@@ -57,7 +57,6 @@ For eaviest writing pressure and full stack, with script ramimport.groovy export
 Take a tour at [5 mins setup guide](doc/QuickStart.md) to launch your first command line.
 
 [How to write Scripts](doc/WritingAScript.md) explain how to customize or configure your scripts for your usage.
-
 
 [Existing Scripts folder](scripts) contains a bunch of existing scripts for already configured OSM transformation and filtering
 

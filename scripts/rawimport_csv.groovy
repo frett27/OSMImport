@@ -68,6 +68,7 @@ builder.build(osmstream) {
 			e.setValue("id",e.getId());
 			
 			// r = []  don't do this, this lead to concurrent issues
+            // you must instanciate a new Array
 			
 			List r = new ArrayList<OSMAttributedEntity>(); 
 			

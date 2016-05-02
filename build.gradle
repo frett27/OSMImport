@@ -101,10 +101,22 @@ distributions {
 	main {
 		baseName = "osmimport"
 		contents {
-			with copySpec {
+			with (copySpec {
 				from ( "$buildDir/libs" )
 				{ include "*.jar" }
-			}
+			}).rename { f ->
+                if (f.startsWith("osmtoolsreader")) {
+                    'osmimport.jar'
+                } else 
+                {
+                    f
+                }
+            }
+
+            with copySpec {
+                from(".")
+                { include "ChangeLog.md" }
+            }
 
 			with copySpec{
 				// include the jre in the build

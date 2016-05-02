@@ -1,10 +1,10 @@
 #CSV output format - Hadoop pivot
 
-**since 0.6**, it is possible to export osm datas into a folder containing csv files.
+**Since 0.6**, it is possible to export osm datas into a folder containing csv files.
 Each table and featureclass output will be generated in a proper file.
 
 Every records are generated in a text file, using the current local charset encoding. With a `'\\n'` endline character.
-**Geometries are encoded in base64**, containing a the ShapeFile Format geometry description. Esri geometry java project on github is able to directly load the geometry in Java Object, as JTS, or other java geometry toolkits.
+**Geometries are encoded in base64**, containing a the **ShapeFile Format encoded** geometry description. Esri geometry java project on github is able to directly load the geometry in Java Object, as JTS, or other java geometry toolkits.
 
 Strings are encoded with a leading and trailing `"` character
 
@@ -54,7 +54,7 @@ Example :
 		
 	}
 
-this script generate a streets.csv file with the following extracted content.
+This script generate a streets.csv file with the following extracted content.
 
 
 Generated output :

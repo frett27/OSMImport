@@ -46,14 +46,14 @@ Existing scripts are located in the **[scripts](../scripts)** folder
 
 Place the OSM (PBF/XML) datafile and the script file, in a folder and run :
 
-	java -Xmx6g -jar [pathto]/osmtoolsreader-all-0.7.10-SNAPSHOT.jar import -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
+	java -Xmx6g -jar [pathto]/osmimport.jar import -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
 
 the output files are placed in the location defined in the stream file (the -s option).
 
 
 ##Command line parameters
 
-	C:\projets\OSMImport>java -Xmx6g -jar build\libs\osmtoolsreader-all-0.7.10-SNAPSHOT.jar help import
+	C:\projets\OSMImport>java -Xmx6g -jar osmimport.jar help import
 
 		OSM Import
 		usage: osmimport  import

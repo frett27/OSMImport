@@ -7,7 +7,7 @@ import com.osmimport.model.OSMEntityGeometry
 builder.build(osmstream) {
 
 	// défini un flux de sortie, et description de la structure
-	sortie = csv(path : var_gdb) {
+	sortie = csv(path : var_ouputcsv) {
 		featureclass("streets", ESRI_GEOMETRY_POLYLINE,"WGS84") {
 			_integer('id')
 			_text("type")

@@ -6,7 +6,7 @@ builder.build(osmstream) {
 	sortie = gdb(path : var_gdb) {
 		featureclass("streets", ESRI_GEOMETRY_POLYLINE,"WGS84") {
 			_integer('id')
-			_text("type")
+			_text("highway")
 			_text("name")
 		}
 	}
