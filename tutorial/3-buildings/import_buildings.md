@@ -12,3 +12,8 @@ Download `alsace-latest.osm.pbf` at `http://download.geofabrik.de/europe/france/
 we use the `-p 2` to create polygons
 
 	osmimport-0.7.12-SNAPSHOT>jre\bin\java -Xmx6g -jar osmimport.jar import -i alsace-latest.osm.pbf -p 2 -s scripts\buildings.groovy -v gdb=buildings.gdb
+
+
+##Result
+
+![](result.png)

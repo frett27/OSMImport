@@ -136,6 +136,11 @@ distributions {
 				from { "scripts" }
 				into { "scripts" }
 			}
+	       	with copySpec {
+				// include scripts examples to distribution
+				from { "tutorial" }
+				into { "tutorial" }
+			}
 			
 		}
 
