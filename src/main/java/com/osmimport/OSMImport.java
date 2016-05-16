@@ -500,6 +500,11 @@ public class OSMImport {
 			System.out.println("    closing " + e.getKey());
 			e.getValue().closeAll();
 		}
+		
+		System.out.println("all files closed");
+		
+		// end process
+		System.exit(0);
 
 	}
 }
