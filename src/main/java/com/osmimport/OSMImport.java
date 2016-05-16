@@ -504,7 +504,7 @@ public class OSMImport {
 		System.out.println("all files closed");
 		
 		// end process
-		// System.exit(0);
+		System.exit(0);
 
 	}
 }
