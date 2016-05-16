@@ -55,30 +55,43 @@ public class RawCSVEntitiesGenerator {
 
 						OSMAttributedEntity e = null;
 
-						Map<String, String> h = MapStringTools
-								.fromString((String) entity.getFields().get(
-										ATTRIBUTES_F));
+						Map<String, Object> flds = entity.getFields();
 
-						Long id = (Long) (entity.getFields().get(ID_F));
+						Map<String, String> h = MapStringTools
+								.fromString((String) flds.get(ATTRIBUTES_F));
+
+						if (flds == null)
+							return;
+
+						Long id = (Long) (flds.get(ID_F));
+
+						if (id == null)
+							return;
 
 						if (isPoint) {
-							e = new OSMEntityPoint(id, (Double) entity
-									.getFields().get(X_F), (Double) entity
-									.getFields().get(Y_F), (Map) h);
+
+							Double xfield = (Double) flds.get(X_F);
+							Double yfield = (Double) flds.get(Y_F);
+
+							if (xfield == null || yfield == null) {
+								throw new Exception("null x or y for " + entity
+										+ " cannot import this line");
+							}
+
+							e = new OSMEntityPoint(id, xfield, yfield, (Map) h);
 						} else if (isPolygon || isLine) {
 
-							byte[] b = GeometryTools.fromAscii((String) entity
-									.getFields().get(GEOMETRY_F));
+							byte[] b = GeometryTools.fromAscii((String) flds
+									.get(GEOMETRY_F));
 
 							Geometry g = null;
 							if (b != null)
-								g = GeometryEngine
-									.geometryFromEsriShape(b,
-											isPolygon ? Type.Polygon
-													: Type.Polyline);
+								g = GeometryEngine.geometryFromEsriShape(b,
+										isPolygon ? Type.Polygon
+												: Type.Polyline);
 
 							e = new OSMEntityGeometry(id, g, (Map) h);
-							
+
 						} else {
 
 							throw new RuntimeException("bad record");
