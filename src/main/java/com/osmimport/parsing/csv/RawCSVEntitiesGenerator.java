@@ -70,12 +70,15 @@ public class RawCSVEntitiesGenerator {
 							byte[] b = GeometryTools.fromAscii((String) entity
 									.getFields().get(GEOMETRY_F));
 
-							Geometry g = GeometryEngine
+							Geometry g = null;
+							if (b != null)
+								g = GeometryEngine
 									.geometryFromEsriShape(b,
 											isPolygon ? Type.Polygon
 													: Type.Polyline);
 
 							e = new OSMEntityGeometry(id, g, (Map) h);
+							
 						} else {
 
 							throw new RuntimeException("bad record");
