@@ -60,6 +60,11 @@ public class TestCSVParser extends TestCase {
 		assertEquals("", sb.toString());
 
 		// ////// test readField
+		
+		sb = new StringBuilder("\"toto \"\"titi\",\"titi\" ");
+		r = p.parseStringWithQuotes(sb);
+		r2 = p.parseStringWithQuotes(sb);
+		assertEquals("toto \"titi", r);
 
 	}
 
@@ -70,14 +75,10 @@ public class TestCSVParser extends TestCase {
 
 			@Override
 			public void lineParsed(long lineNumber, OSMAttributedEntity entity) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void invalidLine(long lineNumber, String line) {
-				// TODO Auto-generated method stub
-
 			}
 		});
 

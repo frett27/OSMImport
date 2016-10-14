@@ -15,7 +15,7 @@ This project aim to provide a simple **optimized command line for filtering / GI
 
 Since October 2014, lots of feedbacks have been implemented in the lastest version. This project **doesn't need PostGIS database**, **or extensive software stack**. This tools has been tested on Windows (x64) and Linux (x64). 
 
-This project use dirsuptive technology, an internal actors system using big data principles (streams, no sequencial read), proposing a disruptive performance experience. This tool benefit directly from a Muticore machine, 
+This project use dirsuptive technology, an internal actors system using big data principles (streams, no sequencial read), proposing a disruptive performance experience. This tool benefit directly from a Muticore machine. for more information about architecture see [architecture](architecture/architecture)
 
 #Features
 
@@ -37,9 +37,12 @@ This project use dirsuptive technology, an internal actors system using big data
 - A minimum of 5go of RAM is necessary for a first load
 	- Nota : RAM is used for processing complete ways and polygons, if RAM is not available, subsequent input file read are going to be done and will lead to decrease performances.
 
-A typical 32 Gb or RAM permit to handle France territory in a very nice timeframe. (please give us your benchmarks feedbacks and configurations)
 
-- The tool only support WGS84 coordinate system for the moment as the osm datas use this coordinate system and it is quite easy to reproject thoses in an other coordinate system afterward.
+- A typical 32 Gb or RAM permit to handle France territory in a very nice timeframe. (please give us your benchmarks feedbacks and configurations). Special tuning could be done for an optimized process. (message regularisation limites, depending on the available memory).
+
+- The tool currenlty **only support WGS84 coordinate system** as the osm datas use this coordinate system and it is quite easy to reproject thoses in an other coordinate system afterward.
+
+- for huge integration (more than 1gb of PBF), or less that 2h country integration, consider using the `osm-flink-tools` to preprocess the input file, this is MUCH FASTER.
 
 
 #Benchmarks
@@ -48,8 +51,9 @@ for simple scenarios (light write pressure):
 
 - **More than 1 000 000 final entities processed per minute** for simple transformations on a standard laptop (1.7 Ghz INTEL i5, 2 physical cores, 8Gb RAM, 5400 rpm Hard Drive)), processing a french department takes about 10mins with 8Gb of RAM. Processing France with a 32gb of RAM takes about 1,5 Hour.
 
-For heaviest writing pressure and full stack, with script ramimport.groovy exporting in gdb, an admin level 1 of france, take about 40 mins, with the same hardware as above.
+- As a REX, on heaviest writing pressure and full stack, using ramimport.groovy script and exporting in gdb. The admin level 1 export, take about 40 mins, with the same hardware as above.
 
+- as FileGeodatabase need a write synchronization per featureclass, writes are synchronized for this output format. This is not the case for CSV output
 
 
 #Download and install - Next actions

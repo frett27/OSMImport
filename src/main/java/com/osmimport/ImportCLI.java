@@ -38,7 +38,7 @@ public class ImportCLI implements CLICommand {
 				.withLongOpt("input")
 				.isRequired()
 				.withDescription(
-						"[REQUIRED] input PBF or OSM file, this can be .pbf or .osm files ")
+						"[REQUIRED] input PBF or OSM file, this can be .pbf or .osm files, if a folder is specified, it must contains the node.csv, ways.csv, rels.csv and polygon.csv files or subfolder ")
 				.create('i');
 
 		Option script = OptionBuilder
