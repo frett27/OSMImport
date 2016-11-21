@@ -55,6 +55,9 @@ for simple scenarios (light write pressure):
 
 - as FileGeodatabase need a write synchronization per featureclass, writes are synchronized for this output format. This is not the case for CSV output
 
+#PBF / OSM - Data Files
+
+Openstreet france propose OSM extracts at this location : http://download.openstreetmap.fr/extracts/
 
 #Download and install - Next actions
 
