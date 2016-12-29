@@ -15,7 +15,7 @@ This project aim to provide a simple **optimized command line for filtering / GI
 
 Since October 2014, lots of feedbacks have been implemented in the lastest version. This project **doesn't need PostGIS database**, **or extensive software stack**. This tools has been tested on Windows (x64) and Linux (x64). 
 
-This project use dirsuptive technology, an internal actors system using big data principles (streams, no sequencial read), proposing a disruptive performance experience. This tool benefit directly from a Muticore machine. for more information about architecture see [architecture](architecture/architecture)
+This project use dirsuptive technology, an internal actors system using big data principles (streams, no sequencial read), proposing a disruptive performance experience. This tool benefit directly from a Muticore machine. for more information about architecture see [architecture](doc/architecture/architecture)
 
 #Features
 
