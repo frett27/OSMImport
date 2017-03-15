@@ -130,8 +130,8 @@ public class RawCSVEntitiesGenerator {
 						}
 					}
 
-					output.lineParsed(lineNumber, new OSMRelation(id, flds, l));
-					return;
+					e = new OSMRelation(id, (Map) h, l);
+
 
 				} else {
 
