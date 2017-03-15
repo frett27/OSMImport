@@ -1,5 +1,6 @@
 package com.osmimport.parsing.csv;
 
+import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,23 +46,19 @@ public class CSVFolderParsingSubSystem extends MeasuredActor {
 	private ActorRef output;
 
 	private double currentVel;
-	
+
 	private static final RegulationMessage TICK_FOR_PID_UPDATE = new RegulationMessage();
 
 	private static class RegulationMessage implements ControlMessage {
 
 	}
-	
+
 	private long REG_TIME = 100;
 
 	private IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack;
 
-	public CSVFolderParsingSubSystem(
-			ActorRef flowRegulator,
-			ActorRef output,
-			Long maxWaysToCreateForWorker,
-			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack,
-			ParsingLevel parsingLevel) {
+	public CSVFolderParsingSubSystem(ActorRef flowRegulator, ActorRef output, Long maxWaysToCreateForWorker,
+			IInvalidPolygonConstructionFeedBack invalidPolygonConstructionFeedBack, ParsingLevel parsingLevel) {
 
 		this.flowRegulator = flowRegulator;
 		this.invalidPolygonConstructionFeedBack = invalidPolygonConstructionFeedBack;
@@ -121,7 +118,13 @@ public class CSVFolderParsingSubSystem extends MeasuredActor {
 
 						@Override
 						public void invalidLine(long lineNumber, String line) {
-							System.err.println("fail to parse line "
+							
+							File file = f.getFileToRead();
+							String fileName = "<unknown>";
+							if (file != null) {
+								fileName = file.getName();
+							}
+							System.err.println("fail to parse line " + fileName + ":" 
 									+ lineNumber + " :" + line);
 						}
 					});
@@ -173,8 +176,7 @@ public class CSVFolderParsingSubSystem extends MeasuredActor {
 
 			double timeToWaitif1000 = 0.001;
 
-			double t = maxTimeToWaitIf0 - maxTimeToWaitIf0 / 1000.0 * v
-					+ timeToWaitif1000;
+			double t = maxTimeToWaitIf0 - maxTimeToWaitIf0 / 1000.0 * v + timeToWaitif1000;
 			if (t > maxTimeToWaitIf0)
 				t = maxTimeToWaitIf0;
 			if (t < 0)
@@ -195,19 +197,14 @@ public class CSVFolderParsingSubSystem extends MeasuredActor {
 			log.debug("error :" + ex.getMessage(), ex);
 		}
 	}
-	
+
 	@Override
 	public void onReceive(Object message) throws Exception {
 
 		if (TICK_FOR_PID_UPDATE.equals(message)) {
 			// don't count
-			getContext()
-					.system()
-					.scheduler()
-					.scheduleOnce(
-							Duration.create(REG_TIME, TimeUnit.MILLISECONDS),
-							getSelf(), TICK_FOR_PID_UPDATE,
-							getContext().dispatcher(), null);
+			getContext().system().scheduler().scheduleOnce(Duration.create(REG_TIME, TimeUnit.MILLISECONDS), getSelf(),
+					TICK_FOR_PID_UPDATE, getContext().dispatcher(), null);
 
 			// ask for the regulation status
 			tell(flowRegulator, new MessageRegulatorStatus(), getSelf());
@@ -221,11 +218,8 @@ public class CSVFolderParsingSubSystem extends MeasuredActor {
 	public void preStart() throws Exception {
 		super.preStart();
 
-		getContext()
-				.system()
-				.scheduler()
-				.scheduleOnce(Duration.create(2, TimeUnit.SECONDS), getSelf(),
-						TICK_FOR_PID_UPDATE, getContext().dispatcher(), null);
+		getContext().system().scheduler().scheduleOnce(Duration.create(2, TimeUnit.SECONDS), getSelf(),
+				TICK_FOR_PID_UPDATE, getContext().dispatcher(), null);
 	}
-	
+
 }

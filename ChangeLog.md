@@ -1,6 +1,7 @@
 
 #ChangeLog :
 
+- 15/03/2017 : add relations to CSV reading
 - 25/04/2016 : add support for double, single fields, reading for CSV files in directory
 - 17/01/2016 : documentation enhancements, full transforming DSL documentation, in the reference documentation file. adding polygon creation failing reports.
 - 10/10/2015 : add export command to export featureclasses and tables into geojson geometry format for csv export
@@ -9,6 +10,10 @@
 - 16/08/2015 : version 0.5,add XML/OSM file support, bugs fixes
 - 28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
 
+Version 0.7.13
+--------------
+
+Add CSV relation reading, was missing in the CSV input subsystem
 
 Version 0.7.12
 --------------
