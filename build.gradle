@@ -5,7 +5,20 @@ apply plugin: 'groovy'
 apply plugin: 'distribution'
 
 group = 'osmtools'
-version = '0.7.13-SNAPSHOT'
+
+if (
+
+def release_number = "0.7"   // base release for compiling (sanitiy check)
+
+def current_release = '0.7.13-SNAPSHOT'
+
+String environmentRelease = System.getenv('RELEASE')
+if (environmentRelease) {
+    assert environmentRelease.startsWith(release_number)
+	current_release = environmentRelease
+}
+
+version = current_release
 
 description = """tools for handling import of osm datas into filegeodatabases, csv"""
 
