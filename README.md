@@ -1,3 +1,4 @@
+
 OSMImport
 =========
 
@@ -11,38 +12,52 @@ _Patrice Freydiere - 2015 - 2016_
 
 Yet An Other OSM Import / Formatting OSM data tool - [Change Log](ChangeLog.md)
 
-This project aim to provide a simple **optimized command line for filtering / GIS structuring OSM PBF or OSM XML files**. The result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). CSV output files are also supported since 0.6 version, allowing to have a smooth BigData shift for OSM data
+This project aim to provide a simple **command line for filtering / GIS structuring OSM PBF or OSM XML files**. The result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). CSV output files are also supported since 0.6 version, allowing to have a smooth BigData shift for OSM data 
 
-Since October 2014, lots of feedbacks have been implemented in the lastest version. This project **doesn't need PostGIS database**, **or extensive software stack**. This tools has been tested on Windows (x64) and Linux (x64). 
+This project use an internal actors system architecture, using big data principles (streams, no sequencial read). This tool benefit directly from a Muticore machine. for more information about architecture see [architecture](doc/architecture/architecture.md)
 
-This project use dirsuptive technology, an internal actors system using big data principles (streams, no sequencial read), proposing a disruptive performance experience. This tool benefit directly from a Muticore machine. for more information about architecture see [architecture](doc/architecture/architecture.md)
 
-#Features
 
-- **Windows** / **Linux** friendly (tested, but in practice should be run on all java compatible desktop / server machines)
+#Objectives
+
+- Simple to use, performant
+- Contributing or extracting information thanks to shared scripts
+
+#Current Features
+
+- **Windows** / **Linux** 
+
 - **PBF / XML / OSM / CSV Big Data Folder Input** input file support
+
 - **FileGeodatabase Output**, that can be natively read by ArcGIS Desktop or QGIS
-- **Create CSV text files in a folder** for Hadoop/Big stacks
+
+- **CSV text files output in a folder** for Hadoop/Big stacks, can be pushed to hdfs store
+
 - **Simple declarative groovy transformation script** 
-	- All **Groovy** and **Java third party are directly usable** in the script, for filtering and transformations.
-	- Simplified merge on a set of script to have different outputed database from a single run.
-	- **Scripts are Easy to share and maintain** (a single human readable .script file)
-- **Multiple destinations output on one run** (ability to merge import scripts)
-- **Way reconstruction**, **Polygon reconstruction**, to have a proper GIS geometry, handled by the ESRI geometry library
-- Automatic **RAM memory management** (manage the RAM consumption)
+-  It use a **Groovy** DSL, opening the field to java third party libraries, used for filtering and transformations.
+-  If multiple class or objects must be extracted in different files, this can be done in one script.
+-  **Scripts are humany readable **
+
+- **Way reconstruction**, **Polygon reconstruction**, to ease the use in a GIS, this is handled by the hadoop ESRI geometry library
+
+- **Performances** : extracting some objets in files can typically be done in half the usual time. 
+
+  ​
 
 
 #Usage context - known usage
 
-- A minimum of 5go of RAM is necessary for a first load
-	- Nota : RAM is used for processing complete ways and polygons, if RAM is not available, subsequent input file read are going to be done and will lead to decrease performances.
+- A minimum of 5go of RAM is necessary for a first load 
+- for 100mb or more PBF input files, (use the preprocessing stage).
 
-
-- A typical 32 Gb or RAM permit to handle France territory in a very nice timeframe. (please give us your benchmarks feedbacks and configurations). Special tuning could be done for an optimized process. (message regularisation limites, depending on the available memory).
 
 - The tool currenlty **only support WGS84 coordinate system** as the osm datas use this coordinate system and it is quite easy to reproject thoses in an other coordinate system afterward.
 
 - for huge integration (more than 1gb of PBF), or less that 2h country integration, consider using the `osm-flink-tools` to preprocess the input file, this is MUCH FASTER.
+
+  - [See Large integration Article]()
+
+    ​
 
 
 #Benchmarks
@@ -53,29 +68,59 @@ for simple scenarios (light write pressure):
 
 - As a REX, on heaviest writing pressure and full stack, using ramimport.groovy script and exporting in gdb. The admin level 1 export, take about 40 mins, with the same hardware as above.
 
-- as FileGeodatabase need a write synchronization per featureclass, writes are synchronized for this output format. This is not the case for CSV output
+- as FileGeodatabase Java API need synchronization per featureclass, writes are synchronized for this output format. There is a performance tradoff. This is not the case for CSV output
 
-#PBF / OSM - Data Files
 
-Openstreet france propose OSM extracts at this location : http://download.openstreetmap.fr/extracts/
 
-#Download and install - Next actions
+# One line startup
+
+```
+java -Xmx6g -jar [pathto]/osmimport.jar import -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
+```
+
+Some extract/transform **scripts** are available here : [scripts](scripts)
+
+
+
+#Tutorial / Informations
 
 Take a tour at [5 mins setup guide](doc/QuickStart.md) to launch your first command line.
 
-[How to write Scripts](doc/WritingAScript.md) explain how to customize or configure your scripts for your usage.
+[How to write Scripts](doc/ScriptReference.md) explain how to create, customize or configure your scripts.
 
-[Existing Scripts folder](scripts) contains a bunch of existing scripts for already configured OSM transformation and filtering
+[Scripts folder](scripts) Scripts samples
 
 other documentations can be found in the [doc](doc) folder
 
-don't hesitate to send pull requests or return of experience.
+
+
+# PBF / OSM - Data Files
+
+OpenStreetMap France offert OSM extracts mirror at this location : http://download.openstreetmap.fr/extracts/
+
+
 
 #Ready to use samples scripts :
 
 - [Buildings](scripts/buildings.groovy) - extract buildings
 - [Streets](scripts/streets.groovy) - extract streets
 
+
+
+
+# How To Build the project
+
+You are a developer, you want to compile and use if from source :
+
+Java 7 or 8 is mandatory
+
+```
+git clone https://github.com/frett27/osmimport.git
+cd osmimport
+./gradlew fatJar
+```
+
+use or contribute.
 
 #Contributions
 
