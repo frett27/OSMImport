@@ -2,7 +2,7 @@
 OSMImport
 =========
 
-_Patrice Freydiere - 2015 - 2016_
+_Patrice Freydiere - 2015 - 2016_ - 2017
 
 ---
 
@@ -38,7 +38,7 @@ This project use an internal actors system architecture, using big data principl
 -  If multiple class or objects must be extracted in different files, this can be done in one script.
 -  **Scripts are humany readable **
 
-- **Way reconstruction**, **Polygon reconstruction**, to ease the use in a GIS, this is handled by the hadoop ESRI geometry library
+- **Inprocess Way and Polygon construction**, to ease the use in a GIS.
 
 - **Performances** : extracting some objets in files can typically be done in half the usual time. 
 
@@ -47,13 +47,12 @@ This project use an internal actors system architecture, using big data principl
 
 #Usage context - known usage
 
-- A minimum of 5go of RAM is necessary for a first load 
-- for 100mb or more PBF input files, (use the preprocessing stage).
+- A minimum of 5go of RAM is necessary for a first simple load 
 
 
 - The tool currenlty **only support WGS84 coordinate system** as the osm datas use this coordinate system and it is quite easy to reproject thoses in an other coordinate system afterward.
 
-- for huge integration (more than 1gb of PBF), or less that 2h country integration, consider using the `osm-flink-tools` to preprocess the input file, this is MUCH FASTER.
+- for huge integration (more than 1gb of PBF),  consider using the `osm-flink-tools` to preprocess the input file, this is MUCH FASTER.
 
   - [See Large integration Article]()
 
@@ -64,9 +63,9 @@ This project use an internal actors system architecture, using big data principl
 
 for simple scenarios (light write pressure):
 
-- **More than 1 000 000 final entities processed per minute** for simple transformations on a standard laptop (1.7 Ghz INTEL i5, 2 physical cores, 8Gb RAM, 5400 rpm Hard Drive)), processing a french department takes about 10mins with 8Gb of RAM. Processing France with a 32gb of RAM takes about 1,5 Hour.
+- **Thanks to LMAX, more than 1 000 000 final entities can be processed in a minute** for simple transformations on a standard laptop. See benchmark article for metrics.
 
-- As a REX, on heaviest writing pressure and full stack, using ramimport.groovy script and exporting in gdb. The admin level 1 export, take about 40 mins, with the same hardware as above.
+- As a REX, on heaviest writing pressure and full stack, using ramimport.groovy script and exporting in gdb. The admin level 1 export, take about 40 mins, with the same hardware as above, with preprocessing.
 
 - as FileGeodatabase Java API need synchronization per featureclass, writes are synchronized for this output format. There is a performance tradoff. This is not the case for CSV output
 
