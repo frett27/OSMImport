@@ -17,7 +17,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key: "$GH_TOKEN"
-  file: "build/libs/osmtoolsreader-all-$RELEASE.jar"
+  file: "$HOME/build/libs/osmtoolsreader-all-$RELEASE.jar"
   skip_cleanup: true
   on:
     tags: true
