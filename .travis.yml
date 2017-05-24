@@ -1,5 +1,8 @@
 language: java
 
+env:
+  global:
+    - RELEASE=$TRAVIS_TAG
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -11,8 +14,8 @@ cache:
 script:
   - ./gradlew fatJar
 
-before_deploy:
-  - export RELEASE=$TRAVIS_TAG.$TRAVIS_BUILD_NUMBER
+#before_deploy:
+#  - export RELEASE=$TRAVIS_TAG
 
 deploy:
   provider: releases
