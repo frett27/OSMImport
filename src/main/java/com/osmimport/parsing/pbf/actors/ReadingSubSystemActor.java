@@ -6,6 +6,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,13 +14,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import scala.concurrent.duration.Duration;
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.dispatch.ControlMessage;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.osmimport.actors.MeasuredActor;
@@ -33,8 +27,14 @@ import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Counter;
 import com.yammer.metrics.core.Timer;
 
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import akka.dispatch.ControlMessage;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import crosby.binary.Fileformat;
 import crosby.binary.Fileformat.Blob;
+import scala.concurrent.duration.Duration;
 
 /**
  * Actor handling the file reading
@@ -201,7 +201,7 @@ public class ReadingSubSystemActor extends MeasuredActor {
 					String start = "Begin :"
 							+ simpleDateFormat.format(new Date());
 
-					FileInputStream fis = new FileInputStream(currentFile);
+					InputStream fis = new FileInputStream(currentFile);
 					try {
 						int cpt = 0;
 						BufferedInputStream bfis = new BufferedInputStream(fis,
@@ -338,10 +338,10 @@ public class ReadingSubSystemActor extends MeasuredActor {
 
 	private ExecutorService asyncReading = Executors.newSingleThreadExecutor();
 
-	void readFile(File f) throws Exception {
+	void readFile(File url) throws Exception {
 
-		log.info("Read file :" + f);
-		this.currentFile = f;
+		log.info("Read stream :" + url);
+		this.currentFile = url;
 
 		tell(dispatcher, MessageParsingSystemStatus.START_JOB, getSelf());
 

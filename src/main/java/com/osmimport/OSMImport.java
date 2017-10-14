@@ -15,10 +15,6 @@ import org.fgdbapi.thindriver.swig.Geodatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-
 import com.osmimport.output.CSVFolderReference;
 import com.osmimport.output.GDBReference;
 import com.osmimport.output.OutCell;
@@ -31,6 +27,7 @@ import com.osmimport.output.actors.gdb.ChainCompiler.ValidateResult;
 import com.osmimport.output.actors.gdb.CompiledTableOutputActor;
 import com.osmimport.output.actors.gdb.FieldsCompilerActor;
 import com.osmimport.parsing.actors.ParsingLevel;
+import com.osmimport.parsing.avro.AvroParsingSubSystem;
 import com.osmimport.parsing.csv.CSVFolderParsingSubSystem;
 import com.osmimport.parsing.pbf.actors.PbfParsingSubSystemActor;
 import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
@@ -45,466 +42,431 @@ import com.osmimport.tools.polygoncreator.ConsoleInvalidPolygonFeedBackReporter;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
+
 /**
  * Main class for the system
- * 
+ *
  * @author pfreydiere
- * 
  */
 public class OSMImport {
 
-	private static Logger log = LoggerFactory.getLogger(OSMImport.class);
-
-	private Long maxWaysToRemember = null;
-
-	private Long overridenEventBuffer = null;
-
-	/**
-	 * reference destinations by path
-	 */
-	private Map<String, OutDestination> outDestinations;
-
-	/**
-	 * the process model
-	 */
-	private ProcessModel pm;
-
-	/**
-	 * log for the entities processing
-	 */
-	private IReport report;
-
-	/**
-	 * level of parsing
-	 */
-	private ParsingLevel parsingLevel = ParsingLevel.PARSING_LEVEL_POLYGON;
-
-	public OSMImport() {
-
-	}
-
-	/**
-	 * define the overriden max ways to remember, other wise, use the predefined
-	 * configuration
-	 * 
-	 * @param maxWaysToRemember
-	 */
-	public void setMaxWaysToRemember(Long maxWaysToRemember) {
-		this.maxWaysToRemember = maxWaysToRemember;
-	}
-
-	/**
-	 * define an overriden event buffer
-	 */
-	public void setOverridenEventBuffer(Long overridenEventBuffer) {
-		this.overridenEventBuffer = overridenEventBuffer;
-	}
-
-	/**
-	 * define the report object that will be used for the entities construct
-	 * 
-	 * @param report
-	 */
-	public void setReport(IReport report) {
-		this.report = report;
-	}
-
-	/**
-	 * define the parsing level
-	 * 
-	 * @param p
-	 *            the parsing level
-	 */
-	public void setParsingLevel(ParsingLevel p) {
-		assert p != null;
-		this.parsingLevel = p;
-	}
-
-	/**
-	 * load and compile the import script
-	 * 
-	 * @param script
-	 * @param additionalVariables
-	 * @throws Exception
-	 */
-	public void loadAndCompileScript(File script,
-			Map<String, String> additionalVariables) throws Exception {
-		assert script != null;
-		assert script.exists();
-
-		ChainCompiler c = new ChainCompiler();
-		Stream mainStream = new Stream(); // fake for getting reference
-		mainStream.actorName = "result";
-		ProcessModel pm = c.compile(script, mainStream, additionalVariables);
-
-		ValidateResult v = c.validateProcessModel(pm);
-		if (v.warnings != null && v.warnings.length > 0) {
-			System.out.println("WARNINGS in the model :");
-			System.out.println(Arrays.asList(v.warnings));
-		}
-
-		this.pm = pm;
-
-	}
-
-	// base class for out destination
-	private static abstract class OutDestination {
-
-		public abstract void closeAll() throws Exception;
-
-	}
-
-	// geodatabase destination
-	private static class OpenedGeodatabase extends OutDestination {
-		public Geodatabase geodatabase;
-		public Map<String, org.fgdbapi.thindriver.swig.Table> tables = new HashMap<>();
-
-		@Override
-		public void closeAll() {
-			assert geodatabase != null;
-			for (Entry<String, org.fgdbapi.thindriver.swig.Table> t : tables
-					.entrySet()) {
-				// info("closing table " + t.getKey());
-				try {
-					geodatabase.closeTable(t.getValue());
-				} catch (Exception ex) {
-					System.out.println("error closing :" + t.getKey() + " :"
-							+ ex.getMessage());
-				}
-			}
+  private static Logger log = LoggerFactory.getLogger(OSMImport.class);
+
+  private Long maxWaysToRemember = null;
+
+  private Long overridenEventBuffer = null;
+
+  /** reference destinations by path */
+  private Map<String, OutDestination> outDestinations;
+
+  /** the process model */
+  private ProcessModel pm;
+
+  /** log for the entities processing */
+  private IReport report;
+
+  /** level of parsing */
+  private ParsingLevel parsingLevel = ParsingLevel.PARSING_LEVEL_POLYGON;
+
+  public OSMImport() {}
+
+  /**
+   * define the overriden max ways to remember, other wise, use the predefined configuration
+   *
+   * @param maxWaysToRemember
+   */
+  public void setMaxWaysToRemember(Long maxWaysToRemember) {
+    this.maxWaysToRemember = maxWaysToRemember;
+  }
+
+  /** define an overriden event buffer */
+  public void setOverridenEventBuffer(Long overridenEventBuffer) {
+    this.overridenEventBuffer = overridenEventBuffer;
+  }
+
+  /**
+   * define the report object that will be used for the entities construct
+   *
+   * @param report
+   */
+  public void setReport(IReport report) {
+    this.report = report;
+  }
+
+  /**
+   * define the parsing level
+   *
+   * @param p the parsing level
+   */
+  public void setParsingLevel(ParsingLevel p) {
+    assert p != null;
+    this.parsingLevel = p;
+  }
+
+  /**
+   * load and compile the import script
+   *
+   * @param script
+   * @param additionalVariables
+   * @throws Exception
+   */
+  public void loadAndCompileScript(File script, Map<String, String> additionalVariables)
+      throws Exception {
+    assert script != null;
+    assert script.exists();
+
+    ChainCompiler c = new ChainCompiler();
+    Stream mainStream = new Stream(); // fake for getting reference
+    mainStream.actorName = "result";
+    ProcessModel pm = c.compile(script, mainStream, additionalVariables);
+
+    ValidateResult v = c.validateProcessModel(pm);
+    if (v.warnings != null && v.warnings.length > 0) {
+      System.out.println("WARNINGS in the model :");
+      System.out.println(Arrays.asList(v.warnings));
+    }
+
+    this.pm = pm;
+  }
+
+  // base class for out destination
+  private abstract static class OutDestination {
+
+    public abstract void closeAll() throws Exception;
+  }
+
+  // geodatabase destination
+  private static class OpenedGeodatabase extends OutDestination {
+    public Geodatabase geodatabase;
+    public Map<String, org.fgdbapi.thindriver.swig.Table> tables = new HashMap<>();
+
+    @Override
+    public void closeAll() {
+      assert geodatabase != null;
+      for (Entry<String, org.fgdbapi.thindriver.swig.Table> t : tables.entrySet()) {
+        // info("closing table " + t.getKey());
+        try {
+          geodatabase.closeTable(t.getValue());
+        } catch (Exception ex) {
+          System.out.println("error closing :" + t.getKey() + " :" + ex.getMessage());
+        }
+      }
+    }
+  }
 
-		}
+  private static class TableOutputStream {
+    public Table table;
+    public OutputStream outputStream;
+  }
 
-	}
+  // csv folder destination
+  private static class CsvFolder extends OutDestination {
+    public File folder;
+    public Map<String, TableOutputStream> files = new HashMap<>();
 
-	private static class TableOutputStream {
-		public Table table;
-		public OutputStream outputStream;
-	}
+    @Override
+    public void closeAll() throws Exception {
+      for (Entry<String, TableOutputStream> e : files.entrySet()) {
+        try {
+          e.getValue().outputStream.close();
+        } catch (Exception ex) {
+          System.out.println("error closing table " + e.getKey() + " :" + ex.getMessage());
+        }
+      }
+    }
+  }
 
-	// csv folder destination
-	private static class CsvFolder extends OutDestination {
-		public File folder;
-		public Map<String, TableOutputStream> files = new HashMap<>();
+  /**
+   * create the needed tabled, and open all files
+   *
+   * @param pm the processing model
+   * @return a hash with all opened outSinks
+   * @throws Exception
+   */
+  private void openOutputDestinations() throws Exception {
 
-		@Override
-		public void closeAll() throws Exception {
-			for (Entry<String, TableOutputStream> e : files.entrySet()) {
-				try {
-					e.getValue().outputStream.close();
-				} catch (Exception ex) {
-					System.out.println("error closing table " + e.getKey()
-							+ " :" + ex.getMessage());
-				}
-			}
-		}
+    assert pm != null;
 
-	}
+    Map<String, OutDestination> g = new HashMap<String, OutDestination>();
 
-	/**
-	 * create the needed tabled, and open all files
-	 * 
-	 * @param pm
-	 *            the processing model
-	 * 
-	 * @return a hash with all opened outSinks
-	 * @throws Exception
-	 */
-	private void openOutputDestinations() throws Exception {
+    for (OutCell oc : pm.outs) {
 
-		assert pm != null;
+      // get output
+      OutSink r = oc.sink;
+      String path = r.getPath();
 
-		Map<String, OutDestination> g = new HashMap<String, OutDestination>();
+      if (!g.containsKey(path)) {
 
-		for (OutCell oc : pm.outs) {
+        OutDestination outDest = null;
 
-			// get output
-			OutSink r = oc.sink;
-			String path = r.getPath();
+        if (r instanceof GDBReference) {
 
-			if (!g.containsKey(path)) {
+          // geodatabase as not been created yet
 
-				OutDestination outDest = null;
+          OpenedGeodatabase og = new OpenedGeodatabase();
+          outDest = og;
 
-				if (r instanceof GDBReference) {
+          System.out.println("create geodatabase " + path);
 
-					// geodatabase as not been created yet
+          // create the GDB
+          Geodatabase geodatabase = FGDBJNIWrapper.createGeodatabase(path);
+          og.geodatabase = geodatabase;
+          for (Table t : r.listTables()) {
 
-					OpenedGeodatabase og = new OpenedGeodatabase();
-					outDest = og;
+            TableHelper h = Tools.convertTable(t);
 
-					System.out.println("create geodatabase " + path);
+            String tableDef = h.buildAsString();
+            System.out.println(
+                "creating table " + h.getName() + " with definition : \n" + tableDef);
 
-					// create the GDB
-					Geodatabase geodatabase = FGDBJNIWrapper
-							.createGeodatabase(path);
-					og.geodatabase = geodatabase;
-					for (Table t : r.listTables()) {
+            org.fgdbapi.thindriver.swig.Table newTable;
+            try {
+              newTable = geodatabase.createTable(tableDef, "");
+            } catch (Exception ex) {
+              System.out.println("ERROR in creating table " + h.getName());
+              System.out.println("ERROR  table definition : " + tableDef);
+              throw ex;
+            }
+            System.out.println("table " + h.getName() + " created");
 
-						TableHelper h = Tools.convertTable(t);
+            // closing table to be sure the definition is correctly
+            // stored
 
-						String tableDef = h.buildAsString();
-						System.out.println("creating table " + h.getName()
-								+ " with definition : \n" + tableDef);
+            geodatabase.closeTable(newTable);
 
-						org.fgdbapi.thindriver.swig.Table newTable;
-						try {
-							newTable = geodatabase.createTable(tableDef, "");
-						} catch (Exception ex) {
-							System.out.println("ERROR in creating table "
-									+ h.getName());
-							System.out.println("ERROR  table definition : "
-									+ tableDef);
-							throw ex;
-						}
-						System.out.println("table " + h.getName() + " created");
+            System.out.println("open the table " + h.getName());
 
-						// closing table to be sure the definition is correctly
-						// stored
+            newTable = geodatabase.openTable(h.getName());
 
-						geodatabase.closeTable(newTable);
+            og.tables.put(h.getName(), newTable);
 
-						System.out.println("open the table " + h.getName());
+            System.out.println("successfully created");
+          } // for
 
-						newTable = geodatabase.openTable(h.getName());
+        } else if (r instanceof CSVFolderReference) {
 
-						og.tables.put(h.getName(), newTable);
+          // work on the CSV reference
+          CsvFolder ref = new CsvFolder();
 
-						System.out.println("successfully created");
+          File folder = new File(path);
 
-					} // for
+          // create the file
+          if (!folder.exists()) {
+            folder.mkdirs();
+            if (!folder.exists()) {
+              throw new Exception("folder " + folder.getAbsolutePath() + " cannot be created");
+            }
+          }
 
-				} else if (r instanceof CSVFolderReference) {
+          ref.folder = folder;
 
-					// work on the CSV reference
-					CsvFolder ref = new CsvFolder();
+          for (Table t : r.listTables()) {
+            TableOutputStream c = new TableOutputStream();
+            c.table = t;
 
-					File folder = new File(path);
+            File outFile = new File(folder, t.getName() + ".csv");
 
-					// create the file
-					if (!folder.exists()) {
-						folder.mkdirs();
-						if (!folder.exists()) {
-							throw new Exception("folder "
-									+ folder.getAbsolutePath()
-									+ " cannot be created");
-						}
-					}
+            OutputStream fs = new BufferedOutputStream(new FileOutputStream(outFile));
+            c.outputStream = fs;
 
-					ref.folder = folder;
+            ref.files.put(t.getName(), c);
+          }
 
-					for (Table t : r.listTables()) {
-						TableOutputStream c = new TableOutputStream();
-						c.table = t;
+          outDest = ref;
 
-						File outFile = new File(folder, t.getName() + ".csv");
+        } else {
+          throw new Exception();
+        }
 
-						OutputStream fs = new BufferedOutputStream(
-								new FileOutputStream(outFile));
+        assert outDest != null;
+        g.put(path, outDest);
+      }
+    } // for outs
 
-						c.outputStream = fs;
+    this.outDestinations = g;
+  }
 
-						ref.files.put(t.getName(), c);
+  /**
+   * main procedure
+   *
+   * @param osmInputFile the input file
+   * @throws Exception
+   */
+  public void run(File osmInputFile) throws Exception {
 
-					}
+    assert pm != null;
+    // constructing the actor system
 
-					outDest = ref;
+    Config config = ConfigFactory.load();
 
-				} else {
-					throw new Exception();
-				}
+    log.debug("get osmcluster config");
+    Config osmclusterconfig = config.getConfig("osmcluster");
 
-				assert outDest != null;
-				g.put(path, outDest);
+    ActorSystem sys = ActorSystem.create("osmcluster", osmclusterconfig);
 
-			}
+    long eventbuffer;
 
-		}// for outs
+    if (overridenEventBuffer != null) {
+      eventbuffer = overridenEventBuffer;
+    } else {
 
-		this.outDestinations = g;
-	}
+      eventbuffer = osmclusterconfig.getLong("eventbuffer");
+      // scale for the number of available processors
+      eventbuffer = eventbuffer * Runtime.getRuntime().availableProcessors() / 4;
+    }
+    log.info("eventbuffer to maintain :{}", eventbuffer);
+    log.info("maxways to handle for each worker : {}", this.maxWaysToRemember);
 
-	/**
-	 * main procedure
-	 * 
-	 * @param osmInputFile
-	 *            the input file
-	 * @throws Exception
-	 */
-	public void run(File osmInputFile) throws Exception {
+    ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class, "output", eventbuffer));
 
-		assert pm != null;
-		// constructing the actor system
+    openOutputDestinations();
 
-		Config config = ConfigFactory.load();
+    // for each out, create the output actor
+    for (OutCell oc : pm.outs) {
 
-		log.debug("get osmcluster config");
-		Config osmclusterconfig = config.getConfig("osmcluster");
+      // get output
+      OutSink r = oc.sink;
+      String path = r.getPath();
 
-		ActorSystem sys = ActorSystem.create("osmcluster", osmclusterconfig);
+      if (!outDestinations.containsKey(path)) {
+        throw new Exception("geodatabase " + path + " not found");
+      }
 
-		long eventbuffer;
+      OutDestination outDest = outDestinations.get(path);
 
-		if (overridenEventBuffer != null) {
-			eventbuffer = overridenEventBuffer;
-		} else {
+      if (outDest instanceof OpenedGeodatabase) {
 
-			eventbuffer = osmclusterconfig.getLong("eventbuffer");
-			// scale for the number of available processors
-			eventbuffer = eventbuffer
-					* Runtime.getRuntime().availableProcessors() / 4;
-		}
-		log.info("eventbuffer to maintain :{}", eventbuffer);
-		log.info("maxways to handle for each worker : {}",
-				this.maxWaysToRemember);
+        OpenedGeodatabase openedGeodatabase = (OpenedGeodatabase) outDest;
 
-		ActorRef flowRegulator = sys.actorOf(Props.create(FlowRegulator.class,
-				"output", eventbuffer));
+        org.fgdbapi.thindriver.swig.Table table = openedGeodatabase.tables.get(oc.tablename);
 
-		openOutputDestinations();
+        if (table == null) throw new Exception("table " + oc.tablename + " not found");
 
-		// for each out, create the output actor
-		for (OutCell oc : pm.outs) {
+        String keyname = path + "_" + oc.tablename;
 
-			// get output
-			OutSink r = oc.sink;
-			String path = r.getPath();
+        // ///////////////////////////////////////////////////////////////
+        // create output actors
 
-			if (!outDestinations.containsKey(path)) {
-				throw new Exception("geodatabase " + path + " not found");
-			}
+        ActorRef tableCompiledOutputActor =
+            sys.actorOf(
+                Props.create(CompiledTableOutputActor.class, table, flowRegulator)
+                    .withDispatcher("pdisp"),
+                Tools.toActorName("T__" + keyname));
+        flowRegulator.tell(
+            new MessageRegulatorRegister(tableCompiledOutputActor), ActorRef.noSender());
 
-			OutDestination outDest = outDestinations.get(path);
+        ActorRef fieldsCompiler =
+            sys.actorOf(
+                Props.create(FieldsCompilerActor.class, table, tableCompiledOutputActor),
+                Tools.toActorName("FC__" + keyname));
+        flowRegulator.tell(new MessageRegulatorRegister(fieldsCompiler), ActorRef.noSender());
 
-			if (outDest instanceof OpenedGeodatabase) {
+        oc._actorRef = fieldsCompiler;
 
-				OpenedGeodatabase openedGeodatabase = (OpenedGeodatabase) outDest;
+      } else if (outDest instanceof CsvFolder) {
 
-				org.fgdbapi.thindriver.swig.Table table = openedGeodatabase.tables
-						.get(oc.tablename);
+        // //
+        CsvFolder f = (CsvFolder) outDest;
+        TableOutputStream t = f.files.get(oc.tablename);
 
-				if (table == null)
-					throw new Exception("table " + oc.tablename + " not found");
+        if (t == null) throw new Exception("file " + oc.tablename + " not found");
 
-				String keyname = path + "_" + oc.tablename;
+        assert t.outputStream != null;
+        assert t.table != null;
 
-				// ///////////////////////////////////////////////////////////////
-				// create output actors
+        String keyname = path + "_" + oc.tablename;
 
-				ActorRef tableCompiledOutputActor = sys.actorOf(
-						Props.create(CompiledTableOutputActor.class, table,
-								flowRegulator).withDispatcher("pdisp"),
-						Tools.toActorName("T__" + keyname));
-				flowRegulator.tell(new MessageRegulatorRegister(
-						tableCompiledOutputActor), ActorRef.noSender());
+        // ///////////////////////////////////////////////////////////////
+        // create output actors
 
-				ActorRef fieldsCompiler = sys.actorOf(Props.create(
-						FieldsCompilerActor.class, table,
-						tableCompiledOutputActor), Tools.toActorName("FC__"
-						+ keyname));
-				flowRegulator.tell(
-						new MessageRegulatorRegister(fieldsCompiler),
-						ActorRef.noSender());
+        ActorRef csvOutputActor =
+            sys.actorOf(
+                Props.create(CSVOutputActor.class, t.table, t.outputStream, flowRegulator)
+                    .withDispatcher("pdisp"),
+                // TODO improvements prefs, refactor, for multithreaded
+                // output, each table could have a separate
+                // execution thread
+                Tools.toActorName("CSV__" + keyname));
+        flowRegulator.tell(new MessageRegulatorRegister(csvOutputActor), ActorRef.noSender());
 
-				oc._actorRef = fieldsCompiler;
+        oc._actorRef = csvOutputActor;
 
-			} else if (outDest instanceof CsvFolder) {
+      } else {
+        throw new Exception("unsupported out destination :" + outDest);
+      }
+    } // for outs
 
-				// //
-				CsvFolder f = (CsvFolder) outDest;
-				TableOutputStream t = f.files.get(oc.tablename);
+    pm.computeChildrens();
+    pm.compactAndExtractOthers();
 
-				if (t == null)
-					throw new Exception("file " + oc.tablename + " not found");
+    // result actor contains the main processing flow
+    ActorRef resultActor = pm.getOrCreateActorRef(sys, pm.mainStream, flowRegulator);
 
-				assert t.outputStream != null;
-				assert t.table != null;
+    // create the parsing subsystem, default
+    Class parsingSubSystemClass = XMLParsingSubSystemActor.class;
 
-				String keyname = path + "_" + oc.tablename;
+    // if ("file".equals(osmInputFile.getProtocol())) {
+    	
+      File inputFile = new File(osmInputFile.toURI());
+      String lowerCaseFileName = osmInputFile.getName().toLowerCase();
+      if (lowerCaseFileName.endsWith(".pbf")) {
+        System.out.println("Using pbf parser subsystem");
+        parsingSubSystemClass = PbfParsingSubSystemActor.class;
+      } else if (lowerCaseFileName.endsWith(".avro") || lowerCaseFileName.endsWith(".avrourls")) {
+        System.out.println("Using avro parser subsystem");
+        parsingSubSystemClass = AvroParsingSubSystem.class;
+      } else if (lowerCaseFileName.endsWith(".xml") || lowerCaseFileName.endsWith(".osm")) {
+        System.out.println("Use xml parsing subsystem"); // default one
+      } else if (inputFile.isDirectory()) {
+        // two cases, CSV, or AVRO
+        System.out.println("Use csv folder parsing subsystem");
+        parsingSubSystemClass = CSVFolderParsingSubSystem.class;
+      } else {
+        throw new Exception("unsupported input format");
+      }
+    // }
 
-				// ///////////////////////////////////////////////////////////////
-				// create output actors
+    IReport r = new ConsoleInvalidPolygonFeedBackReporter();
+    if (this.report != null) {
+      r = this.report;
+    }
 
-				ActorRef csvOutputActor = sys.actorOf(
-						Props.create(CSVOutputActor.class, t.table,
-								t.outputStream, flowRegulator).withDispatcher(
-								"pdisp"),
-						// TODO prefs, refactor, for multithreaded
-						// output, each table must have a separate
-						// execution thread
-						Tools.toActorName("CSV__" + keyname));
-				flowRegulator.tell(
-						new MessageRegulatorRegister(csvOutputActor),
-						ActorRef.noSender());
+    ActorRef parsingSubSystem =
+        sys.actorOf(
+            Props.create(
+                parsingSubSystemClass,
+                flowRegulator,
+                resultActor,
+                maxWaysToRemember,
+                r,
+                parsingLevel));
 
-				oc._actorRef = csvOutputActor;
+    flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem), ActorRef.noSender());
 
-			} else {
-				throw new Exception("unsupported out destination :" + outDest);
-			}
+    // init the reading
+    parsingSubSystem.tell(MessageParsingSystemStatus.INITIALIZE, ActorRef.noSender());
 
-		}// for outs
+    // wait a bit
+    Thread.sleep(2000);
 
-		pm.computeChildrens();
-		pm.compactAndExtractOthers();
+    System.out.println("launch the reading");
+    parsingSubSystem.tell(new MessageReadFile(osmInputFile), ActorRef.noSender());
 
-		// result actor contains the main processing flow
-		ActorRef resultActor = pm.getOrCreateActorRef(sys, pm.mainStream,
-				flowRegulator);
+    sys.awaitTermination();
 
-		// create the parsing subsystem
-		Class parsingSubSystemClass = XMLParsingSubSystemActor.class;
+    System.out.println("end of system, closing files");
 
-		String lowerCaseFileName = osmInputFile.getName().toLowerCase();
-		if (lowerCaseFileName.endsWith(".pbf")) {
-			System.out.println("Using pbf parser subsystem");
-			parsingSubSystemClass = PbfParsingSubSystemActor.class;
-		} else if (lowerCaseFileName.endsWith(".xml")
-				|| lowerCaseFileName.endsWith(".osm")) {
-			System.out.println("Use xml parsing subsystem");
-		} else if (osmInputFile.isDirectory()) {
-			System.out.println("Use csv folder parsing subsystem");
-			parsingSubSystemClass = CSVFolderParsingSubSystem.class;
-		} else {
-			throw new Exception("unsupported input format");
-		}
+    for (Entry<String, OutDestination> e : outDestinations.entrySet()) {
+      System.out.println("    closing " + e.getKey());
+      e.getValue().closeAll();
+    }
 
-		IReport r = new ConsoleInvalidPolygonFeedBackReporter();
-		if (this.report != null) {
-			r = this.report;
-		}
+    System.out.println("all files closed");
 
-		ActorRef parsingSubSystem = sys.actorOf(Props.create(
-				parsingSubSystemClass, flowRegulator, resultActor,
-				maxWaysToRemember, r, parsingLevel));
-
-		flowRegulator.tell(new MessageRegulatorRegister(parsingSubSystem),
-				ActorRef.noSender());
-
-		// init the reading
-		parsingSubSystem.tell(MessageParsingSystemStatus.INITIALIZE,
-				ActorRef.noSender());
-
-		// wait a bit
-		Thread.sleep(2000);
-
-		System.out.println("launch the reading");
-		parsingSubSystem.tell(new MessageReadFile(osmInputFile),
-				ActorRef.noSender());
-
-		sys.awaitTermination();
-
-		System.out.println("end of system, closing files");
-
-		for (Entry<String, OutDestination> e : outDestinations.entrySet()) {
-			System.out.println("    closing " + e.getKey());
-			e.getValue().closeAll();
-		}
-		
-		System.out.println("all files closed");
-		
-		// end process
-		System.exit(0);
-
-	}
+    // end process
+    System.exit(0);
+  }
 }

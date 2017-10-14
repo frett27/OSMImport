@@ -1,6 +1,8 @@
 package com.osmimport.parsing.csv;
 
 import java.io.File;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,187 +23,198 @@ import com.osmimport.structures.model.Table;
 
 public class RawCSVEntitiesGenerator {
 
-	private static final String ATTRIBUTES_F = "attributes";
-	private static final String GEOMETRY_F = "geometry";
-	private static final String RELS = "rels";
-	private static final String Y_F = "y";
-	private static final String X_F = "x";
-	private static final String ID_F = "id";
-	private ParserCallBack output;
+  private static final String ATTRIBUTES_F = "attributes";
+  private static final String GEOMETRY_F = "geometry";
+  private static final String RELS = "rels";
+  private static final String Y_F = "y";
+  private static final String X_F = "x";
+  private static final String ID_F = "id";
+  private ParserCallBack output;
 
-	public RawCSVEntitiesGenerator(ParserCallBack output) {
-		assert output != null;
-		this.output = output;
-	}
+  public RawCSVEntitiesGenerator(ParserCallBack output) {
+    assert output != null;
+    this.output = output;
+  }
 
-	protected void parse(File file, boolean hasGeometry, final boolean isPoint, final boolean isLine,
-			final boolean isPolygon, final boolean isRels) throws Exception {
+  protected void parse(
+      File file,
+      boolean hasGeometry,
+      final boolean isPoint,
+      final boolean isLine,
+      final boolean isPolygon,
+      final boolean isRels)
+      throws Exception {
 
-		assert file.exists();
+    assert file.exists();
 
-		// define the structure read in the CSV
-		Table t = new Table("osmentities");
+    // define the structure read in the CSV
+    Table t = new Table("osmentities");
 
-		// always an id
-		t.addLongField(ID_F);
-		if (isPoint) {
-			t.addDoubleField(X_F);
-			t.addDoubleField(Y_F);
+    // always an id
+    t.addLongField(ID_F);
+    if (isPoint) {
+      t.addDoubleField(X_F);
+      t.addDoubleField(Y_F);
 
-		} else if (isPolygon || isLine) {
-			t.addStringField(GEOMETRY_F, -1);
-		}
+    } else if (isPolygon || isLine) {
+      t.addStringField(GEOMETRY_F, -1);
+    }
 
-		t.addStringField(ATTRIBUTES_F, -1);
+    t.addStringField(ATTRIBUTES_F, -1);
 
-		if (isRels) {
-			// after attributes, we have the rels definition
-			t.addStringField(RELS, 10000);
-		}
+    if (isRels) {
+      // after attributes, we have the rels definition
+      t.addStringField(RELS, 10000);
+    }
 
-		SplittedFileCSVParser parser = new SplittedFileCSVParser(t, new ParserCallBack() {
+    SplittedFileCSVParser parser =
+        new SplittedFileCSVParser(
+            t,
+            new ParserCallBack() {
 
-			@Override
-			public void lineParsed(long lineNumber, OSMAttributedEntity entity) throws Exception {
+              @Override
+              public void lineParsed(long lineNumber, OSMAttributedEntity entity) throws Exception {
 
-				OSMAttributedEntity e = null;
+                OSMAttributedEntity e = null;
 
-				Map<String, Object> flds = entity.getFields();
+                Map<String, Object> flds = entity.getFields();
 
-				// read attributes
-				String attributeString = (String) flds.get(ATTRIBUTES_F);
-				assert attributeString != null;
-				Map<String, String> h = MapStringTools.fromString(attributeString);
+                // read attributes
+                String attributeString = (String) flds.get(ATTRIBUTES_F);
+                assert attributeString != null;
+                Map<String, String> h = MapStringTools.fromString(attributeString);
 
-				if (flds == null) {
-					return;
-				}
+                if (flds == null) {
+                  return;
+                }
 
-				// read id
-				Long id = (Long) (flds.get(ID_F));
+                // read id
+                Long id = (Long) (flds.get(ID_F));
 
-				if (id == null)
-					return;
+                if (id == null) return;
 
-				if (isPoint) {
+                if (isPoint) {
 
-					Double xfield = (Double) flds.get(X_F);
-					Double yfield = (Double) flds.get(Y_F);
+                  Double xfield = (Double) flds.get(X_F);
+                  Double yfield = (Double) flds.get(Y_F);
 
-					if (xfield == null || yfield == null) {
-						throw new Exception("null x or y for " + entity + " cannot import this line");
-					}
+                  if (xfield == null || yfield == null) {
+                    throw new Exception("null x or y for " + entity + " cannot import this line");
+                  }
 
-					e = new OSMEntityPoint(id, xfield, yfield, (Map) h);
-				} else if (isPolygon || isLine) {
+                  e = new OSMEntityPoint(id, xfield, yfield, (Map) h);
+                } else if (isPolygon || isLine) {
 
-					byte[] b = GeometryTools.fromAscii((String) flds.get(GEOMETRY_F));
+                  byte[] b = GeometryTools.fromAscii((String) flds.get(GEOMETRY_F));
 
-					Geometry g = null;
-					if (b != null)
-						g = GeometryEngine.geometryFromEsriShape(b, isPolygon ? Type.Polygon : Type.Polyline);
+                  Geometry g = null;
+                  if (b != null)
+                    g =
+                        GeometryEngine.geometryFromEsriShape(
+                            b, isPolygon ? Type.Polygon : Type.Polyline);
 
-					e = new OSMEntityGeometry(id, g, (Map) h);
+                  e = new OSMEntityGeometry(id, g, (Map) h);
 
-				} else if (isRels) {
+                } else if (isRels) {
 
-					// change the object definition
-					String relsDefinition = (String) flds.get(RELS);
-					String[] allRels = relsDefinition.split("\\|\\|");
+                  // change the object definition
+                  String relsDefinition = (String) flds.get(RELS);
+                  String[] allRels = relsDefinition.split("\\|\\|");
 
-					if (allRels == null)
-						allRels = new String[0];
-					List<OSMRelatedObject> l = new ArrayList<>();
-					for (String related : allRels) {
-						try {
-							if (related == null || related.isEmpty())
-								continue;
-							
-							Map<String, String> hrels = MapStringTools.fromString(related);
+                  if (allRels == null) allRels = new String[0];
+                  List<OSMRelatedObject> l = new ArrayList<>();
+                  for (String related : allRels) {
+                    try {
+                      if (related == null || related.isEmpty()) continue;
 
-							String rrelsid = hrels.get("relid");
-							String rrole = hrels.get("role");
-							String rtype = hrels.get("type");
+                      Map<String, String> hrels = MapStringTools.fromString(related);
 
-							l.add(new OSMRelatedObject(Long.parseLong(rrelsid), rrole, rtype));
-							
-						} catch (Exception ex) {
-							output.invalidLine(lineNumber, " rel " + related + " cannot be parsed -> " + ex.getMessage());
-						}
-					}
+                      String rrelsid = hrels.get("relid");
+                      String rrole = hrels.get("role");
+                      String rtype = hrels.get("type");
 
-					e = new OSMRelation(id, (Map) h, l);
+                      l.add(new OSMRelatedObject(Long.parseLong(rrelsid), rrole, rtype));
 
+                    } catch (Exception ex) {
+                      output.invalidLine(
+                          lineNumber,
+                          " rel " + related + " cannot be parsed -> " + ex.getMessage());
+                    }
+                  }
 
-				} else {
+                  e = new OSMRelation(id, (Map) h, l);
 
-					throw new RuntimeException("bad record");
-				}
+                } else {
 
-				// emit result
-				output.lineParsed(lineNumber, e);
+                  throw new RuntimeException("bad record");
+                }
 
-			}
+                // emit result
+                output.lineParsed(lineNumber, e);
+              }
 
-			@Override
-			public void invalidLine(long lineNumber, String line) {
-				output.invalidLine(lineNumber, line);
-			}
-		});
+              @Override
+              public void invalidLine(long lineNumber, String line) {
+                output.invalidLine(lineNumber, line);
+              }
+            });
 
-		parser.parse(file);
-	}
+    parser.parse(file);
+  }
 
-	public void parse(final File folder) throws Exception {
+  public void parse(final File folder) throws Exception {
 
-		ExecutorService p = Executors.newCachedThreadPool();
+    ExecutorService p = Executors.newCachedThreadPool();
 
-		p.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					parse(new File(folder, "rels.csv"), true, false, false, false, true);
-				} catch (Exception ex) {
-					ex.printStackTrace(System.err);
-				}
-			}
-		});
+    p.execute(
+        new Runnable() {
+          @Override
+          public void run() {
+            try {
+              parse(new File(folder, "rels.csv"), true, false, false, false, true);
+            } catch (Exception ex) {
+              ex.printStackTrace(System.err);
+            }
+          }
+        });
 
-		p.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					parse(new File(folder, "nodes.csv"), true, true, false, false, false);
-				} catch (Exception ex) {
-					ex.printStackTrace(System.err);
-				}
-			}
-		});
+    p.execute(
+        new Runnable() {
+          @Override
+          public void run() {
+            try {
+              parse(new File(folder, "nodes.csv"), true, true, false, false, false);
+            } catch (Exception ex) {
+              ex.printStackTrace(System.err);
+            }
+          }
+        });
 
-		p.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					parse(new File(folder, "ways.csv"), true, false, true, false, false);
-				} catch (Exception ex) {
-					ex.printStackTrace(System.err);
-				}
-			}
-		});
-		p.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					parse(new File(folder, "polygons.csv"), true, false, false, true, false);
-				} catch (Exception ex) {
-					ex.printStackTrace(System.err);
-				}
-			}
-		});
+    p.execute(
+        new Runnable() {
+          @Override
+          public void run() {
+            try {
+              parse(
+                  new File(folder, "ways.csv"), true, false, true, false, false);
+            } catch (Exception ex) {
+              ex.printStackTrace(System.err);
+            }
+          }
+        });
+    p.execute(
+        new Runnable() {
+          @Override
+          public void run() {
+            try {
+              parse(new File(folder, "polygons.csv"), true, false, false, true, false);
+            } catch (Exception ex) {
+              ex.printStackTrace(System.err);
+            }
+          }
+        });
 
-		p.shutdown();
-		p.awaitTermination(10, TimeUnit.DAYS);
-
-	}
-
+    p.shutdown();
+    p.awaitTermination(10, TimeUnit.DAYS);
+  }
 }

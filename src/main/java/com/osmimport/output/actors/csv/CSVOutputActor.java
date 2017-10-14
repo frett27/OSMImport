@@ -134,7 +134,6 @@ public class CSVOutputActor extends MeasuredActor {
 					}
 
 				}
-
 			}
 
 			if (sb.length() > 0)
