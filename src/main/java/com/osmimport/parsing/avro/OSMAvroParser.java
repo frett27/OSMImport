@@ -45,7 +45,7 @@ public class OSMAvroParser {
 
     assert avroFile != null;
 
-    InputStream inputStream = new BufferedInputStream(avroFile);
+    InputStream inputStream = new BufferedInputStream(avroFile, 32000);
     try {
       DataFileStream<OSMEntity> userDatumReader =
           new DataFileStream<OSMEntity>(inputStream, new SpecificDatumReader(OSMEntity.class));
