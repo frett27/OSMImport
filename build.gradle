@@ -32,7 +32,13 @@ ext {
 }
  
 group = 'osmtools'
-version = "0.8.0.${git.head().abbreviatedId}-SNAPSHOT"
+
+def defaultRelease = "0.8.0-SNAPSHOT"
+def exportedVersion = System.getenv("RELEASE")
+if (exportedVersion != null && !"".equals(exportedVersion.trim())) {
+    defaultRelease = exportedVersion 
+}
+version = defaultRelease
 
 description = """tools for handling import of osm datas into filegeodatabases, csv"""
 
@@ -117,7 +123,7 @@ task changeVersion {
             } finally {
                 fi.close()
             }
-            p.setProperty("version",version)
+            p.setProperty("version",version + ".${git.head().abbreviatedId}")
 
             def fo = new FileOutputStream(vf)
             try {
