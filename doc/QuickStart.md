@@ -6,15 +6,11 @@ This documentation explain how to use the OSMImport project to create tables / f
 
 ## 5 Mins Startup
 
-download the install bundle and put it in a directory of your choice.
+### From a binary built
 
+download the -all.jar file from `releases` tag in the github project
 
-###Version _0.7.10-SNAPSHOT_  
-
-**Windows 64 bits** - 
-[osmimport-0.7.11-SNAPSHOT.zip](https://s3-eu-west-1.amazonaws.com/osmimport-cli/osmimport-0.7.11-SNAPSHOT.zip) - Nota: if you use the FGDB output file format, you will need to install redistribuable VC++ 2012 from microsoft, if not already installed.
-
-**Linux 64 bits** - ** Coming **
+> On Windows : you have to have VC++ 2012 C++ runtime installed for filegdb file format
 
 
 
@@ -83,8 +79,8 @@ this article ([UsingVariable.md](UsingVariable.md)) explain in details how to us
 
 	import com.esri.core.geometry.Geometry;
 	import com.osmimport.model.OSMEntity;
-	
-	
+
+
 	// construct the processing graph
 	builder.build(osmstream) {
 	
@@ -97,8 +93,8 @@ this article ([UsingVariable.md](UsingVariable.md)) explain in details how to us
 				_integer('id')
 			}
 		}
-	
-	
+
+
 		// a stream
 		t = stream(osmstream, label:"Points with informations") {
 	
@@ -114,7 +110,7 @@ this article ([UsingVariable.md](UsingVariable.md)) explain in details how to us
 			}
 	
 		}
-
+	
 		// a stream
 		l = stream(osmstream, label:"only lines and fields") {
 	
@@ -133,9 +129,9 @@ this article ([UsingVariable.md](UsingVariable.md)) explain in details how to us
 		// flux de sortie
 		out(streams : t, sink: sortie, tablename:"pts")
 		out(streams : l, sink: sortie, tablename:"lines")
-	
-	
+
+
 	}
-	
+​	
 
 This file is a groovy file, with additional keywords to define the integration of the entities. All Third party library could be used for processing the result.
