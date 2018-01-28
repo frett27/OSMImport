@@ -1,4 +1,4 @@
-#RFC Hdfs
+# RFC Hdfs
 
 
 Problem we want to solve :
@@ -6,11 +6,11 @@ Problem we want to solve :
 - speedup the availability of OSM Data into an HDFS cluster
 - lean the Hadoop processing of OSM Datas
 
-#Status
+# Status
 
 Partially implements
 
-#Requirements
+# Requirements
 
 it seems that several formats are used in hadoop cluster, 
 ESRI provide a JSON oriented Text File
@@ -22,7 +22,7 @@ CSV delimiter is really simple to use and can be used in non geographic framewor
 
 for points, X and Y storage save a lots of disk space and there are variety of datas that are referenced as point, this is an important design point.
 
-#Target / Specs
+# Target / Specs
 
 1 - 
 Choose the hdfs target / table / CSV file

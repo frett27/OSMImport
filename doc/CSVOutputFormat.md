@@ -1,4 +1,4 @@
-#CSV output format - Hadoop pivot
+# CSV output format - Hadoop pivot
 
 **Since 0.6**, it is possible to export osm datas into a folder containing csv files.
 Each table and featureclass output will be generated in a proper file.
@@ -46,12 +46,12 @@ Example :
 			}
 	
 		}
-	
-		
+
+
 		// flux de sortie
 		out(streams : [b], sink : sortie, tablename:"streets")
-	
-		
+
+
 	}
 
 This script generate a streets.csv file with the following extracted content.

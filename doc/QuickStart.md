@@ -1,4 +1,4 @@
-#OSM Import documentation
+# OSM Import documentation
 
 ## Introduction
 
@@ -14,7 +14,7 @@ download the -all.jar file from `releases` tag in the github project
 
 
 
-###From the Git Repo
+### From the Git Repo
 
 > you must have a JDK java 7 (or up) installed, for compiling
 
@@ -25,11 +25,11 @@ download the -all.jar file from `releases` tag in the github project
 > the resulting standalone jar will be located in `build/libs`
 
 
-##Download PBF or OSM located datas
+## Download PBF or OSM located datas
 
 if you dont have PBF or OSM file, you can download them at : [http://www.geofabrik.de/data/download.html](http://www.geofabrik.de/data/download.html) . geofabrik provide daily extraction of OSM datas in PBF or OSM (xml) files.
 
-##Choose an already existed script
+## Choose an already existed script
 
 Existing scripts are located in the **[scripts](../scripts)** folder
 
@@ -38,7 +38,7 @@ Existing scripts are located in the **[scripts](../scripts)** folder
 
 
 
-##Run the commandline
+## Run the commandline
 
 Place the OSM (PBF/XML) datafile and the script file, in a folder and run :
 
@@ -47,7 +47,7 @@ Place the OSM (PBF/XML) datafile and the script file, in a folder and run :
 the output files are placed in the location defined in the stream file (the -s option).
 
 
-##Command line parameters
+## Command line parameters
 
 	C:\projets\OSMImport>java -Xmx6g -jar osmimport.jar help import
 
@@ -74,7 +74,7 @@ this article ([UsingVariable.md](UsingVariable.md)) explain in details how to us
 
 
 
-##Sample script , takes points and lines geometries with keys and values attached.
+## Sample script , takes points and lines geometries with keys and values attached.
 
 
 	import com.esri.core.geometry.Geometry;

@@ -1,8 +1,6 @@
+# OSMImport - Scripts DSL reference
 
-#OSMImport - Scripts DSL reference
-
-
-##Groovy
+## Groovy
 
 Groovy is used to define the script, this permit to inline programmatic transformations and benefit from a concise and compile phase to check the correctness of the definition. 
 
@@ -57,16 +55,16 @@ builder.build(osmstream) {
 
 
 
-##output sinks : gdb / csv directive
+## output sinks : gdb / csv directive
 
 Thoses 2 directives define the structure of the output (in a geodatabase or in a folder containing CSV files) [CSV output format](CSVOutputFormat.md), **gdb or csv** is defined with a "**path**" attribute locating the destination of the result.
 
 	csv(path:"..." ) { // create a directory containing the output csv files
 		....
 	}
-
+	
 	or  gdb(path:"...") { // create a file geodatabase containing the output tables and featureclasses
-
+	
 	}
 
 
@@ -118,7 +116,7 @@ inside **featureclass** or **table** directive, other directives are placed for 
 
 </tr>	
 </table>
-       
+​       
 
 - **\_integer** : define an integer field.
 
@@ -180,7 +178,7 @@ Use example :
 
 
 	// this example below define an output stream, and the output tables and featureclasses
-	
+
 	//
 	// Create a file geodatabase with 3 featureclasses, using the WGS84 output format
 	//
@@ -227,8 +225,7 @@ Use example :
 		}	
 	}
 
-
-#Transforming entities
+# Transforming entities
 
 Entities may be transformed in streams, entities are passed throught streams and may be adjusted or multiple entities could be returned in the stream to handle relationships.
 
@@ -259,7 +256,7 @@ OSMEntity has two subclass :
 - OSMEntityPoint, handling a point geometry
 
 
-##Transform DSL
+## Transform DSL
 
 in transforme or filter directives, your can use the objects methods, depending on the kind of passed entities. but you also have some facilitating classes to handle the testing and transforming elements.
 
@@ -280,8 +277,7 @@ this class is automatically imported as a category in the script and used in tra
 	
 		}
 
-
-##Testing operators
+## Testing operators
 
 <table>
 	<tr>
@@ -311,15 +307,13 @@ this class is automatically imported as a category in the script and used in tra
 
 </table>
 
-
-##Transforming DSL
+## Transforming DSL
 
 a simple added DSL helps you create new entities from the given ones. This DSL is handled by the Transform.groovy class
 
 ![](TransformHelper.png)
 
-
-###DSL chain grammar
+### DSL chain grammar
 
 the DSL starts with the on() directive, this directive start the creation of a **NEW** entity, and return the modification context. the new entity is created on the **.end()** directive.
 
@@ -334,7 +328,7 @@ Once the "on" element has been called, you can either use :
 The final creation of the newcurrently building entity is done using the final .end() directive.
 
 
-###Samples
+### Samples
 
 creating a new entity with only one output field "name_fire", taking the original "name" field, this is a kind of renaming the field in the output.
 
@@ -351,10 +345,10 @@ Chaining the directive is possible :
 Example of the definition of a full stream using the DSL :
 
 	hydrant = stream(osmstream, label:"hydrant") {
-                filter {
-                    e -> isPoint(e) && has(e, "emergency", "fire_hydrant")
-                }
-
+	            filter {
+	                e -> isPoint(e) && has(e, "emergency", "fire_hydrant")
+	            }
+	
 	            transform { e ->
 	                on(e).
 	                map("fire_hydrant:type").into("type").
@@ -367,4 +361,4 @@ Example of the definition of a full stream using the DSL :
 	
 	            }
 	            
-        }
+	    }

@@ -1,4 +1,4 @@
-#Using Variables in scripts
+# Using Variables in scripts
 
 
 for creating generic script, it often need to parametrize entries from command line and pass it to the script
@@ -15,10 +15,10 @@ multiple variables can be passed in repeating the -v option. All variable defini
 usage example :
 
     C:\projets\OSMImport\build\distributions\osmimport-0.5-SNAPSHOT>osmimport \ 
-			-i "C:\projets\OSMImport\rhone-alpes-latest.osm.pbf" \
-			-s "C:\projets\OSMImport\scripts\rawimport.groovy" \
-			-v "toto=titi" \
-			-v "tutu=vuvu"
+    		-i "C:\projets\OSMImport\rhone-alpes-latest.osm.pbf" \
+    		-s "C:\projets\OSMImport\scripts\rawimport.groovy" \
+    		-v "toto=titi" \
+    		-v "tutu=vuvu"
 
 in the example, we define 2 variables in the script : var_toto and var_tutu
 
