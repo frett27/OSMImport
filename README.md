@@ -20,7 +20,7 @@ This tools is currently used on Windows (x64) and Linux (x64).
 
 For performances or filtering capability, see [architecture](doc/architecture/architecture.md) and [doc](doc) folder
 
-#Features
+# Features
 
 - **PBF / XML / OSM / AVRO / CSV Big Data Folder Input** input file support
 - **FileGeodatabase Output**, that can be natively read by ArcGIS Desktop or QGIS
@@ -39,7 +39,7 @@ For performances or filtering capability, see [architecture](doc/architecture/ar
 
 
 
-#Usage context - known usage
+# Usage context - known usage
 
 - A minimum of 5go of RAM is necessary for a first load
 - Nota : RAM is used for processing complete ways and polygons, if RAM is not available, subsequent input file read are going to be done and will lead to decrease performances.
@@ -54,13 +54,13 @@ For performances or filtering capability, see [architecture](doc/architecture/ar
   ​
 
 
-#Benchmarks
+# Benchmarks
 
 test it :-), we got lots of fast feedback for planet extract / transforms.
 
 
 
-#PBF / OSM - Data Files
+# PBF / OSM - Data Files
 
 Openstreet france provide OSM extracts at this location : http://download.openstreetmap.fr/extracts/
 
@@ -72,7 +72,7 @@ Prepared avro data files are available at this url : https://s3-eu-west-1.amazon
 
 
 
-#Download and install - Next actions
+# Download and install - Next actions
 
 Take a tour at [5 mins setup guide](doc/QuickStart.md) to launch your first command line.
 
@@ -84,13 +84,13 @@ other documentations can be found in the [doc](doc) folder
 
 don't hesitate to send pull requests or comments.
 
-#Sample scripts :
+# Sample scripts :
 
 - [Buildings](scripts/buildings.groovy) - extract buildings
 - [Streets](scripts/streets.groovy) - extract streets
 
 
-#Contributions
+# Contributions
 
 Contributions are welcome on :
 
@@ -101,7 +101,7 @@ Contributions are welcome on :
 - ...
 
 
-#Version 1.0 roadmap plan
+# Version 1.0 roadmap plan
 
 - <strike>handling relationships</strike>
 - <strike>handling polygons</strike>
