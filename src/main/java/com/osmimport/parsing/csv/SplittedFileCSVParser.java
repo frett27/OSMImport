@@ -24,7 +24,7 @@ import com.osmimport.structures.model.Table;
  */
 public class SplittedFileCSVParser extends CSVParser {
 
-	private static ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+	private static org.slf4j.Logger logger = (org.slf4j.Logger) LoggerFactory
 			.getLogger(SplittedFileCSVParser.class);
 
 	public SplittedFileCSVParser(Table table, ParserCallBack pcb) {

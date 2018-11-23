@@ -10,12 +10,9 @@ import org.codehaus.jackson.JsonParseException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.BasicConfigurator;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
 
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.MultiPath;
@@ -173,10 +170,9 @@ public class TestPolygonCreator extends TestCase {
 
 		// BasicConfigurator.configureDefaultContext();
 
-		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory
+		Logger root = LoggerFactory
 				.getLogger(Logger.ROOT_LOGGER_NAME);
-		root.setLevel(Level.ALL);
-
+		
 		InputStream is = getClass().getResourceAsStream("case2.json");
 		assertNotNull(is);
 		JSONTokener t = new JSONTokener(new InputStreamReader(is));

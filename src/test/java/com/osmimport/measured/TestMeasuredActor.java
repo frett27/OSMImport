@@ -2,38 +2,31 @@ package com.osmimport.measured;
 
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.TestCase;
-
-import org.slf4j.LoggerFactory;
-
-import scala.concurrent.duration.Duration;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Inbox;
-import akka.actor.Props;
-import ch.qos.logback.classic.BasicConfigurator;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-
 import com.osmimport.actors.AskMetrics;
 import com.osmimport.actors.ControlMessageMetrics;
 import com.osmimport.actors.MessageMetrics;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Inbox;
+import akka.actor.Props;
+import junit.framework.TestCase;
+import scala.concurrent.duration.Duration;
+
 public class TestMeasuredActor extends TestCase {
 
 	public void test() throws Exception {
 
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-	
-		Logger rootLogger = lc.getLogger(Logger.ROOT_LOGGER_NAME);
-		rootLogger.setLevel(Level.DEBUG);
-		
-		BasicConfigurator.configure(lc);
-
-	
+//		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+//	
+//		Logger rootLogger = lc.getLogger(Logger.ROOT_LOGGER_NAME);
+//		rootLogger.setLevel(Level.DEBUG);
+//		
+//		BasicConfigurator.configure(lc);
+//
+//	
 		Config config = ConfigFactory.load();
 
 		ActorSystem sys = ActorSystem.create("osmcluster",

@@ -18,7 +18,7 @@ import com.osmimport.output.fields.StringFieldSetter;
 
 public class GDBOutputTools {
 
-	static ch.qos.logback.classic.Logger log = (ch.qos.logback.classic.Logger) LoggerFactory
+	static org.slf4j.Logger log = (org.slf4j.Logger) LoggerFactory
 			.getLogger(GDBOutputTools.class);
 
 	public static ArrayList<AbstractFieldSetter> createCompiledFieldSetters(

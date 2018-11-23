@@ -24,7 +24,7 @@ import com.osmimport.structures.model.Table;
  */
 public class CSVParser {
 
-	ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+	org.slf4j.Logger logger = (org.slf4j.Logger) LoggerFactory
 			.getLogger(CSVParser.class);
 
 	private Table table;

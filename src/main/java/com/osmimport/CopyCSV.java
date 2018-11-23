@@ -34,7 +34,7 @@ import com.osmimport.tools.Tools;
  */
 public class CopyCSV implements CLICommand {
 
-	private static ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+	private static org.slf4j.Logger logger = (org.slf4j.Logger) LoggerFactory
 			.getLogger(CopyCSV.class);
 
 	@Override
