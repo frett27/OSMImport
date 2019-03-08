@@ -1,22 +1,44 @@
+buildscript {
+ 
+    repositories {
+        jcenter()
+    }
+ 
+    dependencies {
+        // Add dependency for build script,
+        // so we can access Git from our
+        // build script.
+        classpath 'org.ajoberstar:grgit:1.1.0'
+    }
+ 
+}
+
+
+
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 apply plugin: 'distribution'
 
+ext {
+    // Open the Git repository in the current directory.
+    git = org.ajoberstar.grgit.Grgit.open(file('.'))
+ 
+    // Get commit id of HEAD.
+    revision = git.head().id
+    // Alternative is using abbreviatedId of head() method.
+    // revision = git.head().abbreviatedId
+}
+ 
 group = 'osmtools'
 
-def release_number = "0.7"   // base release for compiling (sanitiy check)
-
-def current_release = '0.7.8-SNAPSHOT'
-
-String environmentRelease = System.getenv('RELEASE')
-if (environmentRelease) {
-    assert environmentRelease.startsWith(release_number)
-	current_release = environmentRelease
+def defaultRelease = "0.8.0-SNAPSHOT"
+def exportedVersion = System.getenv("RELEASE")
+if (exportedVersion != null && !"".equals(exportedVersion.trim())) {
+    defaultRelease = exportedVersion 
 }
-
-version = current_release
+version = defaultRelease
 
 description = """tools for handling import of osm datas into filegeodatabases, csv"""
 
@@ -72,6 +94,9 @@ dependencies {
     // ESRI Geometry api
 	compile group: 'com.esri.geometry', name: 'esri-geometry-api', version:'1.2.1'
 
+    // ESRI Geometry api
+	compile group: 'net.frett27', name: 'osm-gis-avro', version:'0.1'
+
 	// used for command line interpretation
 	compile group: 'commons-cli', name: 'commons-cli', version:'1.2'
 
@@ -85,6 +110,36 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version:'4.11'
 	testCompile group: 'ch.qos.logback', name:'logback-classic',version:'1.0.13'
 
+}
+
+task changeVersion {
+    doLast {
+        def vf = project.file('build/resources/main/com/osmimport/version.properties')
+        if (vf.exists()) {
+            def p = new Properties()
+            def fi = new FileInputStream(vf)
+            try {
+                p.load(fi)
+            } finally {
+                fi.close()
+            }
+            p.setProperty("version",version + ".${git.head().abbreviatedId}")
+
+            def fo = new FileOutputStream(vf)
+            try {
+                p.save(fo, "version file")
+            } finally {
+                fo.close()
+            }
+        }
+    }
+}
+
+changeVersion.dependsOn processResources
+
+
+compileJava{
+    dependsOn changeVersion
 }
 
 //create a single Jar with all dependencies

@@ -8,13 +8,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import scala.concurrent.duration.Duration;
-import scala.concurrent.duration.FiniteDuration;
-import akka.actor.ActorRef;
-import akka.dispatch.ControlMessage;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
-
 import com.osmimport.actors.MeasuredActor;
 import com.osmimport.input.csv.ParserCallBack;
 import com.osmimport.model.OSMAttributedEntity;
@@ -23,6 +16,13 @@ import com.osmimport.parsing.pbf.actors.messages.MessageParsingSystemStatus;
 import com.osmimport.parsing.pbf.actors.messages.MessageReadFile;
 import com.osmimport.regulation.MessageRegulatorStatus;
 import com.osmimport.tools.polygoncreator.IInvalidPolygonConstructionFeedBack;
+
+import akka.actor.ActorRef;
+import akka.dispatch.ControlMessage;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Flink CSV folder parsing abstract class for defining a parsing sub system,

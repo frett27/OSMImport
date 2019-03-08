@@ -1,9 +1,11 @@
 package com.osmimport;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -19,134 +21,129 @@ import ch.qos.logback.classic.Logger;
 
 /**
  * Multiplexer for commands associated to OSMImport
- * 
+ *
  * @author pfreydiere
- * 
  */
 public class MCLI {
 
-	private static final org.slf4j.Logger logger = LoggerFactory
-			.getLogger(MCLI.class);
+  private static final org.slf4j.Logger logger = LoggerFactory.getLogger(MCLI.class);
 
-	private static CLICommand[] registeredCommands = { new HelpCLI(),
-			new ImportCLI(), new CopyCSV(), new ExportFGDB() };
+  private static CLICommand[] registeredCommands = {
+    new HelpCLI(), new ImportCLI(), new CopyCSV(), new ExportFGDB()
+  };
 
-	public static class HelpCLI implements CLICommand {
+  public static class HelpCLI implements CLICommand {
 
-		@Override
-		public String getCommandName() {
-			return "help";
-		}
+    @Override
+    public String getCommandName() {
+      return "help";
+    }
 
-		@Override
-		public String getCommandDescription() {
-			return "get help on commands";
-		}
+    @Override
+    public String getCommandDescription() {
+      return "get help on commands";
+    }
 
-		@Override
-		public String getCommandLineStructure() {
-			return " " + getCommandName() + " [Command for dedicated help]";
-		}
-		
-		@Override
-		public Options getOptions() {
+    @Override
+    public String getCommandLineStructure() {
+      return " " + getCommandName() + " [Command for dedicated help]";
+    }
 
-			Option o = OptionBuilder.create('c');
-			o.setArgName("command");
-			o.setRequired(false);
-			o.setLongOpt("command-name");
-			o.setDescription("command for a dedicated help, inform the usage and options");
+    @Override
+    public Options getOptions() {
 
-			Options opts = new Options();
-			opts.addOption(o);
-			return opts;
-		}
+      Option o = OptionBuilder.create('c');
+      o.setArgName("command");
+      o.setRequired(false);
+      o.setLongOpt("command-name");
+      o.setDescription("command for a dedicated help, inform the usage and options");
 
-		@Override
-		public void execute(CommandLine cmdline) throws Exception {
+      Options opts = new Options();
+      opts.addOption(o);
+      return opts;
+    }
 
-			List l = cmdline.getArgList();
-			if (l.size() == 0)
-			{
-				printGeneralUsage();
-			}
-			
-			String command = cmdline.getOptionValue("c");
-			if (command == null)
-			{
-				command = (String)l.get(0);
-			}
-			
-			CLICommand c = commandsReference.get(command);
-			if (c == null)
-			{
-				System.out.println("Command " + command  + " not found for help");
-				System.exit(1);
-			}
-			
-			new HelpFormatter().printHelp("osmimport " + c.getCommandLineStructure(), c.getOptions());
-			
-		}
+    @Override
+    public void execute(CommandLine cmdline) throws Exception {
 
-	}
+      List l = cmdline.getArgList();
+      if (l.size() == 0) {
+        printGeneralUsage();
+      }
 
-	private static Map<String, CLICommand> commandsReference = new HashMap<>();
-	static {
-		for (CLICommand c : registeredCommands) {
-			commandsReference.put(c.getCommandName(), c);
-		}
-	}
+      String command = cmdline.getOptionValue("c");
+      if (command == null) {
+        command = (String) l.get(0);
+      }
 
-	private static ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory
-			.getLogger(Logger.ROOT_LOGGER_NAME);
+      CLICommand c = commandsReference.get(command);
+      if (c == null) {
+        System.out.println("Command " + command + " not found for help");
+        System.exit(1);
+      }
 
-	public static void main(String[] args) throws Exception {
+      new HelpFormatter().printHelp("osmimport " + c.getCommandLineStructure(), c.getOptions());
+    }
+  }
 
-		System.out.println("OSM Import");
+  private static Map<String, CLICommand> commandsReference = new HashMap<>();
 
-		root.setLevel(Level.INFO);
-		
-		
-		if (args.length < 1) {
-			printGeneralUsage();
-		}
+  static {
+    for (CLICommand c : registeredCommands) {
+      commandsReference.put(c.getCommandName(), c);
+    }
+  }
 
-		String command = args[0];
+  private static ch.qos.logback.classic.Logger root =
+      (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
-		if (!commandsReference.containsKey(command)) {
-			System.out.println(" error : command " + command
-					+ " not recognized");
-			printGeneralUsage();
-		}
+  public static void main(String[] args) throws Exception {
 
-		CLICommand c = commandsReference.get(command);
-		logger.debug("launching command :" + command);
-		
-		
-		GnuParser p = new GnuParser();
-		CommandLine r = null;
-		try {
-			r = p.parse(c.getOptions(),
-					Arrays.copyOfRange(args, 1, args.length));
+    System.out.println("OSM Import");
 
-		} catch (MissingOptionException ex) {
-			System.out.println(" error in arguments :" + ex.getMessage());
-			new HelpFormatter().printHelp("osmimport", c.getOptions());
-			System.exit(1);
-		}
+    InputStream version = MCLI.class.getResourceAsStream("version.properties");
+    if (version != null) {
+      Properties p = new Properties();
+      p.load(version);
+      System.out.println("  Version " + p.getProperty("version", "Unknown"));
+    }
 
-		assert r != null;
-		c.execute(r);
+    root.setLevel(Level.INFO);
 
-	}
+    if (args.length < 1) {
+      printGeneralUsage();
+    }
 
-	public static void printGeneralUsage() {
-		System.out.println("   Available Commands :");
-		for (CLICommand c : registeredCommands) {
-			System.out.println("    " + c.getCommandName() + " : "
-					+ c.getCommandDescription());
-		}
-		System.exit(1); // Error
-	}
+    String command = args[0];
 
+    if (!commandsReference.containsKey(command)) {
+      System.out.println(" error : command " + command + " not recognized");
+      printGeneralUsage();
+    }
+
+    CLICommand c = commandsReference.get(command);
+    logger.debug("launching command :" + command);
+
+    GnuParser p = new GnuParser();
+    CommandLine r = null;
+    try {
+      r = p.parse(c.getOptions(), Arrays.copyOfRange(args, 1, args.length));
+
+    } catch (MissingOptionException ex) {
+      System.out.println(" error in arguments :" + ex.getMessage());
+      new HelpFormatter().printHelp("osmimport", c.getOptions());
+      System.exit(1);
+    }
+
+    assert r != null;
+    c.execute(r);
+  }
+
+  public static void printGeneralUsage() {
+    System.out.println("   Available Commands :");
+    for (CLICommand c : registeredCommands) {
+      System.out.println("    " + c.getCommandName() + " : " + c.getCommandDescription());
+    }
+    System.exit(1); // Error
+  }
 }

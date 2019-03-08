@@ -1,12 +1,12 @@
-#Architecture
+# Architecture
 
 *Patrice Freydiere - Juillet 2015*
 
-##Concepts
+## Concepts
 
 The concepts of this project is to have a simple way to read and parse OSM Data for GIS or analytical use (in extracting a sub range of the original datas).
 
-##Architecture
+## Architecture
 
 This is a quite standard ETL architecture, using an actor system to do the job.
 a first sub system parse the pbf file and send to an output a collection of parsed entities.

@@ -2,7 +2,7 @@
 OSMImport
 =========
 
-_Patrice Freydiere - 2015 - 2016_ - 2017
+_Patrice Freydiere - 2015 - 2016 - 2017_
 
 ---
 
@@ -10,118 +10,87 @@ _Patrice Freydiere - 2015 - 2016_ - 2017
 ![](https://travis-ci.org/frett27/OSMImport.svg?branch=master)
 
 
-Yet An Other OSM Import / Formatting OSM data tool - [Change Log](ChangeLog.md)
+Yet An Other OSM Import Tools for OSM data - [Change Log](ChangeLog.md)
 
-This project aim to provide a simple **command line for filtering / GIS structuring OSM PBF or OSM XML files**. The result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). CSV output files are also supported since 0.6 version, allowing to have a smooth BigData shift for OSM data 
+This project aim to provide a simple **command line**  for ingesting OSM Data in a GIS.
 
-This project use an internal actors system architecture, using big data principles (streams, no sequencial read). This tool benefit directly from a Muticore machine. for more information about architecture see [architecture](doc/architecture/architecture.md)
+The output result are tables or featureclasses inside one or multiple output FileGeodatabase (ready to use in GIS software). CSV output files are also supported since 0.6 version, allowing to have a smooth BigData shift.
 
+This tools is currently used on Windows (x64) and Linux (x64). 
 
+For performances or filtering capability, see [architecture](doc/architecture/architecture.md) and [doc](doc) folder
 
-#Objectives
+# Features
 
-- Simple to use, performant
-- Contributing or extracting information thanks to shared scripts
-
-#Current Features
-
-- **Windows** / **Linux** 
-
-- **PBF / XML / OSM / CSV Big Data Folder Input** input file support
-
+- **PBF / XML / OSM / AVRO / CSV Big Data Folder Input** input file support
 - **FileGeodatabase Output**, that can be natively read by ArcGIS Desktop or QGIS
-
-- **CSV text files output in a folder** for Hadoop/Big stacks, can be pushed to hdfs store
-
+- **Create CSV text files in a folder** for Hadoop/Big stacks
 - **Simple declarative groovy transformation script** 
--  It use a **Groovy** DSL, opening the field to java third party libraries, used for filtering and transformations.
--  If multiple class or objects must be extracted in different files, this can be done in one script.
--  **Scripts are humany readable **
+- **Way reconstruction**, **Polygon reconstruction** for PBF / XML input file
+- **Scripts are Easy to share and maintain** (a single human readable .script file), see [scripts](scripts) folder
+- You can use any third party using **Groovy** or **Java ** language in scripts, for filtering and transformations.
+- **Multiple destinations output on one run** (ability to merge import scripts)
+- Automatic **RAM memory management** (manage the RAM consumption)
 
-- **Inprocess Way and Polygon construction**, to ease the use in a GIS.
 
-- **Performances** : extracting some objets in files can typically be done in half the usual time. 
+
+
+**Windows** / **Linux** friendly 
+
+
+
+# Usage context - known usage
+
+- A minimum of 5go of RAM is necessary for a first load
+- Nota : RAM is used for processing complete ways and polygons, if RAM is not available, subsequent input file read are going to be done and will lead to decrease performances.
+
+
+- A typical 32 Gb or RAM permit to handle France territory in a very nice timeframe. (please give us your benchmarks feedbacks and configurations). Special tuning could be done for an optimized process. (message regularisation limites, depending on the available memory).
+
+- The tool currenlty **only support WGS84 coordinate system** as the osm datas use this coordinate system and it is quite easy to reproject thoses in an other coordinate system afterward.
+
+- for huge integration (more than 1gb of PBF), or less that 2h country integration, consider using the `osm-flink-tools` to preprocess the input file, this is MUCH FASTER. This is done for avro prepared files
 
   ​
 
 
-#Usage context - known usage
+# Benchmarks
 
-- A minimum of 5go of RAM is necessary for a first simple load 
-
-
-- The tool currenlty **only support WGS84 coordinate system** as the osm datas use this coordinate system and it is quite easy to reproject thoses in an other coordinate system afterward.
-
-- for huge integration (more than 1gb of PBF),  consider using the `osm-flink-tools` to preprocess the input file, this is MUCH FASTER.
-
-  - [See Large integration Article]()
-
-    ​
-
-
-#Benchmarks
-
-for simple scenarios (light write pressure):
-
-- **Thanks to LMAX, more than 1 000 000 final entities can be processed in a minute** for simple transformations on a standard laptop. See benchmark article for metrics.
-
-- As a REX, on heaviest writing pressure and full stack, using ramimport.groovy script and exporting in gdb. The admin level 1 export, take about 40 mins, with the same hardware as above, with preprocessing.
-
-- as FileGeodatabase Java API need synchronization per featureclass, writes are synchronized for this output format. There is a performance tradoff. This is not the case for CSV output
-
-
-
-# One line startup
-
-```
-java -Xmx6g -jar [pathto]/osmimport.jar import -i ./rhone-alpes-latest.osm.pbf -s ./scripts/buildings.groovy
-```
-
-Some extract/transform **scripts** are available here : [scripts](scripts)
-
-
-
-#Tutorial / Informations
-
-Take a tour at [5 mins setup guide](doc/QuickStart.md) to launch your first command line.
-
-[How to write Scripts](doc/ScriptReference.md) explain how to create, customize or configure your scripts.
-
-[Scripts folder](scripts) Scripts samples
-
-other documentations can be found in the [doc](doc) folder
+test it :-), we got lots of fast feedback for planet extract / transforms.
 
 
 
 # PBF / OSM - Data Files
 
-OpenStreetMap France offert OSM extracts mirror at this location : http://download.openstreetmap.fr/extracts/
+Openstreet france provide OSM extracts at this location : http://download.openstreetmap.fr/extracts/
 
 
 
-#Ready to use samples scripts :
+# AVRO - Data Files
+
+Prepared avro data files are available at this url : https://s3-eu-west-1.amazonaws.com/avroosm/index.html
+
+
+
+# Download and install - Next actions
+
+Take a tour at [5 mins setup guide](doc/QuickStart.md) to launch your first command line.
+
+[Existing Scripts folder](scripts) contains a bunch of existing scripts for already configured OSM transformation and filtering
+
+If you want to go further and customize the scripts, see [How to write Scripts](doc/WritingAScript.md). It explain how to customize or configure your scripts for your usage.
+
+other documentations can be found in the [doc](doc) folder
+
+don't hesitate to send pull requests or comments.
+
+# Sample scripts :
 
 - [Buildings](scripts/buildings.groovy) - extract buildings
 - [Streets](scripts/streets.groovy) - extract streets
 
 
-
-
-# How To Build the project
-
-You are a developer, you want to compile and use if from source :
-
-Java 7 or 8 is mandatory
-
-```
-git clone https://github.com/frett27/osmimport.git
-cd osmimport
-./gradlew fatJar
-```
-
-use or contribute.
-
-#Contributions
+# Contributions
 
 Contributions are welcome on :
 
@@ -132,7 +101,7 @@ Contributions are welcome on :
 - ...
 
 
-#Version 1.0 roadmap plan
+# Version 1.0 roadmap plan
 
 - <strike>handling relationships</strike>
 - <strike>handling polygons</strike>
@@ -144,4 +113,5 @@ Contributions are welcome on :
 - error logs, and feedbacks
 - clean logs
 - extend fields type to Date (supported fields: integer, string, long, floats)
+
 

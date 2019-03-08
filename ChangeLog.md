@@ -2,6 +2,7 @@
 ChangeLog :
 -----------
 
+- 15/10/2017 : add avro reading to benefit from https://s3-eu-west-1.amazonaws.com/avroosm/index.html hub
 - 15/03/2017 : add relations to CSV reading
 - 25/04/2016 : add support for double, single fields, reading for CSV files in directory
 - 17/01/2016 : documentation enhancements, full transforming DSL documentation, in the reference documentation file. adding polygon creation failing reports.
@@ -11,10 +12,36 @@ ChangeLog :
 - 16/08/2015 : version 0.5,add XML/OSM file support, bugs fixes
 - 28/01/2015 : Polygon support, packaged in a simple command line, ajustment with JRE, and RAM consumpsion
 
+
+
+## Version 0.8
+
+add avro file input, using the -i ....avro file, it is also possible to use a .avrourls containing a list of avro urls, for example : 
+
+**france.avrourls**
+
+```
+http://s3-eu-west-1.amazonaws.com/avroosm/france/1.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/2.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/3.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/4.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/5.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/6.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/7.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/8.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/9.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/10.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/11.avro
+http://s3-eu-west-1.amazonaws.com/avroosm/france/12.avro
+```
+
+
+
 Version 0.7.13
 --------------
 
 Add CSV relation reading, was missing in the CSV input subsystem
+
 
 Version 0.7.12
 --------------
@@ -32,6 +59,7 @@ Adding the reporting about failure in polygon creation, on import command line. 
 add -l option for import , permit to log in separate files all failures in polygon construct.
 
 add -p option for limiting the polyline, polygon creation (save time in polygons, or lignes are useless)
+
 
 Version 0.7.5
 -------------
@@ -57,7 +85,7 @@ Version 0.7.5
 			e.setValue("type", t)
 			return e;
 		}
-
+	
 	}
 
 </pre>
@@ -82,6 +110,7 @@ can be written with the new DSL as :
 
 
 
+
 Version 0.7
 -----------
 
@@ -94,7 +123,7 @@ breaking change :
 before :
 
 	osmimport  -s ... -i .... -v ....
- 
+
 now :
 
 	osmimport import -s ... -i .... -v ....
@@ -109,7 +138,7 @@ Version 0.6 (2015 september):
 - add output in csv for table/feature class, permit to use this tool with big data stacks
 
 incompatible changes :
-  
+
   as the output is not only a GDB, out "gdb" property is renamed "sink" 
 
 before :
@@ -135,6 +164,7 @@ breaking change :
 - the com.poc.osm package has been renamed to com.osmimport
 
 
+
 Version 0.4 (2014 december):
 ------------
 
@@ -148,6 +178,6 @@ Version 0.4 (2014 december):
 
 - Add _long type for fields, this is equivalent to 
 
-	usage : `_long("fieldname")`
+ usage : `_long("fieldname")`
 
-	`_integer("fieldname", size : 8)`
+ `_integer("fieldname", size : 8)`

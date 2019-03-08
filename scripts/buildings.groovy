@@ -26,7 +26,6 @@ builder.build(osmstream) {
 		
 		transform {  e ->
 			on(e).newValue("id",e.id).map("building").into("type").end()
-			String t = e.getFields().get("building")
 			return e;
 		}
 

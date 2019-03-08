@@ -1,7 +1,7 @@
 
 builder.build(osmstream) {
-	sortie = csv(path : var_gdb) {
-		featureclass('highway_pt',ESRI_GEOMETRY_POLYLINE, 'WGS84') {
+	sortie = gdb(path : var_gdb) {
+		featureclass('highway_pt',ESRI_GEOMETRY_POINT, 'WGS84') {
 			_text('osmid',size:50)    _text('width',size:50)
 			_text('sac_scale',size:50)
 			_text('access',size:50)
@@ -26,7 +26,7 @@ builder.build(osmstream) {
 			_text('footway',size:50)
 			_text('highway',size:50)
 		}
-		featureclass('highway_l',ESRI_GEOMETRY_POINT, 'WGS84') {
+		featureclass('highway_l',ESRI_GEOMETRY_POLYLINE, 'WGS84') {
 			_text('osmid',size:50)    _text('width',size:50)
 			_text('sac_scale',size:50)
 			_text('access',size:50)
